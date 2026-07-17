@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { Splash } from "@/components/Splash";
 import { useAppStore, watchSystemTheme } from "@/store/app";
+import { loadEditorPrefs } from "@/store/settings";
 import { isTauri, listProjects, getSetting } from "@/lib/ipc";
 import type { Theme } from "@/store/app";
 
@@ -33,6 +34,7 @@ export default function App() {
       } else {
         setTheme("dark");
       }
+      await loadEditorPrefs();
       const projects = await listProjects();
       if (!cancelled) setProjects(projects);
 

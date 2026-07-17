@@ -8,6 +8,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Editor preferences + searchable settings** — the Settings page gained a
+  search box that filters its sections, and a new Editor section with **font
+  size**, **tab size** and **word wrap** controls that apply live to every open
+  editor and persist across restarts (a new `settings` store, unit-tested,
+  backed by the existing setting storage).
 - **Testing panel** — a new Testing tab runs a project's `test` command and
   shows a parsed pass/fail summary (badges + framework) alongside the raw output
   and exit code. Summaries are parsed by a new `orbit_core::testing` module that

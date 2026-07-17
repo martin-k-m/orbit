@@ -11,9 +11,11 @@ import {
   bracketMatching,
   foldGutter,
   indentOnInput,
+  indentUnit,
   syntaxHighlighting,
   defaultHighlightStyle,
 } from "@codemirror/language";
+import { useSettingsStore } from "@/store/settings";
 import {
   search,
   searchKeymap,
@@ -82,9 +84,17 @@ const orbitTheme = EditorView.theme(
   { dark: true },
 );
 
+/** Per-document editor preferences. */
+interface Prefs {
+  fontSize: number;
+  tabSize: number;
+  wordWrap: boolean;
+}
+
 /** The non-language editing extensions, shared by every document. */
 function baseExtensions(
   readOnly: boolean,
+  prefs: Prefs,
   onChange?: (v: string) => void,
   onCursor?: (line: number, col: number) => void,
 ): Extension[] {
@@ -93,6 +103,8 @@ function baseExtensions(
     foldGutter(),
     history(),
     indentOnInput(),
+    indentUnit.of(" ".repeat(prefs.tabSize)),
+    EditorState.tabSize.of(prefs.tabSize),
     bracketMatching(),
     highlightActiveLine(),
     highlightSelectionMatches(),
@@ -107,7 +119,8 @@ function baseExtensions(
       indentWithTab,
     ]),
     orbitTheme,
-    EditorView.lineWrapping,
+    EditorView.theme({ "&": { fontSize: `${prefs.fontSize}px` } }),
+    ...(prefs.wordWrap ? [EditorView.lineWrapping] : []),
     EditorState.readOnly.of(readOnly),
     EditorView.editable.of(!readOnly),
     EditorView.updateListener.of((u) => {
@@ -156,6 +169,11 @@ export function CodeEditor({
   const onCursorRef = useRef(onCursor);
   onCursorRef.current = onCursor;
 
+  // Editor preferences — changing one rebuilds the view with the new config.
+  const fontSize = useSettingsStore((s) => s.fontSize);
+  const tabSize = useSettingsStore((s) => s.tabSize);
+  const wordWrap = useSettingsStore((s) => s.wordWrap);
+
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
@@ -165,6 +183,7 @@ export function CodeEditor({
       extensions: [
         ...baseExtensions(
           readOnly,
+          { fontSize, tabSize, wordWrap },
           (v) => onChangeRef.current?.(v),
           (line, col) => onCursorRef.current?.(line, col),
         ),
@@ -180,11 +199,11 @@ export function CodeEditor({
       view.destroy();
       viewRef.current = null;
     };
-    // Rebuild when the file, its language, or read-only-ness changes. `value` is
-    // intentionally excluded: it seeds the doc, and re-seeding on every keystroke
-    // would fight the user's cursor.
+    // Rebuild when the file, its language, read-only-ness, or an editor
+    // preference changes. `value` is intentionally excluded: it seeds the doc,
+    // and re-seeding on every keystroke would fight the user's cursor.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [path, language, readOnly]);
+  }, [path, language, readOnly, fontSize, tabSize, wordWrap]);
 
   // Jump to a requested line (e.g. a search hit). Keyed on the nonce so the same
   // line can be revealed twice, but a re-render alone never re-scrolls.
