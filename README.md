@@ -59,6 +59,7 @@ Think of it as the calm control room for everything you build:
 | 🛰 **Ecosystem previews** | Clearly-labelled previews for **Blink**, **Killer**, **Flux** and **Beacon** — the real engines land in v2.0 ([roadmap](ROADMAP.md)). |
 | 🖥 **Native & premium** | Tauri 2 app for macOS, Windows and Linux with a tray, native menus, keyboard shortcuts and a dark, glass-panelled design. |
 | 🖥 **Built-in terminal** | A real PTY-backed shell per project — colours, `top`/`vim`, Ctrl-C and reflow all work. Opens in your shell (`$SHELL`/`COMSPEC`), in the project directory. |
+| 📝 **File explorer & editor** | Browse the project tree and edit files in a CodeMirror editor — syntax highlighting, folding, multi-cursor, save, encoding/line-ending detection. |
 | ⌨️ **A real CLI** | The same engine as a terminal companion: `orbit scan`, `orbit info`, `orbit health`, `orbit run`. |
 
 ## 🧭 The ecosystem
@@ -187,6 +188,9 @@ Have an idea? [Open a feature request](https://github.com/martin-k-m/orbit/issue
 or start a [discussion](https://github.com/martin-k-m/orbit/discussions).
 
 ## 🤝 Contributing
+
+New here (human or AI)? Read **[HANDOFF.md](HANDOFF.md)** first — the honest
+ground-truth of what's built, what isn't, and the build/release gotchas.
 
 Contributions are welcome! Start with [docs/contributing.md](docs/contributing.md)
 and the good-first-issue label. Before pushing:
