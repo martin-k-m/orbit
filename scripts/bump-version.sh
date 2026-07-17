@@ -26,9 +26,8 @@ sed -i.bak -E "s/^version = \"[0-9][^\"]*\"/version = \"$version\"/" Cargo.toml 
 sed -i.bak -E "s/^version = \"[0-9][^\"]*\"/version = \"$version\"/" apps/desktop/src-tauri/Cargo.toml && rm -f apps/desktop/src-tauri/Cargo.toml.bak
 sed -i.bak -E "s/(\"version\": )\"[0-9][^\"]*\"/\1\"$version\"/" apps/desktop/src-tauri/tauri.conf.json && rm -f apps/desktop/src-tauri/tauri.conf.json.bak
 
-# Frontend + website package manifests.
+# Desktop frontend package manifest.
 sed -i.bak -E "s/(\"version\": )\"[0-9][^\"]*\"/\1\"$version\"/" apps/desktop/ui/package.json && rm -f apps/desktop/ui/package.json.bak
-sed -i.bak -E "s/(\"version\": )\"[0-9][^\"]*\"/\1\"$version\"/" apps/website/package.json && rm -f apps/website/package.json.bak
 
 echo "Bumped Orbit to v$version."
 echo "Next: update CHANGELOG.md and RELEASE_NOTES.md, then tag: git tag v$version"

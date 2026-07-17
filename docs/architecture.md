@@ -28,7 +28,7 @@ surfaces — a desktop app, a CLI and a marketing/docs site.
                               │ Tailwind/shadcn │
                               └─────────────────┘
 
-   apps/website  →  Next.js marketing site + documentation (static export)
+   orbit-web  →  Next.js marketing site + docs (separate repo, static export)
 ```
 
 ## Design principles
@@ -94,11 +94,13 @@ built on its own.
 The IPC contract (command names and payload shapes) is documented in
 `commands.rs`; the TypeScript mirror lives in `ui/src/lib/types.ts`.
 
-### `orbit-web` (`apps/website`)
+### `orbit-web` (separate repository)
 
-A Next.js 14 site configured for **static export** (`output: "export"`): the
-product landing page plus the documentation. No backend; deployable to any
-static host (GitHub Pages by default).
+The marketing site and documentation live in their own repository,
+[`orbit-web`](https://github.com/martin-k-m/orbit-web) — a Next.js 14 site
+configured for **static export** (`output: "export"`), deployed to GitHub Pages
+at https://orbit.blinkdev.me. It has no backend and keeps this repo focused on
+the app, engine and CLI.
 
 ## Data & storage
 

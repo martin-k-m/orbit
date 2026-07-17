@@ -7,7 +7,7 @@ This guide gets you from a fresh clone to a running Orbit desktop app.
 | Tool            | Version | Notes                                                        |
 | --------------- | ------- | ------------------------------------------------------------ |
 | Rust            | ≥ 1.77  | Install via [rustup](https://rustup.rs). Includes `cargo`.   |
-| Node.js         | ≥ 18    | For the desktop frontend and the website.                    |
+| Node.js         | ≥ 18    | For the desktop frontend (`apps/desktop/ui`).                |
 | A C toolchain   | any     | Needed to build bundled SQLite (MSVC on Windows, clang/gcc). |
 | Tauri prereqs   | —       | See the [Tauri 2 prerequisites](https://tauri.app/start/prerequisites/) for your OS (WebView2 on Windows, Xcode CLT on macOS, webkit2gtk on Linux). |
 | Git             | any     | Orbit shells out to `git` for repository status.             |
@@ -24,18 +24,20 @@ cargo install tauri-cli --version "^2"
 orbit/
 ├── Cargo.toml            # workspace: orbit-core + orbit-cli
 ├── apps/
-│   ├── desktop/          # Tauri app (its own crate, excluded from the workspace)
-│   │   ├── src-tauri/    # Rust backend
-│   │   └── ui/           # React + TypeScript frontend
-│   └── website/          # Next.js marketing site + docs
+│   └── desktop/          # Tauri app (its own crate, excluded from the workspace)
+│       ├── src-tauri/    # Rust backend
+│       └── ui/           # React + TypeScript frontend
 ├── crates/
 │   ├── orbit-core/       # the engine (library)
 │   └── orbit-cli/        # terminal companion (binary `orbit`)
 ├── packages/             # shared, reusable packages
 ├── scripts/              # release & tooling helpers
 ├── docs/                 # architecture, development, contributing
-└── .github/workflows/    # test · build · release · website
+└── .github/workflows/    # test · build · release
 ```
+
+> The marketing site and documentation live in a separate repository,
+> [`orbit-web`](https://github.com/martin-k-m/orbit-web).
 
 ## The engine and the CLI
 
@@ -100,11 +102,9 @@ npm --prefix apps/desktop/ui run dev
 
 ## The website
 
-```bash
-npm --prefix apps/website install
-npm --prefix apps/website run dev      # http://localhost:3000
-npm --prefix apps/website run build    # static export to apps/website/out/
-```
+The marketing site and documentation live in their own repository,
+[`orbit-web`](https://github.com/martin-k-m/orbit-web) (deployed to
+https://orbit.blinkdev.me). See that repo's README to run it locally.
 
 ## Testing philosophy
 

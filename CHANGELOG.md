@@ -33,9 +33,11 @@ The first public release.
   TypeScript + Tailwind frontend with a premium dark design.
 - **Auto-update** — the desktop app checks for, downloads and installs signed
   updates from GitHub Releases (Tauri updater).
-- **`orbit-web`** — a Next.js marketing site and documentation, static-exported.
-- **CI/CD** — GitHub Actions split into `test`, `build`, `release` and
-  `website` workflows, building installers for macOS (Intel + Apple Silicon),
+- **Marketing site & docs** — the Next.js website lives in its own repo,
+  [`orbit-web`](https://github.com/martin-k-m/orbit-web) (deployed to
+  https://orbit.blinkdev.me).
+- **CI/CD** — GitHub Actions split into `test`, `build` and `release`
+  workflows, building installers for macOS (Intel + Apple Silicon),
   Windows and Linux.
 
 [Unreleased]: https://github.com/martin-k-m/orbit/compare/v1.0.0...HEAD
