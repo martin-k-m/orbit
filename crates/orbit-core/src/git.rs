@@ -575,7 +575,7 @@ mod tests {
     use std::fs;
 
     /// A bare commit with a given hash, for exercising the pure graph layout.
-    fn commit(hash: &str) -> Commit {
+    fn fake_commit(hash: &str) -> Commit {
         Commit {
             hash: hash.to_string(),
             short_hash: hash.to_string(),
@@ -588,9 +588,9 @@ mod tests {
     #[test]
     fn graph_layout_keeps_linear_history_in_one_lane() {
         let items = vec![
-            (commit("C"), vec!["B".to_string()]),
-            (commit("B"), vec!["A".to_string()]),
-            (commit("A"), vec![]),
+            (fake_commit("C"), vec!["B".to_string()]),
+            (fake_commit("B"), vec!["A".to_string()]),
+            (fake_commit("A"), vec![]),
         ];
         let rows = layout(items);
         assert!(rows.iter().all(|r| r.lane == 0));
@@ -601,10 +601,10 @@ mod tests {
     fn graph_layout_opens_a_lane_for_a_merge() {
         // M merges B and C, which both descend from root A.
         let items = vec![
-            (commit("M"), vec!["B".to_string(), "C".to_string()]),
-            (commit("C"), vec!["A".to_string()]),
-            (commit("B"), vec!["A".to_string()]),
-            (commit("A"), vec![]),
+            (fake_commit("M"), vec!["B".to_string(), "C".to_string()]),
+            (fake_commit("C"), vec!["A".to_string()]),
+            (fake_commit("B"), vec!["A".to_string()]),
+            (fake_commit("A"), vec![]),
         ];
         let rows = layout(items);
         assert_eq!(rows[0].lane, 0, "merge commit sits on the mainline");
