@@ -45,10 +45,10 @@ Turning projects into true workspaces.
 - 🚧 **Workspace model** — each project remembers its terminals, launch
   commands, env vars, notes, bookmarks, docs links and pinned logs. Switching a
   project restores the whole workspace.
-- 📋 **Integrated terminal** — multiple tabs, split panes, persistent sessions,
-  ANSI colour, scrollback, search, rename, shortcuts. Opens in the project
-  directory. Detects the preferred shell (PowerShell, CMD, bash, zsh, fish).
-  Sessions survive restarts.
+- 🚧 **Integrated terminal** — a real PTY-backed shell per project has landed
+  (ConPTY on Windows, openpty elsewhere): ANSI colour, scrollback, resize, and
+  shell detection (PowerShell, CMD, bash, zsh, fish). Still to come: multiple
+  tabs, split panes, search, and sessions that survive restarts.
 - 📋 **Live log viewer** — per-process, colourised, searchable, filter to
   errors/warnings, copy/save/export, side-by-side logs, error surfacing.
 - 📋 **Task runner** — build/test/lint/format/bench/deploy + custom scripts,

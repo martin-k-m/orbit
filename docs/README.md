@@ -9,13 +9,14 @@ Everything you need to use, build and ship Orbit.
 - [Installation](./installation.md) — per-platform install & uninstall.
 - [Configuration](./configuration.md) — `.project-orbit` profiles and app data.
 - [Workspaces](./workspace.md) — tasks, notes and bookmarks per project.
+- [Terminal](./terminal.md) — the built-in PTY shell, and which shell it opens.
 - [Environment variables](./environment.md) — `.env` files, masking, validation.
 - [CLI reference](./cli.md) — the `orbit` terminal companion.
 - [Plugins & integrations](./plugins.md) — Blink, Killer, Flux, Beacon.
 - [FAQ](./faq.md) — the questions people actually ask.
 - [Troubleshooting](./troubleshooting.md) — fixes for common issues.
 
-> Looking for the terminal, Docker, database or API client? See the
+> Looking for Docker, the database explorer or the API client? See the
 > [ROADMAP](../ROADMAP.md) — it marks honestly what's shipped vs. planned.
 
 ## Building & contributing
