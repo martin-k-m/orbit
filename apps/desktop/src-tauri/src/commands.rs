@@ -6,6 +6,7 @@
 //! errors are returned as strings so they land in the JS promise's `catch`.
 
 use crate::state::AppState;
+use crate::terminal::Terminals;
 use orbit_core::analytics::ActivityReport;
 use orbit_core::deps::Dependency;
 use orbit_core::env::EnvReport;
@@ -373,6 +374,64 @@ pub async fn run_task(
     })
     .await
     .map_err(|e| e.to_string())?
+}
+
+// --- Terminal -------------------------------------------------------------
+
+/// The shells installed on this machine, best first. The first entry is what
+/// Orbit opens by default.
+#[tauri::command]
+pub fn terminal_shells() -> Vec<orbit_core::shell::Shell> {
+    orbit_core::shell::available()
+}
+
+/// Open a shell on a PTY in `path` and start streaming output.
+///
+/// Output arrives as `terminal:output` events; the shell exiting emits
+/// `terminal:exit`.
+#[tauri::command]
+pub fn terminal_open(
+    app: tauri::AppHandle,
+    terminals: State<'_, Terminals>,
+    path: String,
+    shell: Option<String>,
+    cols: Option<u16>,
+    rows: Option<u16>,
+) -> Result<String, String> {
+    terminals.open(
+        &app,
+        Path::new(&path),
+        shell,
+        cols.unwrap_or(80),
+        rows.unwrap_or(24),
+    )
+}
+
+/// Send keystrokes to a terminal session.
+#[tauri::command]
+pub fn terminal_write(
+    terminals: State<'_, Terminals>,
+    id: String,
+    data: String,
+) -> Result<(), String> {
+    terminals.write(&id, &data)
+}
+
+/// Tell a session its viewport changed size.
+#[tauri::command]
+pub fn terminal_resize(
+    terminals: State<'_, Terminals>,
+    id: String,
+    cols: u16,
+    rows: u16,
+) -> Result<(), String> {
+    terminals.resize(&id, cols, rows)
+}
+
+/// Close a terminal session and kill its shell.
+#[tauri::command]
+pub fn terminal_close(terminals: State<'_, Terminals>, id: String) -> Result<(), String> {
+    terminals.close(&id)
 }
 
 // --- Environment files ----------------------------------------------------

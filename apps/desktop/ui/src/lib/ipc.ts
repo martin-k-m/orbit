@@ -9,6 +9,9 @@ import type {
   HealthReport,
   ProjectDetail,
   ProjectSummary,
+  Shell,
+  TerminalExit,
+  TerminalOutput,
   Workspace,
 } from "./types";
 
@@ -434,6 +437,13 @@ const demoSettings = new Map<string, string>([
   ["data-location", "~/Library/Application Support/com.orbit.dev"],
 ]);
 
+// Shells the browser demo pretends to have found.
+const DEMO_SHELLS: Shell[] = [
+  { label: "Zsh", program: "/bin/zsh", args: ["-l"], kind: "zsh" },
+  { label: "Bash", program: "/bin/bash", args: ["-l"], kind: "bash" },
+  { label: "sh", program: "/bin/sh", args: [], kind: "sh" },
+];
+
 // Workspaces the demo has handed out, so edits persist for the session.
 const demoWorkspaces = new Map<string, Workspace>();
 
@@ -726,6 +736,74 @@ export async function runTask(
     };
   }
   return invoke<CommandOutput>("run_task", { path, commandLine, confirmed });
+}
+
+// --- Terminal ---------------------------------------------------------------
+
+/** The shells installed on this machine, best first. */
+export async function terminalShells(): Promise<Shell[]> {
+  if (!isTauri()) return DEMO_SHELLS;
+  return invoke<Shell[]>("terminal_shells");
+}
+
+/**
+ * Open a shell on a PTY in `path`. Output arrives as `terminal:output` events;
+ * subscribe with {@link onTerminalOutput} before writing.
+ */
+export async function terminalOpen(
+  path: string,
+  shell?: string,
+  cols = 80,
+  rows = 24,
+): Promise<string> {
+  if (!isTauri()) return `demo-term-${Math.random().toString(36).slice(2, 8)}`;
+  return invoke<string>("terminal_open", { path, shell, cols, rows });
+}
+
+/** Send keystrokes to a session. */
+export async function terminalWrite(id: string, data: string): Promise<void> {
+  if (!isTauri()) return;
+  return invoke<void>("terminal_write", { id, data });
+}
+
+/** Tell a session its viewport changed size, so the shell reflows. */
+export async function terminalResize(
+  id: string,
+  cols: number,
+  rows: number,
+): Promise<void> {
+  if (!isTauri()) return;
+  return invoke<void>("terminal_resize", { id, cols, rows });
+}
+
+/** Close a session and kill its shell. */
+export async function terminalClose(id: string): Promise<void> {
+  if (!isTauri()) return;
+  return invoke<void>("terminal_close", { id });
+}
+
+/** Subscribe to terminal output. Returns an unlisten function. */
+export async function onTerminalOutput(
+  handler: (payload: TerminalOutput) => void,
+): Promise<() => void> {
+  if (!isTauri()) return () => {};
+  const { listen } = await import("@tauri-apps/api/event");
+  const unlisten = await listen<TerminalOutput>("terminal:output", (e) =>
+    handler(e.payload),
+  );
+  return unlisten;
+}
+
+/** Subscribe to session exits. Returns an unlisten function. */
+export async function onTerminalExit(
+  handler: (payload: TerminalExit) => void,
+): Promise<() => void> {
+  if (!isTauri()) return () => {};
+  const { listen } = await import("@tauri-apps/api/event");
+  const unlisten = await listen<TerminalExit>("terminal:exit", (e) =>
+    handler(e.payload),
+  );
+  return unlisten;
 }
 
 // --- Environment files ------------------------------------------------------

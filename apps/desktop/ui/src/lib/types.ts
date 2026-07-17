@@ -126,6 +126,40 @@ export interface Workspace {
   updatedAt: number;
 }
 
+// --- Terminal (mirrors `orbit_core::shell` + src-tauri/terminal.rs) ----------
+
+/** Which shell a session runs. */
+export type ShellKind =
+  | "power-shell"
+  | "windows-power-shell"
+  | "cmd"
+  | "bash"
+  | "zsh"
+  | "fish"
+  | "sh"
+  | "nu"
+  | "other";
+
+/** A launchable shell detected on this machine. */
+export interface Shell {
+  label: string;
+  program: string;
+  args: string[];
+  kind: ShellKind;
+}
+
+/** A chunk of output from a terminal session (`terminal:output` event). */
+export interface TerminalOutput {
+  id: string;
+  data: string;
+}
+
+/** Emitted once when a session's shell exits (`terminal:exit` event). */
+export interface TerminalExit {
+  id: string;
+  code?: number | null;
+}
+
 // --- Environment files (mirrors `orbit_core::env`) ---------------------------
 
 /** The environment an `.env` file targets. */

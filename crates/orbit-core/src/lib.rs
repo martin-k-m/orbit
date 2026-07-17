@@ -144,6 +144,8 @@ mod tests {
         assert_serialize::<env::Entry>();
         assert_serialize::<env::Issue>();
         assert_serialize::<env::Scope>();
+        assert_serialize::<shell::Shell>();
+        assert_serialize::<shell::ShellKind>();
 
         // Types the frontend also sends back must round-trip. `save_workspace`
         // takes a Workspace as a command *parameter*, so it must deserialize.
