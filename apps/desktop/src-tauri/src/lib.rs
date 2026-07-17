@@ -62,6 +62,10 @@ pub fn run() {
             commands::set_setting,
             commands::open_terminal,
             commands::app_version,
+            commands::get_workspace,
+            commands::save_workspace,
+            commands::run_task,
+            commands::env_report,
         ])
         .run(tauri::generate_context!())
         .expect("error while running the Orbit application");

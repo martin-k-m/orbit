@@ -91,6 +91,82 @@ export interface CommandOutput {
   stderr: string;
 }
 
+// --- Workspaces (mirrors `orbit_core::workspace`) ---------------------------
+
+/** A saved terminal tab belonging to a project. */
+export interface TerminalTab {
+  id: string;
+  title: string;
+  shell: string;
+  cwd: string;
+}
+
+/** A saved link — docs, dashboards, a staging URL. */
+export interface Bookmark {
+  id: string;
+  label: string;
+  url: string;
+}
+
+/** A pinned, runnable task for the project. */
+export interface Task {
+  id: string;
+  name: string;
+  command: string;
+  favorite: boolean;
+}
+
+/** Everything Orbit remembers about a project. */
+export interface Workspace {
+  projectId: string;
+  notes: string;
+  terminals: TerminalTab[];
+  bookmarks: Bookmark[];
+  tasks: Task[];
+  updatedAt: number;
+}
+
+// --- Environment files (mirrors `orbit_core::env`) ---------------------------
+
+/** The environment an `.env` file targets. */
+export type EnvScope =
+  | "default"
+  | "local"
+  | "development"
+  | "production"
+  | "test"
+  | "example"
+  | { other: string };
+
+/** A single KEY=VALUE entry. `secret` means the UI should mask it. */
+export interface EnvEntry {
+  key: string;
+  value: string;
+  line: number;
+  secret: boolean;
+}
+
+/** A parsed environment file. */
+export interface EnvFile {
+  path: string;
+  scope: EnvScope;
+  entries: EnvEntry[];
+}
+
+/** A problem worth surfacing: duplicate | missing | invalid-key | empty. */
+export interface EnvIssue {
+  kind: string;
+  message: string;
+  file: string;
+  key?: string | null;
+}
+
+/** The full picture for a project's environment files. */
+export interface EnvReport {
+  files: EnvFile[];
+  issues: EnvIssue[];
+}
+
 /** How risky a command looks — mirrors `orbit_core::safety::Risk`. */
 export type Risk = "safe" | "caution" | "dangerous";
 
