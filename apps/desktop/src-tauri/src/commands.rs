@@ -253,6 +253,12 @@ pub fn git_log(path: String, limit: usize) -> Result<Vec<git::Commit>, String> {
     Ok(git::recent_commits(Path::new(&path), limit))
 }
 
+/// Recent commits with commit-graph lane data, for drawing a history rail.
+#[tauri::command]
+pub fn git_graph(path: String, limit: usize) -> Result<Vec<git::GraphCommit>, String> {
+    Ok(git::recent_graph(Path::new(&path), limit))
+}
+
 /// Local branch names.
 #[tauri::command]
 pub fn git_branches(path: String) -> Result<Vec<String>, String> {

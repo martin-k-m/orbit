@@ -8,6 +8,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Commit graph in Source Control.** The history now draws a real
+  **commit-graph rail** — a lane per branch with a node in each commit's lane —
+  so you can read branch and merge structure at a glance. Backed by a new
+  `git::recent_graph` plus a **pure, unit-tested lane-layout** function (parents
+  from `git log %P`), on the same `git` CLI as the rest of the power center.
 - **AI assistant — local-first and optional.** A new **AI** tool window brings a
   project-aware chat to the workspace, backed by any **OpenAI-compatible**
   endpoint you configure in Settings → AI: a local runtime (Ollama, LM Studio, a

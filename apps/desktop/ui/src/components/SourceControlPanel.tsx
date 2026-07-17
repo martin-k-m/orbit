@@ -15,10 +15,10 @@ import {
   Tag,
   Loader2,
 } from "lucide-react";
-import type { Commit, GitStatus, GitStatusEntry, StashEntry } from "@/lib/types";
+import type { Commit, GraphCommit, GitStatus, GitStatusEntry, StashEntry } from "@/lib/types";
 import {
   gitStatus,
-  gitLog,
+  gitGraph,
   gitStage,
   gitUnstage,
   gitDiff,
@@ -51,7 +51,7 @@ type Selection = { file: string; staged: boolean } | null;
 export function SourceControlPanel({ root }: { root: string }) {
   const pushToast = useAppStore((s) => s.pushToast);
   const [status, setStatus] = useState<GitStatus | null>(null);
-  const [commits, setCommits] = useState<Commit[]>([]);
+  const [commits, setCommits] = useState<GraphCommit[]>([]);
   const [branches, setBranches] = useState<string[]>([]);
   const [stashes, setStashes] = useState<StashEntry[]>([]);
   const [tags, setTags] = useState<string[]>([]);
@@ -70,7 +70,7 @@ export function SourceControlPanel({ root }: { root: string }) {
   const refresh = useCallback(async () => {
     const [s, log, brs, sts, tgs] = await Promise.all([
       gitStatus(root),
-      gitLog(root, 15),
+      gitGraph(root, 15),
       gitBranches(root),
       gitStashList(root),
       gitTags(root),
@@ -229,6 +229,8 @@ export function SourceControlPanel({ root }: { root: string }) {
   }
 
   const canCommit = !!message.trim() && status.staged.length > 0 && !busy;
+  // Widest point of the graph, so every row's rail column lines up.
+  const laneCount = Math.max(1, ...commits.map((c) => Math.max(0, ...c.rails) + 1));
 
   return (
     <Frame>
@@ -500,24 +502,24 @@ export function SourceControlPanel({ root }: { root: string }) {
               </div>
               {commits.map((c) => (
                 <button
-                  key={c.hash}
+                  key={c.commit.hash}
                   onClick={() => {
                     setSelected(null);
-                    setCommitView(c);
+                    setCommitView(c.commit);
                   }}
                   className={cn(
                     "no-drag flex w-full items-center gap-2 px-3 py-1 text-left text-[12px] transition-colors hover:bg-white/[0.04]",
-                    commitView?.hash === c.hash && "bg-accent/10",
+                    commitView?.hash === c.commit.hash && "bg-accent/10",
                   )}
-                  title={`${c.author} · ${c.hash}`}
+                  title={`${c.commit.author} · ${c.commit.hash}`}
                 >
-                  <GitCommitHorizontal className="h-3.5 w-3.5 shrink-0 text-fg-subtle" />
-                  <span className="truncate text-fg-muted">{c.summary}</span>
+                  <GraphRail lane={c.lane} rails={c.rails} lanes={laneCount} />
+                  <span className="truncate text-fg-muted">{c.commit.summary}</span>
                   <span className="ml-auto shrink-0 text-[10px] text-fg-subtle">
-                    {relativeTime(c.timestamp)}
+                    {relativeTime(c.commit.timestamp)}
                   </span>
                   <span className="shrink-0 font-mono text-[10px] text-fg-subtle">
-                    {c.shortHash}
+                    {c.commit.shortHash}
                   </span>
                 </button>
               ))}
@@ -698,6 +700,48 @@ function Frame({ children }: { children: React.ReactNode }) {
 
 function Centered({ children }: { children: React.ReactNode }) {
   return <div className="flex h-full w-full items-center justify-center">{children}</div>;
+}
+
+/**
+ * The commit-graph rail for one history row: a vertical line for every active
+ * lane (`rails`) and a filled dot in this commit's own lane. Straight rails
+ * approximate the graph — enough to read branch and merge structure at a glance.
+ */
+function GraphRail({
+  lane,
+  rails,
+  lanes,
+}: {
+  lane: number;
+  rails: number[];
+  lanes: number;
+}) {
+  const W = 11;
+  const H = 22;
+  const width = Math.max(1, lanes) * W;
+  const cx = (i: number) => i * W + W / 2;
+  return (
+    <svg
+      width={width}
+      height={H}
+      className="shrink-0 text-fg-subtle/40"
+      style={{ minWidth: width }}
+      aria-hidden="true"
+    >
+      {rails.map((r) => (
+        <line
+          key={r}
+          x1={cx(r)}
+          y1={0}
+          x2={cx(r)}
+          y2={H}
+          stroke="currentColor"
+          strokeWidth={1.5}
+        />
+      ))}
+      <circle cx={cx(lane)} cy={H / 2} r={3} className="fill-accent" />
+    </svg>
+  );
 }
 
 function basename(path: string): string {

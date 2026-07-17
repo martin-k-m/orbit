@@ -89,9 +89,10 @@ Desktop features that are **built and wired to the UI**:
   `orbit_core::search`; click a result to open the file at that line. This is
   project-scoped content search, **not** the cross-source universal palette yet.
 - **Source control (git power center)** — the Git tool window: staged/unstaged
-  groups, one-click stage/unstage, inline diff, commit, recent history, branch
+  groups, one-click stage/unstage, inline diff, commit, recent history with a
+  **commit-graph rail** (lane layout is pure + unit-tested), branch
   switch/create, and fetch/pull/push (pull is ff-only). Backed by
-  `orbit_core::git`. No merge/rebase/cherry-pick/commit-graph yet.
+  `orbit_core::git`. No merge/rebase/cherry-pick or blame yet.
 - **AI assistant (local-first, optional)** — an **AI** tool window: a
   project-aware chat backed by any OpenAI-compatible endpoint the user sets in
   Settings → AI (defaults to a local Ollama URL). Off by default; config + key in
