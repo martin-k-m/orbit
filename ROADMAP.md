@@ -48,8 +48,10 @@ Turning projects into true workspaces.
   project restores the whole workspace.
 - 🚧 **File explorer + editor** — a lazy file tree and a CodeMirror 6 editor
   (syntax highlighting, folding, multi-cursor, save, encoding/line-ending
-  detection). Backed by `orbit_core::files`. Next: multiple tabs, and a language
-  server for go-to-definition and real diagnostics.
+  detection), now with **multiple editor tabs** (per-tab drafts and dirty state,
+  reopen-focuses, close-picks-neighbour, `Ctrl/Cmd+S`/`Ctrl/Cmd+W`). Backed by
+  `orbit_core::files`. Next: split editors, and a language server for
+  go-to-definition and real diagnostics.
 - 🚧 **Integrated terminal** — a real PTY-backed shell per project has landed
   (ConPTY on Windows, openpty elsewhere): ANSI colour, scrollback, resize, and
   shell detection (PowerShell, CMD, bash, zsh, fish). Still to come: multiple

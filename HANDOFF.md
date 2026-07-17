@@ -67,7 +67,8 @@ Desktop features that are **built and wired to the UI**:
 - Git status, health, dependency panels
 - Command runner (safety-guarded), workspace tasks/notes
 - **Integrated terminal** — real PTY (`portable-pty`), xterm.js UI
-- **File explorer + CodeMirror 6 editor** (Explorer tab)
+- **File explorer + CodeMirror 6 editor** with **multiple editor tabs**
+  (per-tab drafts/dirty state, reopen-focuses, close-picks-neighbour) (Explorer tab)
 - Environment report; local analytics
 - System tray, native menu, Dark/Light/**System** theme (persisted)
 - **Signed auto-update** (from v1.1.0)
@@ -83,8 +84,9 @@ Be very clear about this — do not claim otherwise in any doc or the UI:
   go-to-definition, find-references, rename, hover types, real diagnostics.
 - **No debugger (DAP)**, no test-runner UI, no Problems panel.
 - **No Docker, database, or API-client tooling.**
-- **No multi-window / dockable / split-pane IDE layout.** One editor file and
-  one terminal per project view; no editor tabs yet.
+- **No multi-window / dockable / split-pane IDE layout.** The editor has
+  multiple tabs now, but there are no split editors, and still one terminal per
+  project view.
 - **No plugin SDK/runtime.**
 - Terminal has no tabs/splits/search/session-persistence yet.
 

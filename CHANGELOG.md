@@ -8,6 +8,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Editor tabs — multi-file editing** — the Explorer now keeps every file you
+  open in its own tab instead of replacing the one before it. Each tab holds its
+  own unsaved draft and dirty marker, reopening a file focuses its existing tab
+  rather than duplicating it, and closing the active tab moves focus to its
+  neighbour (right, then left). `Ctrl/Cmd+S` saves the active tab; `Ctrl/Cmd+W`
+  closes it. Tabs are scoped per project, so switching projects starts clean.
 - **File explorer + code editor** — a project Explorer tab with a lazy file
   tree and a CodeMirror 6 editor: syntax highlighting for 7 languages, folding,
   multi-cursor, save, and a status line showing language/encoding/line-ending.
