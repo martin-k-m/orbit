@@ -73,6 +73,10 @@ Desktop features that are **built and wired to the UI**:
 - **Workspace search (find in files)** — a Search tab per project backed by
   `orbit_core::search`; click a result to open the file at that line. This is
   project-scoped content search, **not** the cross-source universal palette yet.
+- **Source control (git power center)** — a Source Control tab: staged/unstaged
+  groups, one-click stage/unstage, inline diff, commit, recent history. Backed
+  by `orbit_core::git` (`status`/`stage`/`unstage`/`diff`/`commit`). No
+  push/pull/branch/stash/graph yet.
 - Environment report; local analytics
 - System tray, native menu, Dark/Light/**System** theme (persisted)
 - **Red brand identity** (red-600 → rose-500, matching the website) + a

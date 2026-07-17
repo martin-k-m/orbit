@@ -56,6 +56,24 @@ export interface GitInfo {
   lastCommit?: Commit | null;
 }
 
+/** One changed path (mirrors `orbit_core::git::StatusEntry`). */
+export interface GitStatusEntry {
+  path: string;
+  /** Git status letter: M, A, D, R, C, U, ? … */
+  code: string;
+  /** Human label, e.g. "Modified". */
+  label: string;
+}
+
+/** Grouped source-control status (mirrors `orbit_core::git::GitStatus`). */
+export interface GitStatus {
+  branch: string;
+  staged: GitStatusEntry[];
+  unstaged: GitStatusEntry[];
+  ahead: number;
+  behind: number;
+}
+
 export interface HealthWarning {
   kind: string;
   message: string;

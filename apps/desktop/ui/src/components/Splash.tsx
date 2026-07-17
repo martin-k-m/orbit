@@ -35,10 +35,7 @@ export function Splash({ hidden, onHidden }: { hidden: boolean; onHidden?: () =>
       <div className="relative flex flex-col items-center animate-scale-in">
         <div className="relative animate-float">
           <div className="absolute -inset-10 rounded-full bg-accent/25 blur-3xl animate-breathe" />
-          <OrbitGlyph
-            spin
-            className="relative h-28 w-28 drop-shadow-[0_0_35px_rgba(220,38,38,0.65)]"
-          />
+          <OrbitGlyph className="relative h-28 w-28 drop-shadow-[0_0_35px_rgba(220,38,38,0.65)]" />
         </div>
 
         <h1 className="mt-10 text-5xl font-semibold tracking-tight text-gradient">

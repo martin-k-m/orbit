@@ -15,6 +15,7 @@ import {
   ListTodo,
   Sparkles,
   Search,
+  GitBranch,
 } from "lucide-react";
 import type {
   Command,
@@ -35,6 +36,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TerminalPane } from "@/components/TerminalPane";
 import { ExplorerPanel } from "@/components/ExplorerPanel";
 import { SearchPanel } from "@/components/SearchPanel";
+import { SourceControlPanel } from "@/components/SourceControlPanel";
 import { useEditorStore } from "@/store/editor";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -149,6 +151,9 @@ export function ProjectView({
           <TabsTrigger value="search">
             <Search className="h-3.5 w-3.5" /> Search
           </TabsTrigger>
+          <TabsTrigger value="source-control">
+            <GitBranch className="h-3.5 w-3.5" /> Source Control
+          </TabsTrigger>
           <TabsTrigger value="terminal">Terminal</TabsTrigger>
         </TabsList>
 
@@ -169,6 +174,9 @@ export function ProjectView({
         </TabsContent>
         <TabsContent value="search">
           <SearchPanel root={path} onOpen={openSearchResult} />
+        </TabsContent>
+        <TabsContent value="source-control">
+          <SourceControlPanel root={path} />
         </TabsContent>
         <TabsContent value="terminal">
           <TerminalTab path={path} onOpen={handleTerminal} />

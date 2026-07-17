@@ -202,6 +202,51 @@ pub fn git_info(path: String) -> Result<Option<GitInfo>, String> {
     Ok(git::info(Path::new(&path)))
 }
 
+/// Grouped staged/unstaged status for the source-control panel (`null` if the
+/// project is not a git repository).
+#[tauri::command]
+pub fn git_status(path: String) -> Result<Option<git::GitStatus>, String> {
+    Ok(git::status(Path::new(&path)))
+}
+
+/// Stage one path, or every change when `path` is null/empty.
+#[tauri::command]
+pub fn git_stage(path: String, file: Option<String>) -> Result<(), String> {
+    let dir = Path::new(&path);
+    match file.as_deref().filter(|f| !f.is_empty()) {
+        Some(f) => git::stage(dir, f).map_err(|e| e.to_string()),
+        None => git::stage_all(dir).map_err(|e| e.to_string()),
+    }
+}
+
+/// Unstage one path, or everything when `path` is null/empty.
+#[tauri::command]
+pub fn git_unstage(path: String, file: Option<String>) -> Result<(), String> {
+    let dir = Path::new(&path);
+    match file.as_deref().filter(|f| !f.is_empty()) {
+        Some(f) => git::unstage(dir, f).map_err(|e| e.to_string()),
+        None => git::unstage_all(dir).map_err(|e| e.to_string()),
+    }
+}
+
+/// The unified diff for a file, staged or unstaged.
+#[tauri::command]
+pub fn git_diff(path: String, file: String, staged: bool) -> Result<String, String> {
+    git::diff(Path::new(&path), &file, staged).map_err(|e| e.to_string())
+}
+
+/// Commit the staged changes; returns the new commit.
+#[tauri::command]
+pub fn git_commit(path: String, message: String) -> Result<git::Commit, String> {
+    git::commit(Path::new(&path), &message).map_err(|e| e.to_string())
+}
+
+/// The most recent commits (newest first).
+#[tauri::command]
+pub fn git_log(path: String, limit: usize) -> Result<Vec<git::Commit>, String> {
+    Ok(git::recent_commits(Path::new(&path), limit))
+}
+
 /// Assess how risky a project's command is before running it, so the UI can
 /// show a confirmation dialog for anything destructive.
 #[tauri::command]

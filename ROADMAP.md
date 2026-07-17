@@ -64,9 +64,12 @@ Turning projects into true workspaces.
 
 ## v1.2 — Git power center & environments 📋
 
-- 📋 **Git power center** — staged/unstaged/untracked files, commit, stage,
+- 🚧 **Git power center** — staged/unstaged/untracked files, commit, stage,
   push/pull/fetch, branch create/switch/delete, merge, rebase, cherry-pick,
-  stashes, tags, contributors, and a commit-graph visualisation.
+  stashes, tags, contributors, and a commit-graph visualisation. First slice
+  shipped: a Source Control tab with staged/unstaged groups, one-click
+  stage/unstage, an inline diff viewer, commit, and recent history (backed by
+  `orbit_core::git`). Push/pull, branches, stashes and the graph are next.
 - 🚧 **Environment variable manager** — the engine is in
   (`orbit_core::env`: discovery across `.env`, `.env.local`, `.env.development`,
   `.env.production`, `.env.example`; dotenv parsing, secret detection + masking,

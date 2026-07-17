@@ -126,6 +126,8 @@ mod tests {
         assert_serialize::<ProjectDetail>();
         assert_serialize::<git::GitInfo>();
         assert_serialize::<git::Commit>();
+        assert_serialize::<git::GitStatus>();
+        assert_serialize::<git::StatusEntry>();
         assert_serialize::<health::HealthReport>();
         assert_serialize::<health::Warning>();
         assert_serialize::<deps::Dependency>();

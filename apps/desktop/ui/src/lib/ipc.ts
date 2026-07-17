@@ -3,11 +3,13 @@ import type {
   ActivityReport,
   Assessment,
   CommandOutput,
+  Commit,
   Dependency,
   EnvReport,
   FileContents,
   FileNode,
   GitInfo,
+  GitStatus,
   HealthReport,
   ProjectDetail,
   ProjectSummary,
@@ -649,6 +651,47 @@ export async function projectDeps(path: string): Promise<Dependency[]> {
 export async function gitInfo(path: string): Promise<GitInfo | null> {
   if (!isTauri()) return detailFor(path).git ?? null;
   return invoke<GitInfo | null>("git_info", { path });
+}
+
+// --- Source control ---------------------------------------------------------
+
+/** Grouped staged/unstaged status, or null when the project is not a repo. */
+export async function gitStatus(path: string): Promise<GitStatus | null> {
+  if (!isTauri()) return null;
+  return invoke<GitStatus | null>("git_status", { path });
+}
+
+/** Stage one file, or every change when `file` is omitted. */
+export async function gitStage(path: string, file?: string): Promise<void> {
+  if (!isTauri()) return;
+  return invoke<void>("git_stage", { path, file: file ?? null });
+}
+
+/** Unstage one file, or everything when `file` is omitted. */
+export async function gitUnstage(path: string, file?: string): Promise<void> {
+  if (!isTauri()) return;
+  return invoke<void>("git_unstage", { path, file: file ?? null });
+}
+
+/** The unified diff for a file, staged (`--cached`) or working-tree. */
+export async function gitDiff(
+  path: string,
+  file: string,
+  staged: boolean,
+): Promise<string> {
+  if (!isTauri()) return "";
+  return invoke<string>("git_diff", { path, file, staged });
+}
+
+/** Commit the staged changes; resolves with the new commit. */
+export async function gitCommit(path: string, message: string): Promise<Commit> {
+  return invoke<Commit>("git_commit", { path, message });
+}
+
+/** The most recent commits, newest first. */
+export async function gitLog(path: string, limit = 20): Promise<Commit[]> {
+  if (!isTauri()) return [];
+  return invoke<Commit[]>("git_log", { path, limit });
 }
 
 /**
