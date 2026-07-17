@@ -68,6 +68,7 @@ The engine. Pure library, no `unsafe` (`unsafe_code = "forbid"`).
 | `env`         | `.env` discovery/parsing, secret masking, duplicate/missing detection.|
 | `workspace`   | Per-project tasks, notes, bookmarks and terminal tabs.                 |
 | `shell`       | Which shells exist here, and which one the user actually wants.        |
+| `files`       | Lazy directory listing and file reading (encoding/line-ending/language).|
 | `store`       | SQLite persistence (feature `persistence`): projects, settings, events.|
 
 The data model uses `#[serde(rename_all = "camelCase")]` so it crosses the
@@ -89,11 +90,21 @@ built on its own.
 
 - `src-tauri/` — the Rust half. `lib.rs` wires plugins, opens the SQLite store
   in the OS app-data directory, installs the tray and native menu, and
-  registers the command handlers in `commands.rs`. `state.rs` holds the shared
-  `Store` and a process registry behind a `Mutex`.
+  registers the ~30 command handlers in `commands.rs`. `state.rs` holds the
+  shared `Store` behind a `Mutex`. `terminal.rs` owns the PTY sessions for the
+  integrated terminal (via `portable-pty`), streaming output back to the UI as
+  Tauri events.
 - `ui/` — the React + TypeScript + Tailwind frontend. It talks to the backend
   through a typed IPC layer (`invoke`/`listen`) and falls back to seeded demo
-  data when not running inside Tauri, so the UI renders in a browser too.
+  data when not running inside Tauri, so the UI renders in a browser too. The
+  editor uses CodeMirror 6 (`components/CodeEditor.tsx`); the terminal uses
+  xterm.js (`components/TerminalPane.tsx`).
+
+> **Note for contributors:** `src-tauri` cannot be compiled on a machine without
+> the platform webview stack (WebView2 / webkit2gtk), so it is validated in CI,
+> not locally. To keep IPC-type mistakes out of that slow loop, `orbit-core`'s
+> `ipc_types_are_serializable` test asserts every type crossing the boundary is
+> `Serialize`/`Deserialize` — run `cargo test` and it fails fast.
 
 The IPC contract (command names and payload shapes) is documented in
 `commands.rs`; the TypeScript mirror lives in `ui/src/lib/types.ts`.
