@@ -76,6 +76,7 @@ pub fn run() {
             commands::read_dir,
             commands::read_file,
             commands::write_file,
+            commands::search_workspace,
         ])
         .run(tauri::generate_context!())
         .expect("error while running the Orbit application");

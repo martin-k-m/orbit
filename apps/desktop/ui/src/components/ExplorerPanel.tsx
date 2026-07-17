@@ -174,6 +174,7 @@ export function ExplorerPanel({ root }: { root: string }) {
                   value={active.draft}
                   language={active.contents.language}
                   readOnly={active.contents.truncated}
+                  reveal={active.reveal}
                   onChange={(v) => updateDraft(active.path, v)}
                 />
               ) : null}

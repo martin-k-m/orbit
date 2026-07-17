@@ -152,6 +152,39 @@ export interface FileContents {
   size: number;
 }
 
+// --- Search (mirrors `orbit_core::search`) ----------------------------------
+
+/** One matching line within a file. */
+export interface SearchMatch {
+  /** 1-based line number. */
+  line: number;
+  /** 1-based character column of the first match on the line. */
+  column: number;
+  /** The line's text, trimmed for display. */
+  text: string;
+  /** Byte offset of the match within `text` (equal to `matchEnd` if off-screen). */
+  matchStart: number;
+  /** Byte offset just past the match within `text`. */
+  matchEnd: number;
+}
+
+/** All matching lines within a single file. */
+export interface FileMatches {
+  path: string;
+  name: string;
+  language?: string | null;
+  matches: SearchMatch[];
+}
+
+/** The outcome of a workspace search. */
+export interface SearchResults {
+  fileCount: number;
+  matchCount: number;
+  /** A cap was hit — more matches exist than were returned. */
+  truncated: boolean;
+  files: FileMatches[];
+}
+
 // --- Terminal (mirrors `orbit_core::shell` + src-tauri/terminal.rs) ----------
 
 /** Which shell a session runs. */

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { EditorState, type Extension } from "@codemirror/state";
+import { EditorState, EditorSelection, type Extension } from "@codemirror/state";
 import { EditorView, keymap, lineNumbers, highlightActiveLine } from "@codemirror/view";
 import {
   defaultKeymap,
@@ -82,12 +82,15 @@ export function CodeEditor({
   language,
   readOnly = false,
   onChange,
+  reveal,
 }: {
   path: string;
   value: string;
   language?: string | null;
   readOnly?: boolean;
   onChange?: (value: string) => void;
+  /** Scroll to a 1-based line; the `nonce` re-triggers a jump to the same line. */
+  reveal?: { line: number; nonce: number };
 }) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef<EditorView | null>(null);
@@ -118,6 +121,24 @@ export function CodeEditor({
     // would fight the user's cursor.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path, language, readOnly]);
+
+  // Jump to a requested line (e.g. a search hit). Keyed on the nonce so the same
+  // line can be revealed twice, but a re-render alone never re-scrolls.
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view || !reveal) return;
+    const doc = view.state.doc;
+    const lineNo = Math.min(Math.max(reveal.line, 1), doc.lines);
+    const pos = doc.line(lineNo).from;
+    view.dispatch({
+      selection: EditorSelection.cursor(pos),
+      effects: EditorView.scrollIntoView(pos, { y: "center" }),
+    });
+    view.focus();
+    // Rebuilding the view (path change) runs this again for the new document.
+    // Keyed on the nonce, not `reveal`, so repeat clicks re-scroll but edits don't.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reveal?.nonce, path]);
 
   return <div ref={hostRef} className="h-full w-full overflow-hidden" />;
 }

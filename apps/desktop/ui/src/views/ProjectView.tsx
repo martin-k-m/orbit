@@ -14,6 +14,7 @@ import {
   FileCode2,
   ListTodo,
   Sparkles,
+  Search,
 } from "lucide-react";
 import type {
   Command,
@@ -28,10 +29,13 @@ import {
   runCommand,
   openTerminal,
   generateProfile,
+  readFile,
 } from "@/lib/ipc";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TerminalPane } from "@/components/TerminalPane";
 import { ExplorerPanel } from "@/components/ExplorerPanel";
+import { SearchPanel } from "@/components/SearchPanel";
+import { useEditorStore } from "@/store/editor";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -48,7 +52,9 @@ export function ProjectView({
   path: string;
 }) {
   const [detail, setDetail] = useState<ProjectDetail | null>(null);
+  const [tab, setTab] = useState("overview");
   const pushToast = useAppStore((s) => s.pushToast);
+  const openInEditor = useEditorStore((s) => s.openTab);
 
   useEffect(() => {
     let cancelled = false;
@@ -82,6 +88,13 @@ export function ProjectView({
       title: "Profile generated",
       description: `orbit.toml written for ${project.name}`,
     });
+  }
+
+  // Open a search hit in the editor at its line, then reveal the Explorer tab.
+  async function openSearchResult(filePath: string, line: number) {
+    const contents = await readFile(filePath);
+    openInEditor(filePath, contents, line);
+    setTab("explorer");
   }
 
   return (
@@ -121,7 +134,7 @@ export function ProjectView({
       </header>
 
       {/* Tabs */}
-      <Tabs defaultValue="overview">
+      <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="commands">Commands</TabsTrigger>
@@ -133,6 +146,9 @@ export function ProjectView({
             </span>
           </TabsTrigger>
           <TabsTrigger value="explorer">Explorer</TabsTrigger>
+          <TabsTrigger value="search">
+            <Search className="h-3.5 w-3.5" /> Search
+          </TabsTrigger>
           <TabsTrigger value="terminal">Terminal</TabsTrigger>
         </TabsList>
 
@@ -150,6 +166,9 @@ export function ProjectView({
         </TabsContent>
         <TabsContent value="explorer">
           <ExplorerPanel root={path} />
+        </TabsContent>
+        <TabsContent value="search">
+          <SearchPanel root={path} onOpen={openSearchResult} />
         </TabsContent>
         <TabsContent value="terminal">
           <TerminalTab path={path} onOpen={handleTerminal} />

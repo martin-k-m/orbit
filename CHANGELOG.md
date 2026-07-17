@@ -8,6 +8,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Workspace search — find in files** — a new Search tab in each project runs a
+  literal, ASCII-case-insensitive (optionally case-sensitive or whole-word)
+  content search across the project, powered by the new `orbit_core::search`
+  engine. It skips ignored (`node_modules`, `target`, `.git`, …), binary and
+  oversized files, and caps its own output so a broad query stays cheap.
+  Results group by file with the matched span highlighted; clicking one opens
+  the file in an editor tab and scrolls to the line.
 - **Editor tabs — multi-file editing** — the Explorer now keeps every file you
   open in its own tab instead of replacing the one before it. Each tab holds its
   own unsaved draft and dirty marker, reopening a file focuses its existing tab

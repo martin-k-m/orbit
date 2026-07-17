@@ -413,6 +413,27 @@ pub fn write_file(path: String, contents: String) -> Result<(), String> {
     std::fs::write(&file, contents).map_err(|e| e.to_string())
 }
 
+/// Search a project for a literal string ("find in files"). Skips ignored,
+/// binary and oversized files; results are capped so a broad query stays cheap.
+#[tauri::command]
+pub fn search_workspace(
+    root: String,
+    query: String,
+    case_sensitive: bool,
+    whole_word: bool,
+) -> Result<orbit_core::search::SearchResults, String> {
+    let dir = PathBuf::from(&root);
+    if !dir.is_dir() {
+        return Err(format!("{root} is not a directory"));
+    }
+    let query = orbit_core::search::Query {
+        text: query,
+        case_sensitive,
+        whole_word,
+    };
+    orbit_core::search::search_workspace(&dir, &query).map_err(|e| e.to_string())
+}
+
 // --- Terminal -------------------------------------------------------------
 
 /// The shells installed on this machine, best first. The first entry is what

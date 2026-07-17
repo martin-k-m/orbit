@@ -41,6 +41,7 @@ pub mod process;
 pub mod profile;
 pub mod safety;
 pub mod scan;
+pub mod search;
 pub mod shell;
 pub mod workspace;
 
@@ -151,6 +152,9 @@ mod tests {
         assert_serialize::<files::FileContents>();
         assert_serialize::<files::Encoding>();
         assert_serialize::<files::LineEnding>();
+        assert_serialize::<search::SearchResults>();
+        assert_serialize::<search::FileMatches>();
+        assert_serialize::<search::Match>();
 
         // Types the frontend also sends back must round-trip. `save_workspace`
         // takes a Workspace as a command *parameter*, so it must deserialize.

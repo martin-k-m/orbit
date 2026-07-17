@@ -92,9 +92,11 @@ Turning projects into true workspaces.
   active ports, with per-project port attribution.
 - 📋 **Explorer upgrades** — building on the v1.1 file tree: search, favourites,
   recent files, quick preview, reveal in OS explorer, drag & drop.
-- 📋 **Universal search** — one `⌘/Ctrl+K` across projects, commands, files,
+- 🚧 **Universal search** — one `⌘/Ctrl+K` across projects, commands, files,
   branches, commits, notes, env vars, terminal history, databases, API requests
-  and settings.
+  and settings. First slice shipped: **in-project find-in-files** (content
+  search with case/whole-word options, backed by `orbit_core::search`,
+  click-through to the editor). The cross-source palette is next.
 
 ## v2.0 — Platform 📋
 

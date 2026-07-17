@@ -120,6 +120,22 @@ describe("editor store", () => {
     expect(s().tabs).toHaveLength(1);
   });
 
+  it("carries a reveal line and re-reveals on reopen with a fresh nonce", () => {
+    s().openTab("/p/a.ts", file("a"), 12);
+    expect(activeTab(s())!.reveal?.line).toBe(12);
+    const firstNonce = activeTab(s())!.reveal!.nonce;
+
+    // Opening without a line leaves the existing reveal untouched.
+    s().openTab("/p/b.ts", file("b"));
+    expect(activeTab(s())!.reveal).toBeUndefined();
+
+    // Reopening the same file at a new line bumps the nonce so the editor jumps.
+    s().openTab("/p/a.ts", file("a"), 3);
+    const tab = s().tabs.find((t) => t.path === "/p/a.ts")!;
+    expect(tab.reveal?.line).toBe(3);
+    expect(tab.reveal!.nonce).toBeGreaterThan(firstNonce);
+  });
+
   it("closeAll clears everything", () => {
     s().openTab("/p/a.ts", file("a"));
     s().openTab("/p/b.ts", file("b"));

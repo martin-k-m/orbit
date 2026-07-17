@@ -11,6 +11,7 @@ import type {
   HealthReport,
   ProjectDetail,
   ProjectSummary,
+  SearchResults,
   Shell,
   TerminalExit,
   TerminalOutput,
@@ -797,6 +798,27 @@ export async function readFile(path: string): Promise<FileContents> {
 export async function writeFile(path: string, contents: string): Promise<void> {
   if (!isTauri()) return;
   return invoke<void>("write_file", { path, contents });
+}
+
+/**
+ * Search a project for a literal string ("find in files"). Ignored, binary and
+ * oversized files are skipped in the engine; results are capped.
+ */
+export async function searchWorkspace(
+  root: string,
+  query: string,
+  caseSensitive: boolean,
+  wholeWord: boolean,
+): Promise<SearchResults> {
+  if (!isTauri()) {
+    return { fileCount: 0, matchCount: 0, truncated: false, files: [] };
+  }
+  return invoke<SearchResults>("search_workspace", {
+    root,
+    query,
+    caseSensitive,
+    wholeWord,
+  });
 }
 
 // --- Terminal ---------------------------------------------------------------

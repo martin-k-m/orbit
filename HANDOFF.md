@@ -59,6 +59,7 @@ Engine modules (`crates/orbit-core/src/`), all unit-tested:
 | `workspace` | Per-project tasks/notes/bookmarks/terminal tabs (JSON in SQLite) |
 | `shell` | Which shells exist + which the user prefers |
 | `files` | Lazy dir listing + file read (encoding/line-ending/language/binary) |
+| `search` | Find-in-files: literal content search, skips ignored/binary/large, capped |
 | `store` | SQLite persistence (feature `persistence`, schema v2) |
 
 Desktop features that are **built and wired to the UI**:
@@ -69,6 +70,9 @@ Desktop features that are **built and wired to the UI**:
 - **Integrated terminal** — real PTY (`portable-pty`), xterm.js UI
 - **File explorer + CodeMirror 6 editor** with **multiple editor tabs**
   (per-tab drafts/dirty state, reopen-focuses, close-picks-neighbour) (Explorer tab)
+- **Workspace search (find in files)** — a Search tab per project backed by
+  `orbit_core::search`; click a result to open the file at that line. This is
+  project-scoped content search, **not** the cross-source universal palette yet.
 - Environment report; local analytics
 - System tray, native menu, Dark/Light/**System** theme (persisted)
 - **Signed auto-update** (from v1.1.0)

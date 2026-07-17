@@ -16,7 +16,16 @@ export interface EditorTab {
   draft: string;
   /** `draft !== contents.text` — kept as state so the UI doesn't recompute it. */
   dirty: boolean;
+  /**
+   * A pending "scroll to this line" request (1-based), e.g. from a search hit.
+   * The `nonce` makes repeat reveals of the same line distinct, so the editor
+   * jumps again on a second click but not on every keystroke.
+   */
+  reveal?: { line: number; nonce: number };
 }
+
+/** Monotonic source of reveal nonces. Not time/random, so it stays testable. */
+let revealSeq = 0;
 
 interface EditorState {
   tabs: EditorTab[];
@@ -25,8 +34,10 @@ interface EditorState {
   /**
    * Open a file, or focus it if it's already open. Reopening never discards
    * unsaved edits in the existing tab — it only brings it to the front.
+   * Pass `revealLine` (1-based) to scroll the editor to a specific line, as a
+   * search result does.
    */
-  openTab: (path: string, contents: FileContents) => void;
+  openTab: (path: string, contents: FileContents, revealLine?: number) => void;
   /** Focus an already-open tab. No-op if the path isn't open. */
   setActive: (path: string) => void;
   /**
@@ -66,11 +77,18 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   tabs: [],
   activePath: null,
 
-  openTab: (path, contents) => {
+  openTab: (path, contents, revealLine) => {
+    const reveal =
+      revealLine != null ? { line: revealLine, nonce: ++revealSeq } : undefined;
     const existing = get().tabs.find((t) => t.path === path);
     if (existing) {
-      // Already open — just focus it and keep any unsaved edits intact.
-      set({ activePath: path });
+      // Already open — focus it, keep unsaved edits, but honour a new reveal.
+      set((s) => ({
+        activePath: path,
+        tabs: reveal
+          ? s.tabs.map((t) => (t.path === path ? { ...t, reveal } : t))
+          : s.tabs,
+      }));
       return;
     }
     const tab: EditorTab = {
@@ -79,6 +97,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       contents,
       draft: contents.text,
       dirty: false,
+      reveal,
     };
     set((s) => ({ tabs: [...s.tabs, tab], activePath: path }));
   },
