@@ -691,6 +691,12 @@ export async function gitDiff(
   return invoke<string>("git_diff", { path, file, staged });
 }
 
+/** The full patch for a commit/ref. */
+export async function gitShow(path: string, reference: string): Promise<string> {
+  if (!isTauri()) return "";
+  return invoke<string>("git_show", { path, reference });
+}
+
 /** Commit the staged changes; resolves with the new commit. */
 export async function gitCommit(path: string, message: string): Promise<Commit> {
   return invoke<Commit>("git_commit", { path, message });

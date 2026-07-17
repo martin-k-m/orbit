@@ -8,6 +8,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Commit detail in Source Control** — clicking a commit in the history now
+  shows its full patch in the diff viewer (via a new `git show` engine helper,
+  unit-tested), so you can review any past change without leaving the panel.
 - **LSP protocol foundation** — the base plumbing for a future language-server
   client: `Content-Length` message framing and JSON-RPC 2.0 helpers, with an
   incremental stream `Decoder` that reassembles messages split across reads

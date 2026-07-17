@@ -21,6 +21,7 @@ import {
   gitStage,
   gitUnstage,
   gitDiff,
+  gitShow,
   gitCommit,
   gitBranches,
   gitSwitchBranch,
@@ -55,6 +56,8 @@ export function SourceControlPanel({ root }: { root: string }) {
   const [busy, setBusy] = useState(false);
   const [selected, setSelected] = useState<Selection>(null);
   const [diff, setDiff] = useState("");
+  const [commitView, setCommitView] = useState<Commit | null>(null);
+  const [commitDiff, setCommitDiff] = useState("");
   const [creating, setCreating] = useState(false);
   const [newBranch, setNewBranch] = useState("");
 
@@ -96,6 +99,26 @@ export function SourceControlPanel({ root }: { root: string }) {
       cancelled = true;
     };
   }, [root, selected, status]);
+
+  // Load a commit's full patch when one is selected from history.
+  useEffect(() => {
+    if (!commitView) {
+      setCommitDiff("");
+      return;
+    }
+    let cancelled = false;
+    gitShow(root, commitView.hash).then((d) => {
+      if (!cancelled) setCommitDiff(d);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [root, commitView]);
+
+  const selectFile = useCallback((s: Selection) => {
+    setSelected(s);
+    setCommitView(null);
+  }, []);
 
   const mutate = useCallback(
     async (fn: () => Promise<void>) => {
@@ -332,7 +355,7 @@ export function SourceControlPanel({ root }: { root: string }) {
             entries={status.staged}
             staged
             selected={selected}
-            onSelect={setSelected}
+            onSelect={selectFile}
             onAction={(file) => void mutate(() => gitUnstage(root, file))}
             onActionAll={
               status.staged.length
@@ -347,7 +370,7 @@ export function SourceControlPanel({ root }: { root: string }) {
             entries={status.unstaged}
             staged={false}
             selected={selected}
-            onSelect={setSelected}
+            onSelect={selectFile}
             onAction={(file) => void mutate(() => gitStage(root, file))}
             onActionAll={
               status.unstaged.length
@@ -406,9 +429,16 @@ export function SourceControlPanel({ root }: { root: string }) {
                 History
               </div>
               {commits.map((c) => (
-                <div
+                <button
                   key={c.hash}
-                  className="flex items-center gap-2 px-3 py-1 text-[12px]"
+                  onClick={() => {
+                    setSelected(null);
+                    setCommitView(c);
+                  }}
+                  className={cn(
+                    "no-drag flex w-full items-center gap-2 px-3 py-1 text-left text-[12px] transition-colors hover:bg-white/[0.04]",
+                    commitView?.hash === c.hash && "bg-accent/10",
+                  )}
                   title={`${c.author} · ${c.hash}`}
                 >
                   <GitCommitHorizontal className="h-3.5 w-3.5 shrink-0 text-fg-subtle" />
@@ -419,7 +449,7 @@ export function SourceControlPanel({ root }: { root: string }) {
                   <span className="shrink-0 font-mono text-[10px] text-fg-subtle">
                     {c.shortHash}
                   </span>
-                </div>
+                </button>
               ))}
             </div>
           )}
@@ -428,7 +458,20 @@ export function SourceControlPanel({ root }: { root: string }) {
 
       {/* Right: diff viewer */}
       <div className="flex min-w-0 flex-1 flex-col">
-        {selected ? (
+        {commitView ? (
+          <>
+            <div className="flex items-center gap-2 border-b border-white/[0.06] px-3 py-2 text-xs">
+              <GitCommitHorizontal className="h-3.5 w-3.5 shrink-0 text-accent" />
+              <span className="truncate text-fg-muted">{commitView.summary}</span>
+              <span className="ml-auto shrink-0 font-mono text-fg-subtle">
+                {commitView.shortHash}
+              </span>
+            </div>
+            <div className="scrollbar-thin min-h-0 flex-1 overflow-auto">
+              <DiffView diff={commitDiff} />
+            </div>
+          </>
+        ) : selected ? (
           <>
             <div className="flex items-center gap-2 border-b border-white/[0.06] px-3 py-2 text-xs">
               <span className="truncate font-mono text-fg-muted">{selected.file}</span>
@@ -442,7 +485,9 @@ export function SourceControlPanel({ root }: { root: string }) {
           </>
         ) : (
           <Centered>
-            <p className="text-sm text-fg-subtle">Select a file to view its diff.</p>
+            <p className="text-sm text-fg-subtle">
+              Select a file or a commit to view its diff.
+            </p>
           </Centered>
         )}
       </div>

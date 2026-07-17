@@ -235,6 +235,12 @@ pub fn git_diff(path: String, file: String, staged: bool) -> Result<String, Stri
     git::diff(Path::new(&path), &file, staged).map_err(|e| e.to_string())
 }
 
+/// The full patch for a commit/ref.
+#[tauri::command]
+pub fn git_show(path: String, reference: String) -> Result<String, String> {
+    git::show(Path::new(&path), &reference).map_err(|e| e.to_string())
+}
+
 /// Commit the staged changes; returns the new commit.
 #[tauri::command]
 pub fn git_commit(path: String, message: String) -> Result<git::Commit, String> {

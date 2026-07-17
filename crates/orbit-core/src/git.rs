@@ -294,6 +294,11 @@ pub fn unstage_all(dir: &Path) -> crate::Result<()> {
     run_ok(dir, &["restore", "--staged", "--", "."]).map(|_| ())
 }
 
+/// The full patch for a commit or ref (`git show <reference>`).
+pub fn show(dir: &Path, reference: &str) -> crate::Result<String> {
+    run_ok(dir, &["show", "--no-color", reference])
+}
+
 /// The unified diff for one path — staged (`--cached`) or working-tree.
 pub fn diff(dir: &Path, path: &str, staged: bool) -> crate::Result<String> {
     if staged {
@@ -612,6 +617,18 @@ mod tests {
             "pop restores the change"
         );
         assert!(stash_list(d).is_empty());
+    }
+
+    #[test]
+    fn show_returns_a_commit_patch() {
+        let tmp = init_repo();
+        let d = tmp.path();
+        fs::write(d.join("a.txt"), "one\n").unwrap();
+        stage(d, "a.txt").unwrap();
+        commit(d, "add a").unwrap();
+        let patch = show(d, "HEAD").unwrap();
+        assert!(patch.contains("add a"), "patch has the message: {patch}");
+        assert!(patch.contains("+one"), "patch has the added line: {patch}");
     }
 
     #[test]
