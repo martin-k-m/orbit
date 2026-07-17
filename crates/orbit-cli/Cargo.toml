@@ -1,0 +1,24 @@
+[package]
+name = "orbit-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+description = "Orbit's terminal companion — scan, inspect and run your projects from the shell."
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "orbit"
+path = "src/main.rs"
+
+[dependencies]
+orbit-core = { workspace = true }
+clap = { workspace = true }
+serde_json = { workspace = true }
+time = { workspace = true }
+anyhow = { workspace = true }

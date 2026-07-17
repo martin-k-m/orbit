@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/martin-k-m/orbit/tree/main/docs
+    about: Architecture, development and contributing guides.
+  - name: Security disclosure
+    url: https://github.com/martin-k-m/orbit/security/advisories/new
+    about: Please report vulnerabilities privately, not as public issues.

@@ -1,0 +1,32 @@
+# Normalize line endings: commit LF, check out native. Keeps a Windows dev box
+# from committing CRLF that would break CI on Linux/macOS.
+* text=auto eol=lf
+
+# Explicitly text
+*.rs      text eol=lf
+*.toml    text eol=lf
+*.ts      text eol=lf
+*.tsx     text eol=lf
+*.js      text eol=lf
+*.jsx     text eol=lf
+*.json    text eol=lf
+*.css     text eol=lf
+*.html    text eol=lf
+*.md      text eol=lf
+*.yml     text eol=lf
+*.yaml    text eol=lf
+*.svg     text eol=lf
+
+# Binary assets — never touch
+*.png     binary
+*.ico     binary
+*.icns    binary
+*.jpg     binary
+*.jpeg    binary
+*.webp    binary
+*.woff    binary
+*.woff2   binary
+
+# Lockfiles: keep as-is, don't show huge diffs in review
+Cargo.lock       -diff
+package-lock.json -diff

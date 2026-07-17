@@ -1,0 +1,17 @@
+<!-- Primary Orbit logo — light wordmark, for dark backgrounds. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="96" viewBox="0 0 360 96" fill="none" role="img" aria-label="Orbit">
+  <defs>
+    <linearGradient id="ring" x1="8" y1="24" x2="80" y2="72" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6366F1"/>
+      <stop offset="1" stop-color="#A78BFA"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(48 48)">
+    <g transform="rotate(-22)">
+      <ellipse cx="0" cy="0" rx="34" ry="19.5" stroke="url(#ring)" stroke-width="4.6" fill="none"/>
+      <circle cx="-29" cy="12" r="4.6" fill="#F4F4FA"/>
+    </g>
+    <circle cx="0" cy="0" r="10.5" fill="#EDEEFF"/>
+  </g>
+  <text x="100" y="60" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="48" font-weight="700" letter-spacing="-1.5" fill="#F5F6FF">Orbit</text>
+</svg>
