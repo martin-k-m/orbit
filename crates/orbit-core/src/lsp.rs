@@ -21,6 +21,10 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::collections::HashMap;
+use std::io::{Read, Write};
+use std::process::{Child, Command, Stdio};
+use std::sync::{Arc, Mutex};
+use std::thread::JoinHandle;
 
 /// A 0-based position in a document (LSP uses 0-based line/character).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -351,6 +355,116 @@ fn parse_location(result: &Value) -> Option<Location> {
     })
 }
 
+/// The recommended language server for an editor language id, if one is common
+/// enough to try. `(program, args)` — the driver checks it's actually installed.
+pub fn server_for(language: &str) -> Option<(&'static str, &'static [&'static str])> {
+    match language {
+        "rust" => Some(("rust-analyzer", &[])),
+        "typescript" | "javascript" => Some(("typescript-language-server", &["--stdio"])),
+        "python" => Some(("pylsp", &[])),
+        "go" => Some(("gopls", &[])),
+        _ => None,
+    }
+}
+
+/// A running language server: spawns the process, pumps its stdout through a
+/// [`Session`] on a background thread (writing any replies back), and lets the
+/// caller open documents and read diagnostics.
+///
+/// This is the transport the [`Session`] state machine was built to be driven
+/// by. It's plain `std::process`/threads (no Tauri), so it compiles and is
+/// checkable in `orbit-core`; actually exercising it needs a real server
+/// installed, so the integration test is `#[ignore]`d by default.
+#[derive(Debug)]
+pub struct LspDriver {
+    child: Child,
+    stdin: Arc<Mutex<std::process::ChildStdin>>,
+    session: Arc<Mutex<Session>>,
+    version: i64,
+    _reader: JoinHandle<()>,
+}
+
+impl LspDriver {
+    /// Spawn `program args…` as a server for `root_uri` and send `initialize`.
+    pub fn start(program: &str, args: &[&str], root_uri: &str) -> std::io::Result<Self> {
+        let mut child = Command::new(program)
+            .args(args)
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::null())
+            .spawn()?;
+
+        let stdin = Arc::new(Mutex::new(child.stdin.take().expect("piped stdin")));
+        let mut stdout = child.stdout.take().expect("piped stdout");
+        let session = Arc::new(Mutex::new(Session::new(root_uri)));
+
+        // Kick off the handshake.
+        {
+            let init = session.lock().unwrap().initialize();
+            stdin.lock().unwrap().write_all(&init)?;
+        }
+
+        // Reader thread: server stdout → Session → write any replies back.
+        let reader_session = Arc::clone(&session);
+        let reader_stdin = Arc::clone(&stdin);
+        let _reader = std::thread::spawn(move || {
+            let mut decoder = Decoder::new();
+            let mut chunk = [0u8; 8192];
+            loop {
+                match stdout.read(&mut chunk) {
+                    Ok(0) | Err(_) => break, // server closed or errored
+                    Ok(n) => decoder.feed(&chunk[..n]),
+                }
+                while let Some(payload) = decoder.next_message() {
+                    let replies = reader_session.lock().unwrap().handle(&payload);
+                    if let Ok(mut w) = reader_stdin.lock() {
+                        for r in replies {
+                            let _ = w.write_all(&r);
+                        }
+                    }
+                }
+            }
+        });
+
+        Ok(LspDriver {
+            child,
+            stdin,
+            session,
+            version: 0,
+            _reader,
+        })
+    }
+
+    /// Whether the `initialize` handshake has completed (poll after `start`).
+    pub fn is_ready(&self) -> bool {
+        self.session.lock().unwrap().is_initialized()
+    }
+
+    /// Notify the server a document is open (or its full text changed).
+    pub fn open(&mut self, uri: &str, language_id: &str, text: &str) -> std::io::Result<()> {
+        self.version += 1;
+        let msg = self
+            .session
+            .lock()
+            .unwrap()
+            .did_open(uri, language_id, self.version, text);
+        self.stdin.lock().unwrap().write_all(&msg)
+    }
+
+    /// The diagnostics currently known for a document.
+    pub fn diagnostics(&self, uri: &str) -> Vec<Diagnostic> {
+        self.session.lock().unwrap().diagnostics(uri).to_vec()
+    }
+}
+
+impl Drop for LspDriver {
+    fn drop(&mut self) {
+        // Best-effort: ask the child to stop, then reap it.
+        let _ = self.child.kill();
+        let _ = self.child.wait();
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -503,5 +617,41 @@ mod tests {
         assert_eq!(reply["id"], 7);
         // One (null) result per requested item.
         assert_eq!(reply["result"].as_array().unwrap().len(), 2);
+    }
+
+    #[test]
+    fn known_languages_map_to_servers() {
+        assert_eq!(server_for("rust").unwrap().0, "rust-analyzer");
+        assert_eq!(
+            server_for("typescript").unwrap().0,
+            "typescript-language-server"
+        );
+        assert!(server_for("cobol").is_none());
+    }
+
+    // Real end-to-end driver test — needs `rust-analyzer` on PATH, so it's
+    // ignored by default. Run with `cargo test -- --ignored` where available.
+    #[test]
+    #[ignore]
+    fn driver_handshakes_with_rust_analyzer() {
+        let tmp = tempfile::tempdir().unwrap();
+        let root = format!("file://{}", tmp.path().display());
+        let Ok(mut driver) = LspDriver::start("rust-analyzer", &[], &root) else {
+            return; // server not installed; nothing to assert
+        };
+        // Give the handshake a moment.
+        for _ in 0..50 {
+            if driver.is_ready() {
+                break;
+            }
+            std::thread::sleep(std::time::Duration::from_millis(100));
+        }
+        assert!(
+            driver.is_ready(),
+            "rust-analyzer should complete initialize"
+        );
+        driver
+            .open("file:///x.rs", "rust", "fn main() { let x = ; }")
+            .unwrap();
     }
 }
