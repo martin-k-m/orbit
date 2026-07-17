@@ -6,6 +6,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [1.1.0] — 2026-07-17
+
 ### Added
 
 - **Integrated terminal** — every project has a real PTY-backed shell (ConPTY on
@@ -86,5 +90,6 @@ The first public release.
   workflows, building installers for macOS (Intel + Apple Silicon),
   Windows and Linux.
 
-[Unreleased]: https://github.com/martin-k-m/orbit/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/martin-k-m/orbit/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/martin-k-m/orbit/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/martin-k-m/orbit/releases/tag/v1.0.0

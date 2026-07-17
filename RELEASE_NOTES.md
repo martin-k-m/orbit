@@ -1,91 +1,77 @@
-# Orbit v1.0.0 — Release Notes
+# Orbit v1.1.0 — Release Notes
 
-**The first public release of Orbit.** A local-first developer command center
-for managing projects, tools and workflows — no server, no account, no
-telemetry.
+The terminal release. Orbit gains a real embedded shell, signed automatic
+updates, and a theme that follows your OS — plus a pile of correctness fixes.
+
+Still everything you'd expect: local-first, no account, no telemetry.
 
 ## Highlights
 
-### 🗂 Project management
+### 🖥 Integrated terminal
 
-- Point Orbit at any folder and it detects every **Rust, TypeScript/JavaScript,
-  Python, Go and Docker** project inside, with the right commands, frameworks
-  and dependency counts.
-- Add, pin and organise projects on a dashboard that remembers what you opened
-  last.
-- Human-editable `.project-orbit` profiles let you pin a project's name and the
-  exact commands Orbit should run.
+Every project now has a **real shell built in**, running on a pseudo-terminal
+(ConPTY on Windows, `openpty` on macOS/Linux) — not a piped subprocess. Because
+programs see a TTY, the things that break in most embedded consoles just work:
 
-### ⌘ Command center
+- Colours, prompts, spinners and progress bars
+- Full-screen programs — `top`, `vim`, `lazygit`
+- `Ctrl-C`, history, tab completion, reflow on resize
 
-- A `Cmd/Ctrl + K` command palette to jump to any project, run `dev`/`build`/
-  `test`, open a terminal, or scan a folder — without leaving the keyboard.
-- Native application menu and a system tray with quick access.
+It opens in the project directory, in the shell you actually use — Orbit detects
+`pwsh`/PowerShell/cmd on Windows and zsh/fish/bash on macOS/Linux, respecting
+`$SHELL`/`COMSPEC`. `bash`/`zsh` start as login shells so your profile loads.
 
-### ▶️ Run & inspect
+> Tabs, split panes, output search and sessions that survive a restart are on
+> the [roadmap](https://github.com/martin-k-m/orbit/blob/main/ROADMAP.md).
 
-- One-click running of a project's commands, with captured output.
-- **Git at a glance:** branch, cleanliness, ahead/behind and last commit.
-- **Project health:** a 0–100 score with concrete warnings (oversized files,
-  TODOs, heavy artifacts, missing tests).
-- **Dependency manager:** the declared dependencies of every ecosystem, read
-  offline from manifests.
-- **Developer analytics:** local, private time-per-language and build-time
-  tracking that never leaves your machine.
+### 🔄 Signed automatic updates
 
-### 🛰 Ecosystem integrations
+Orbit checks GitHub Releases on launch and offers to install a newer version in
+place. Updates are **signed** and verified against a public key compiled into
+the app, so a tampered or spoofed release can't install itself. Nothing
+downloads or installs without you clicking. See
+[docs/updates.md](https://github.com/martin-k-m/orbit/blob/main/docs/updates.md).
 
-Previews for the sibling tools **Blink** (acceleration), **Killer** (security),
-**Flux** (automation) and **Beacon** (APIs).
+### 🎨 System theme
 
-### 🔒 Safety & privacy
+Appearance now offers **Dark / Light / System**. "System" follows your OS and
+updates live when it flips. Your choice is also finally remembered across
+restarts — previously it silently reset to dark every launch.
 
-- No network on hot paths. Analytics stay local.
-- A **dangerous-command guard** flags destructive commands (`rm -rf`, `dd`,
-  `mkfs`, fork bombs, `curl | sh`, …) and requires explicit confirmation before
-  running them.
-- Restrictive Content-Security-Policy and a minimal Tauri capability set.
-  `orbit-core` forbids `unsafe` code.
+### 🗂 Workspaces & environments, wired up
 
-### ⌨️ CLI companion
+The workspace model (per-project tasks, notes, bookmarks) and the `.env` manager
+(discovery, secret masking, duplicate/missing-variable detection) are now
+reachable from the app, not just the engine.
 
-The same engine as a terminal binary: `orbit scan | info | health | deps | git |
-commands | run | init`, all with `--json`.
+## Fixes
 
-### 🔄 Auto-update (opt-in)
-
-The updater is wired into the app and checks GitHub Releases on launch, but
-v1.0.0 does not publish signed update artifacts — that needs an updater signing
-key (see docs/releasing.md). Update checks no-op safely until then; installers
-are the supported path.
+- Desktop bundles wouldn't compile because an IPC type wasn't `Serialize`; a
+  guard test now catches that class of bug in `cargo test`.
+- Fixed the frontend path in the Tauri before-commands that failed every build.
+- Fixed the updater signing key (it was password-protected; CI had no TTY for
+  the prompt).
+- Light mode's status colours were tuned for a dark surface and washed out; they
+  are re-tuned.
 
 ## Downloads
 
-| Platform | Files |
+| Platform | File |
 | --- | --- |
-| macOS (Apple Silicon & Intel) | `.dmg` |
-| Windows | `.msi`, `.exe` |
-| Linux | `.AppImage`, `.deb` |
+| macOS (Apple Silicon) | `Orbit_1.1.0_aarch64.dmg` |
+| macOS (Intel) | `Orbit_1.1.0_x64.dmg` |
+| Windows | `Orbit_1.1.0_x64_en-US.msi` · `Orbit_1.1.0_x64-setup.exe` |
+| Linux | `Orbit_1.1.0_amd64.AppImage` · `Orbit_1.1.0_amd64.deb` |
 
-## Install
+Verify against `SHA256SUMS.txt`. Full history:
+[CHANGELOG.md](https://github.com/martin-k-m/orbit/blob/main/CHANGELOG.md).
 
-See [docs/installation.md](docs/installation.md). Everything runs locally; no
-account or connection required.
+## Upgrading
+
+If you're on v1.0.0, install v1.1.0 over it — your local data (projects,
+workspaces, settings) is preserved; the database migrates automatically. From
+v1.1.0 onward, in-app updates take over.
 
 ## Breaking changes
 
-None — this is the first release.
-
-## Migration notes
-
 None.
-
-## Known limitations
-
-- Ecosystem integrations (Blink/Killer/Flux/Beacon) ship as clearly-labelled
-  previews; connecting the real engines is on the roadmap.
-- Dependency "update available" hints are planned for a follow-up release.
-
-## Thanks
-
-Built for developers who want their tools to stay on their machine. ✦
