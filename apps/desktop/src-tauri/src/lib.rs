@@ -7,6 +7,7 @@
 
 mod commands;
 mod state;
+mod terminal;
 
 use state::AppState;
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, SubmenuBuilder};
@@ -31,6 +32,7 @@ pub fn run() {
 
     builder
         .manage(AppState::new())
+        .manage(terminal::Terminals::new())
         .setup(|app| {
             attach_store(app.handle());
             install_menu(app.handle())?;
@@ -66,6 +68,11 @@ pub fn run() {
             commands::save_workspace,
             commands::run_task,
             commands::env_report,
+            commands::terminal_shells,
+            commands::terminal_open,
+            commands::terminal_write,
+            commands::terminal_resize,
+            commands::terminal_close,
         ])
         .run(tauri::generate_context!())
         .expect("error while running the Orbit application");
