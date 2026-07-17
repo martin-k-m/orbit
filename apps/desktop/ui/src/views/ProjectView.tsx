@@ -40,6 +40,7 @@ import { SourceControlPanel } from "@/components/SourceControlPanel";
 import { ProblemsPanel } from "@/components/ProblemsPanel";
 import { TestingPanel } from "@/components/TestingPanel";
 import { useEditorStore } from "@/store/editor";
+import { useWorkspaceStore } from "@/store/workspace";
 import { nextActiveAfterClose } from "@/lib/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -56,9 +57,14 @@ export function ProjectView({
   path: string;
 }) {
   const [detail, setDetail] = useState<ProjectDetail | null>(null);
-  // Which tool window is docked at the bottom (null = collapsed). The editor
-  // (Explorer) is the permanent centre, IntelliJ-style.
-  const [bottomTool, setBottomTool] = useState<string | null>(null);
+  // Which tool window is docked at the bottom (null = collapsed) and how tall
+  // the dock is — layout state lives in the workspace store so it survives
+  // project switches and (for the height) app restarts, IntelliJ-style. The
+  // editor (Explorer) is the permanent centre.
+  const bottomTool = useWorkspaceStore((s) => s.bottomTool);
+  const setBottomTool = useWorkspaceStore((s) => s.setBottomTool);
+  const toggleTool = useWorkspaceStore((s) => s.toggleBottomTool);
+  const dockHeight = useWorkspaceStore((s) => s.dockHeight);
   const pushToast = useAppStore((s) => s.pushToast);
   const pendingFile = useAppStore((s) => s.pendingFile);
   const clearPendingFile = useAppStore((s) => s.clearPendingFile);
@@ -117,8 +123,6 @@ export function ProjectView({
   }
 
   const git = detail.git;
-  const toggleTool = (id: string) =>
-    setBottomTool((cur) => (cur === id ? null : id));
 
   const BOTTOM_TOOLS: { id: string; label: string; icon: typeof Terminal; badge?: number }[] = [
     { id: "problems", label: "Problems", icon: ListTodo, badge: health.warnings.length || undefined },
@@ -180,9 +184,13 @@ export function ProjectView({
         <ExplorerPanel root={path} />
       </div>
 
-      {/* Bottom tool window (docked) */}
+      {/* Bottom tool window (docked) — drag its top edge to resize. */}
       {bottomTool && (
-        <div className="flex h-[300px] min-h-0 flex-col border-t border-border bg-bg">
+        <div
+          className="relative flex min-h-0 flex-col border-t border-border bg-bg"
+          style={{ height: dockHeight }}
+        >
+          <DockResizeHandle />
           <div className="flex items-center gap-2 border-b border-border bg-elevated px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-fg-subtle">
             {BOTTOM_TOOLS.find((t) => t.id === bottomTool)?.label}
             <button
@@ -257,6 +265,53 @@ export function ProjectView({
         })}
       </div>
     </div>
+  );
+}
+
+/**
+ * A grab strip along the top edge of the bottom dock. Dragging it up grows the
+ * dock, down shrinks it; the height is clamped and persisted by the store.
+ */
+function DockResizeHandle() {
+  const setDockHeight = useWorkspaceStore((s) => s.setDockHeight);
+  const drag = useRef<{ startY: number; startH: number } | null>(null);
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      if (!drag.current) return;
+      // Dragging up (a smaller clientY) grows the dock.
+      setDockHeight(drag.current.startH + (drag.current.startY - e.clientY));
+    };
+    const onUp = () => {
+      if (!drag.current) return;
+      drag.current = null;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, [setDockHeight]);
+
+  return (
+    <div
+      role="separator"
+      aria-orientation="horizontal"
+      aria-label="Resize tool window"
+      onMouseDown={(e) => {
+        e.preventDefault();
+        drag.current = {
+          startY: e.clientY,
+          startH: useWorkspaceStore.getState().dockHeight,
+        };
+        document.body.style.cursor = "row-resize";
+        document.body.style.userSelect = "none";
+      }}
+      className="no-drag absolute inset-x-0 top-0 z-10 h-1.5 -translate-y-1/2 cursor-row-resize transition-colors hover:bg-accent/40"
+    />
   );
 }
 

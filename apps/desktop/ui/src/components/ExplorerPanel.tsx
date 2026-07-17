@@ -15,6 +15,8 @@ import {
   Check,
   X,
   ListTree,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import type { FileNode, Symbol as DocSymbol } from "@/lib/types";
 import {
@@ -30,6 +32,7 @@ import {
 } from "@/lib/ipc";
 import { CodeEditor } from "@/components/CodeEditor";
 import { useEditorStore, activeTab, type EditorTab } from "@/store/editor";
+import { useWorkspaceStore } from "@/store/workspace";
 import { useAppStore } from "@/store/app";
 import { cn } from "@/lib/cn";
 
@@ -67,6 +70,8 @@ export function ExplorerPanel({ root }: { root: string }) {
   const revealLine = useEditorStore((s) => s.revealLine);
   const setCursor = useEditorStore((s) => s.setCursor);
   const active = useEditorStore(activeTab);
+  const treeCollapsed = useWorkspaceStore((s) => s.treeCollapsed);
+  const toggleTree = useWorkspaceStore((s) => s.toggleTree);
   const [showOutline, setShowOutline] = useState(false);
 
   const [loadingPath, setLoadingPath] = useState<string | null>(null);
@@ -194,27 +199,45 @@ export function ExplorerPanel({ root }: { root: string }) {
 
   return (
     <div className="flex h-full overflow-hidden rounded-lg border border-border bg-panel">
-      <aside className="scrollbar-thin flex w-64 shrink-0 flex-col overflow-y-auto border-r border-white/[0.06]">
-        <div className="flex items-center gap-1 border-b border-white/[0.06] px-2 py-1.5">
-          <span className="mr-auto truncate pl-1 text-[11px] font-medium uppercase tracking-wider text-fg-subtle">
-            Explorer
-          </span>
-          <button
-            onClick={() => setRootCreate("file")}
-            title="New file"
-            className="no-drag rounded p-1 text-fg-subtle transition-colors hover:bg-white/[0.06] hover:text-fg"
-          >
-            <FilePlus className="h-3.5 w-3.5" />
-          </button>
-          <button
-            onClick={() => setRootCreate("folder")}
-            title="New folder"
-            className="no-drag rounded p-1 text-fg-subtle transition-colors hover:bg-white/[0.06] hover:text-fg"
-          >
-            <FolderPlus className="h-3.5 w-3.5" />
-          </button>
-        </div>
-        <div className="flex-1 py-2">
+      {treeCollapsed ? (
+        <button
+          onClick={toggleTree}
+          title="Show Explorer"
+          aria-label="Show Explorer"
+          className="no-drag flex w-8 shrink-0 items-start justify-center border-r border-white/[0.06] pt-2 text-fg-subtle transition-colors hover:bg-white/[0.04] hover:text-fg"
+        >
+          <PanelLeftOpen className="h-4 w-4" />
+        </button>
+      ) : (
+        <aside className="scrollbar-thin flex w-64 shrink-0 flex-col overflow-y-auto border-r border-white/[0.06]">
+          <div className="flex items-center gap-1 border-b border-white/[0.06] px-2 py-1.5">
+            <span className="mr-auto truncate pl-1 text-[11px] font-medium uppercase tracking-wider text-fg-subtle">
+              Explorer
+            </span>
+            <button
+              onClick={() => setRootCreate("file")}
+              title="New file"
+              className="no-drag rounded p-1 text-fg-subtle transition-colors hover:bg-white/[0.06] hover:text-fg"
+            >
+              <FilePlus className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={() => setRootCreate("folder")}
+              title="New folder"
+              className="no-drag rounded p-1 text-fg-subtle transition-colors hover:bg-white/[0.06] hover:text-fg"
+            >
+              <FolderPlus className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={toggleTree}
+              title="Hide Explorer"
+              aria-label="Hide Explorer"
+              className="no-drag rounded p-1 text-fg-subtle transition-colors hover:bg-white/[0.06] hover:text-fg"
+            >
+              <PanelLeftClose className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          <div className="flex-1 py-2">
           {rootCreate && (
             <NameInput
               icon={rootCreate === "folder" ? "folder" : "file"}
@@ -226,9 +249,10 @@ export function ExplorerPanel({ root }: { root: string }) {
               onCancel={() => setRootCreate(null)}
             />
           )}
-          <Tree dir={root} depth={0} activePath={activePath} onOpen={openFile} ops={ops} />
-        </div>
-      </aside>
+            <Tree dir={root} depth={0} activePath={activePath} onOpen={openFile} ops={ops} />
+          </div>
+        </aside>
+      )}
 
       <section className="flex min-w-0 flex-1 flex-col">
         {tabs.length > 0 ? (

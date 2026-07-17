@@ -3,6 +3,7 @@ import { AppShell } from "@/components/AppShell";
 import { Splash } from "@/components/Splash";
 import { useAppStore, watchSystemTheme } from "@/store/app";
 import { loadEditorPrefs } from "@/store/settings";
+import { loadWorkspaceLayout } from "@/store/workspace";
 import { isTauri, listProjects, getSetting } from "@/lib/ipc";
 import type { Theme } from "@/store/app";
 
@@ -35,6 +36,7 @@ export default function App() {
         setTheme("dark");
       }
       await loadEditorPrefs();
+      await loadWorkspaceLayout();
       const projects = await listProjects();
       if (!cancelled) setProjects(projects);
 
