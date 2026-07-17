@@ -1,8 +1,9 @@
 name: Release
 
-# Builds signed installers for macOS (Intel + Apple Silicon), Windows and Linux
-# and publishes them — plus the updater `latest.json` — to a GitHub Release.
-# Trigger by pushing a version tag (e.g. `v1.0.0`) or manually.
+# Builds signed installers for macOS (Intel + Apple Silicon), Windows and Linux,
+# publishes them — plus the updater `latest.json` and SHA256 checksums — to a
+# GitHub Release, with the changelog attached.
+# Trigger by pushing a semantic version tag (e.g. `v1.0.0`) or manually.
 on:
   push:
     tags:
@@ -11,6 +12,9 @@ on:
 
 permissions:
   contents: write
+
+env:
+  RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || format('v{0}-dev', github.run_number) }}
 
 jobs:
   publish:
@@ -67,22 +71,51 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Required for signed updater artifacts — set these repo secrets.
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           projectPath: apps/desktop/src-tauri
-          tagName: ${{ github.ref_type == 'tag' && github.ref_name || format('v{0}-dev', github.run_number) }}
-          releaseName: "Orbit ${{ github.ref_type == 'tag' && github.ref_name || 'dev build' }}"
-          releaseBody: |
-            See the assets below to download and install Orbit for your platform.
-
-            - macOS: `.dmg` (Apple Silicon and Intel)
-            - Windows: `.msi` / `.exe`
-            - Linux: `.AppImage` / `.deb`
-
-            Full notes: https://github.com/martin-k-m/orbit/blob/main/RELEASE_NOTES.md
+          tagName: ${{ env.RELEASE_TAG }}
+          releaseName: "Orbit ${{ env.RELEASE_TAG }}"
+          releaseBody: "Building assets… release notes and checksums are attached when all platforms finish."
           releaseDraft: true
           prerelease: false
           includeUpdaterJson: true
           args: ${{ matrix.args }}
+
+  finalize:
+    name: Checksums & release notes
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publish checksums and attach the changelog
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ env.RELEASE_TAG }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist && cd dist
+
+          # Pull down every asset the matrix just uploaded (the release is a draft).
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern '*' --clobber
+
+          # Checksums for everything except the checksum file itself.
+          rm -f SHA256SUMS.txt
+          sha256sum * > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+          gh release upload "$TAG" SHA256SUMS.txt --repo "$GITHUB_REPOSITORY" --clobber
+
+          # Release notes = changelog + checksums.
+          cd "$GITHUB_WORKSPACE"
+          {
+            cat RELEASE_NOTES.md
+            echo
+            echo '## Checksums (SHA256)'
+            echo
+            echo '```'
+            cat dist/SHA256SUMS.txt
+            echo '```'
+          } > notes.md
+          gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --notes-file notes.md
