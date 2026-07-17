@@ -67,10 +67,11 @@ pub fn build_body(model: &str, messages: &[ChatMessage]) -> String {
 /// Pull the assistant's reply out of an OpenAI-compatible response, turning an
 /// error payload (`{"error":{"message":…}}`) into a readable [`Error`].
 pub fn parse_reply(raw: &str) -> crate::Result<String> {
-    let value: serde_json::Value = serde_json::from_str(raw.trim()).map_err(|e| Error::Command {
-        command: "ai".into(),
-        message: format!("the model server sent a response that wasn't JSON: {e}"),
-    })?;
+    let value: serde_json::Value =
+        serde_json::from_str(raw.trim()).map_err(|e| Error::Command {
+            command: "ai".into(),
+            message: format!("the model server sent a response that wasn't JSON: {e}"),
+        })?;
 
     // A structured error comes back as `{ "error": { "message": … } }` (or, on
     // some servers, a bare `{ "error": "…" }`).
@@ -167,8 +168,14 @@ mod tests {
     #[test]
     fn build_body_serializes_roles_lowercase_and_disables_streaming() {
         let msgs = vec![
-            ChatMessage { role: Role::System, content: "be terse".into() },
-            ChatMessage { role: Role::User, content: "hi".into() },
+            ChatMessage {
+                role: Role::System,
+                content: "be terse".into(),
+            },
+            ChatMessage {
+                role: Role::User,
+                content: "hi".into(),
+            },
         ];
         let body: serde_json::Value = serde_json::from_str(&build_body("llama3.2", &msgs)).unwrap();
         assert_eq!(body["model"], "llama3.2");
