@@ -1,8 +1,14 @@
 blank_issues_enabled: false
 contact_links:
+  - name: Discussions
+    url: https://github.com/martin-k-m/orbit/discussions
+    about: Questions, ideas and show-and-tell. Start here if it isn't a bug.
   - name: Documentation
-    url: https://github.com/martin-k-m/orbit/tree/main/docs
-    about: Architecture, development and contributing guides.
+    url: https://orbit.blinkdev.me/docs
+    about: Getting started, installation, configuration, CLI and troubleshooting.
+  - name: Roadmap
+    url: https://github.com/martin-k-m/orbit/blob/main/ROADMAP.md
+    about: What's shipped, in progress and planned.
   - name: Security disclosure
     url: https://github.com/martin-k-m/orbit/security/advisories/new
     about: Please report vulnerabilities privately, not as public issues.
