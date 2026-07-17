@@ -1,4 +1,4 @@
-import { FolderPlus, ScanSearch, BarChart3, Boxes } from "lucide-react";
+import { FolderPlus, ScanSearch, BarChart3, Settings as SettingsIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAppStore } from "@/store/app";
 import { addProject, pickFolder, scanFolder } from "@/lib/ipc";
@@ -54,10 +54,10 @@ export function QuickActions() {
       run: () => navigate({ kind: "analytics" }),
     },
     {
-      label: "Ecosystem",
-      description: "Blink · Killer · Flux",
-      icon: Boxes,
-      run: () => navigate({ kind: "ecosystem" }),
+      label: "Settings",
+      description: "Themes & editor",
+      icon: SettingsIcon,
+      run: () => navigate({ kind: "settings" }),
     },
   ];
 

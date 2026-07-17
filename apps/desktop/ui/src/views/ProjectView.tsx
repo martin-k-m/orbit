@@ -133,9 +133,6 @@ export function ProjectView({
                   {project.name}
                 </h1>
                 <LanguageChip language={project.primaryLanguage} />
-                {project.ecosystemLink && (
-                  <Badge variant="accent">{project.ecosystemLink}</Badge>
-                )}
               </div>
               <p className="mt-0.5 font-mono text-xs text-fg-subtle">{path}</p>
             </div>

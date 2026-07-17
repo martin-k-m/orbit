@@ -66,12 +66,13 @@ export function ExplorerPanel({ root }: { root: string }) {
   const updateDraft = useEditorStore((s) => s.updateDraft);
   const markSaved = useEditorStore((s) => s.markSaved);
   const revealLine = useEditorStore((s) => s.revealLine);
+  const cursor = useEditorStore((s) => s.cursor);
+  const setCursor = useEditorStore((s) => s.setCursor);
   const active = useEditorStore(activeTab);
   const [showOutline, setShowOutline] = useState(false);
 
   const [loadingPath, setLoadingPath] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [cursor, setCursor] = useState({ line: 1, col: 1 });
   const [refreshToken, setRefreshToken] = useState(0);
   const [rootCreate, setRootCreate] = useState<null | "file" | "folder">(null);
   const pushToast = useAppStore((s) => s.pushToast);
@@ -313,7 +314,7 @@ export function ExplorerPanel({ root }: { root: string }) {
                   readOnly={active.contents.truncated}
                   reveal={active.reveal}
                   onChange={(v) => updateDraft(active.path, v)}
-                  onCursor={(line, col) => setCursor({ line, col })}
+                  onCursor={(line, col) => setCursor(line, col)}
                 />
               ) : null}
             </div>

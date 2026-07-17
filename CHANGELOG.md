@@ -6,6 +6,21 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **IntelliJ-style shell + status bar.** A slim IDE **status bar** now runs
+  across the bottom — the current git branch, the active editor's caret
+  position (Ln, Col), and the file's language / encoding / line ending. The
+  shell was flattened toward a professional IDE look: the marketing gradient
+  washes are gone, panels are solid, the title bar and tool sidebar are denser,
+  and a project fills the full width like a real IDE.
+- **Removed the Ecosystem previews.** The Blink/Killer/Flux/Beacon preview page
+  and its badges are gone; the sidebar and command palette navigate the real
+  tools instead.
+- **Dashboard redistributed.** The old Dashboard is now a lean **Projects**
+  launcher (recent projects + quick actions); its coding stats moved into
+  **Analytics**, and live per-project context lives in the new status bar.
+
 ## [1.2.0] — 2026-07-17
 
 The IDE release. Orbit grows from a developer command center into a genuine,

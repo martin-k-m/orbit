@@ -3,7 +3,9 @@ import { Command } from "cmdk";
 import {
   LayoutDashboard,
   BarChart3,
-  Boxes,
+  Container,
+  Database,
+  Globe,
   Settings as SettingsIcon,
   FolderPlus,
   TerminalSquare,
@@ -147,7 +149,7 @@ export function CommandPalette() {
               >
                 <PaletteItem
                   icon={LayoutDashboard}
-                  label="Go to Dashboard"
+                  label="Go to Projects"
                   onSelect={() => run(() => navigate({ kind: "dashboard" }))}
                 />
                 <PaletteItem
@@ -156,9 +158,19 @@ export function CommandPalette() {
                   onSelect={() => run(() => navigate({ kind: "analytics" }))}
                 />
                 <PaletteItem
-                  icon={Boxes}
-                  label="Go to Ecosystem"
-                  onSelect={() => run(() => navigate({ kind: "ecosystem" }))}
+                  icon={Container}
+                  label="Go to Containers"
+                  onSelect={() => run(() => navigate({ kind: "docker" }))}
+                />
+                <PaletteItem
+                  icon={Database}
+                  label="Go to Database"
+                  onSelect={() => run(() => navigate({ kind: "database" }))}
+                />
+                <PaletteItem
+                  icon={Globe}
+                  label="Go to APIs"
+                  onSelect={() => run(() => navigate({ kind: "apis" }))}
                 />
                 <PaletteItem
                   icon={SettingsIcon}

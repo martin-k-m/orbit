@@ -30,6 +30,9 @@ let revealSeq = 0;
 interface EditorState {
   tabs: EditorTab[];
   activePath: string | null;
+  /** The active editor's caret position (1-based), for the status bar. */
+  cursor: { line: number; col: number };
+  setCursor: (line: number, col: number) => void;
 
   /**
    * Open a file, or focus it if it's already open. Reopening never discards
@@ -78,6 +81,9 @@ function neighbourPath(tabs: EditorTab[], closedIndex: number): string | null {
 export const useEditorStore = create<EditorState>((set, get) => ({
   tabs: [],
   activePath: null,
+  cursor: { line: 1, col: 1 },
+
+  setCursor: (line, col) => set({ cursor: { line, col } }),
 
   openTab: (path, contents, revealLine) => {
     const reveal =
