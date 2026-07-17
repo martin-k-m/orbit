@@ -8,12 +8,14 @@
 use crate::state::AppState;
 use orbit_core::analytics::ActivityReport;
 use orbit_core::deps::Dependency;
+use orbit_core::env::EnvReport;
 use orbit_core::git::GitInfo;
 use orbit_core::health::HealthReport;
 use orbit_core::model::{EcosystemLink, Language, Project};
 use orbit_core::process::CommandOutput;
 use orbit_core::store::StoredProject;
-use orbit_core::{deps, git, health, process, profile, scan, ProjectDetail};
+use orbit_core::workspace::Workspace;
+use orbit_core::{deps, env, git, health, process, profile, scan, ProjectDetail};
 use serde::Serialize;
 use std::path::{Path, PathBuf};
 use tauri::State;
@@ -299,6 +301,92 @@ pub fn open_terminal(path: String) -> Result<(), String> {
 #[tauri::command]
 pub fn app_version() -> String {
     env!("CARGO_PKG_VERSION").to_string()
+}
+
+// --- Workspaces -----------------------------------------------------------
+
+/// Load a project's workspace (terminals, tasks, bookmarks, notes).
+///
+/// A project that has never been opened gets an empty workspace seeded from its
+/// detected commands, so the task list is useful immediately.
+#[tauri::command]
+pub fn get_workspace(
+    state: State<'_, AppState>,
+    id: String,
+    path: String,
+) -> Result<Workspace, String> {
+    let mut workspace = state.with_store(|store| {
+        store
+            .workspace_or_default(&id)
+            .map_err(|e| e.to_string())
+    })?;
+
+    // First open: seed tasks from whatever the scanner detected.
+    if workspace.tasks.is_empty() {
+        if let Ok(Some(project)) = scan::analyze(Path::new(&path)) {
+            workspace.seed_tasks_from(&project);
+        }
+    }
+    Ok(workspace)
+}
+
+/// Persist a project's workspace.
+#[tauri::command]
+pub fn save_workspace(state: State<'_, AppState>, workspace: Workspace) -> Result<(), String> {
+    let now = now();
+    state.with_store(|store| {
+        store
+            .save_workspace(&workspace, now)
+            .map_err(|e| e.to_string())
+    })
+}
+
+/// Run one of a workspace's user-defined tasks.
+///
+/// Like [`run_command`], destructive tasks are refused unless confirmed.
+#[tauri::command]
+pub async fn run_task(
+    path: String,
+    command_line: String,
+    confirmed: Option<bool>,
+) -> Result<CommandOutput, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let dir = PathBuf::from(&path);
+        if !dir.is_dir() {
+            return Err(format!("{path} is not a directory"));
+        }
+        let command = orbit_core::model::Command::parse(
+            "task",
+            &command_line,
+            orbit_core::model::CommandSource::Profile,
+        )
+        .ok_or_else(|| "empty command".to_string())?;
+
+        let assessment = orbit_core::assess(&command.program, &command.args);
+        if assessment.risk.requires_confirmation() && confirmed != Some(true) {
+            return Err(format!(
+                "confirmation required: {}",
+                assessment.reasons.join("; ")
+            ));
+        }
+        process::run_to_completion(&dir, &command).map_err(|e| e.to_string())
+    })
+    .await
+    .map_err(|e| e.to_string())?
+}
+
+// --- Environment files ----------------------------------------------------
+
+/// Report on a project's `.env` files: every file, plus duplicate, empty,
+/// invalid and missing-vs-template variables. Secret values are flagged so the
+/// UI can mask them.
+#[tauri::command]
+pub fn env_report(path: String) -> Result<EnvReport, String> {
+    let dir = PathBuf::from(&path);
+    if !dir.is_dir() {
+        return Err(format!("{path} is not a directory"));
+    }
+    Ok(env::report(&dir))
 }
 
 /// Launch the platform's terminal emulator in `dir`.

@@ -4,10 +4,12 @@ import type {
   Assessment,
   CommandOutput,
   Dependency,
+  EnvReport,
   GitInfo,
   HealthReport,
   ProjectDetail,
   ProjectSummary,
+  Workspace,
 } from "./types";
 
 /** True when running inside the Tauri runtime (vs. a plain browser / CI). */
@@ -429,8 +431,51 @@ const DEMO_ACTIVITY: ActivityReport = {
 
 const demoSettings = new Map<string, string>([
   ["theme", "dark"],
-  ["data-location", "~/Library/Application Support/dev.orbit.app"],
+  ["data-location", "~/Library/Application Support/com.orbit.dev"],
 ]);
+
+// Workspaces the demo has handed out, so edits persist for the session.
+const demoWorkspaces = new Map<string, Workspace>();
+
+// A representative env report for the browser demo.
+const DEMO_ENV_REPORT: EnvReport = {
+  files: [
+    {
+      path: "/Users/dev/code/beacon/.env",
+      scope: "default",
+      entries: [
+        { key: "PORT", value: "3000", line: 1, secret: false },
+        { key: "NODE_ENV", value: "development", line: 2, secret: false },
+        {
+          key: "DATABASE_URL",
+          value: "postgres://localhost:5432/beacon",
+          line: 3,
+          secret: false,
+        },
+        { key: "API_TOKEN", value: "sk_live_51H8xQ2eZvKY", line: 4, secret: true },
+      ],
+    },
+    {
+      path: "/Users/dev/code/beacon/.env.example",
+      scope: "example",
+      entries: [
+        { key: "PORT", value: "", line: 1, secret: false },
+        { key: "NODE_ENV", value: "", line: 2, secret: false },
+        { key: "DATABASE_URL", value: "", line: 3, secret: false },
+        { key: "API_TOKEN", value: "", line: 4, secret: true },
+        { key: "SENTRY_DSN", value: "", line: 5, secret: true },
+      ],
+    },
+  ],
+  issues: [
+    {
+      kind: "missing",
+      message: "`SENTRY_DSN` is in .env.example but missing here",
+      file: ".env",
+      key: "SENTRY_DSN",
+    },
+  ],
+};
 
 // A mutable copy so demo mutations (pin/remove/add) feel real in the browser.
 let demoSummaries: ProjectSummary[] = DEMO_SUMMARIES.map((p) => ({ ...p }));
@@ -619,6 +664,76 @@ export async function generateProfile(path: string): Promise<string> {
 export async function activityReport(days?: number): Promise<ActivityReport> {
   if (!isTauri()) return DEMO_ACTIVITY;
   return invoke<ActivityReport>("activity_report", { days });
+}
+
+// --- Workspaces -------------------------------------------------------------
+
+/**
+ * Load a project's workspace (terminals, tasks, bookmarks, notes). A project
+ * opened for the first time comes back seeded from its detected commands.
+ */
+export async function getWorkspace(id: string, path: string): Promise<Workspace> {
+  if (!isTauri()) {
+    const existing = demoWorkspaces.get(id);
+    if (existing) return existing;
+    const detail = detailFor(path);
+    const seeded: Workspace = {
+      projectId: id,
+      notes: "",
+      terminals: [],
+      bookmarks: [],
+      tasks: detail.project.commands.map((c) => ({
+        id: `detected:${c.name}`,
+        name: c.name,
+        command: [c.program, ...c.args].join(" "),
+        favorite: ["dev", "test", "build"].includes(c.name),
+      })),
+      updatedAt: 0,
+    };
+    demoWorkspaces.set(id, seeded);
+    return seeded;
+  }
+  return invoke<Workspace>("get_workspace", { id, path });
+}
+
+/** Persist a project's workspace. */
+export async function saveWorkspace(workspace: Workspace): Promise<void> {
+  if (!isTauri()) {
+    demoWorkspaces.set(workspace.projectId, {
+      ...workspace,
+      updatedAt: Math.floor(Date.now() / 1000),
+    });
+    return;
+  }
+  return invoke<void>("save_workspace", { workspace });
+}
+
+/** Run a workspace task. Destructive tasks require `confirmed: true`. */
+export async function runTask(
+  path: string,
+  commandLine: string,
+  confirmed?: boolean,
+): Promise<CommandOutput> {
+  if (!isTauri()) {
+    const assessment = assessDemo(commandLine);
+    if (assessment.risk === "dangerous" && confirmed !== true) {
+      throw new Error(`confirmation required: ${assessment.reasons.join("; ")}`);
+    }
+    return {
+      code: 0,
+      stdout: `$ ${commandLine}\n\n[demo] Task finished in 1.2s.\n`,
+      stderr: "",
+    };
+  }
+  return invoke<CommandOutput>("run_task", { path, commandLine, confirmed });
+}
+
+// --- Environment files ------------------------------------------------------
+
+/** Report a project's .env files plus any duplicate/empty/invalid/missing vars. */
+export async function envReport(path: string): Promise<EnvReport> {
+  if (!isTauri()) return DEMO_ENV_REPORT;
+  return invoke<EnvReport>("env_report", { path });
 }
 
 export async function getSetting(key: string): Promise<string | null> {

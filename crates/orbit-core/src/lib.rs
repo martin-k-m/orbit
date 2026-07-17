@@ -134,11 +134,23 @@ mod tests {
         assert_serialize::<analytics::BuildRecord>();
         assert_serialize::<Language>();
         assert_serialize::<EcosystemLink>();
+        assert_serialize::<workspace::Workspace>();
+        assert_serialize::<workspace::Task>();
+        assert_serialize::<workspace::TerminalTab>();
+        assert_serialize::<workspace::Bookmark>();
+        assert_serialize::<env::EnvReport>();
+        assert_serialize::<env::EnvFile>();
+        assert_serialize::<env::Entry>();
+        assert_serialize::<env::Issue>();
+        assert_serialize::<env::Scope>();
 
-        // Types the frontend also sends back must round-trip.
+        // Types the frontend also sends back must round-trip. `save_workspace`
+        // takes a Workspace as a command *parameter*, so it must deserialize.
         assert_deserialize::<Project>();
         assert_deserialize::<process::CommandOutput>();
         assert_deserialize::<safety::Assessment>();
+        assert_deserialize::<workspace::Workspace>();
+        assert_deserialize::<env::EnvReport>();
     }
 
     #[test]
