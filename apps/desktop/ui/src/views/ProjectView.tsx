@@ -14,7 +14,6 @@ import {
   FileCode2,
   ListTodo,
   Sparkles,
-  ChevronRight,
 } from "lucide-react";
 import type {
   Command,
@@ -31,6 +30,7 @@ import {
   generateProfile,
 } from "@/lib/ipc";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { TerminalPane } from "@/components/TerminalPane";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -147,7 +147,7 @@ export function ProjectView({
           <DependenciesTab dependencies={dependencies} />
         </TabsContent>
         <TabsContent value="terminal">
-          <TerminalInfoTab path={path} onOpen={handleTerminal} />
+          <TerminalTab path={path} onOpen={handleTerminal} />
         </TabsContent>
       </Tabs>
     </div>
@@ -582,35 +582,24 @@ function DepGroup({ title, deps }: { title: string; deps: Dependency[] }) {
   );
 }
 
-function TerminalInfoTab({
-  path,
-  onOpen,
-}: {
-  path: string;
-  onOpen: () => void;
-}) {
+/**
+ * The project's embedded shell, plus an escape hatch to the system terminal for
+ * anyone who'd rather use their own.
+ */
+function TerminalTab({ path, onOpen }: { path: string; onOpen: () => void }) {
   return (
-    <Card>
-      <CardContent className="flex flex-col gap-4 p-6">
-        <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-gradient text-white">
-            <Terminal className="h-5 w-5" />
-          </span>
-          <div>
-            <p className="text-sm font-medium text-fg">Open in your terminal</p>
-            <p className="text-xs text-fg-muted">
-              Launches your default terminal at the project root.
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 rounded-lg border border-white/[0.06] bg-black/40 px-3 py-2.5 font-mono text-xs text-fg-muted">
-          <ChevronRight className="h-3.5 w-3.5 text-accent" />
-          cd {path}
-        </div>
-        <Button variant="secondary" size="sm" onClick={onOpen} className="self-start">
-          <Terminal className="h-3.5 w-3.5" /> Open terminal here
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-fg-muted">
+          A real shell, running in{" "}
+          <span className="font-mono text-fg-subtle">{path}</span>.
+        </p>
+        <Button variant="secondary" size="sm" onClick={onOpen}>
+          <Terminal className="h-3.5 w-3.5" /> Open system terminal
         </Button>
-      </CardContent>
-    </Card>
+      </div>
+      {/* Remount per project so each gets its own PTY session. */}
+      <TerminalPane key={path} path={path} className="h-[440px]" />
+    </div>
   );
 }
