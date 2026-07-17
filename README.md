@@ -15,7 +15,9 @@ No server. No account. No telemetry. Everything runs on your machine.
 [![Built with Rust](https://img.shields.io/badge/built%20with-Rust-F74C00.svg?logo=rust&logoColor=white)](https://www.rust-lang.org)
 [![Powered by Tauri](https://img.shields.io/badge/powered%20by-Tauri%202-24C8DB.svg?logo=tauri&logoColor=white)](https://tauri.app)
 
-[Download](#-download) · [Features](#-features) · [Architecture](docs/architecture.md) · [Development](docs/development.md) · [Contributing](docs/contributing.md)
+[Download](#-download) · [Features](#-features) · [Roadmap](ROADMAP.md) · [Architecture](docs/architecture.md) · [Development](docs/development.md) · [Contributing](docs/contributing.md)
+
+[**Website & docs → orbit.blinkdev.me**](https://orbit.blinkdev.me)
 
 </div>
 
@@ -165,19 +167,15 @@ and a minimal Tauri capability set, and `orbit-core` forbids `unsafe` code.
 
 ## 🗺 Roadmap
 
-Orbit v1.0 is the foundation. Where it's headed:
+v1.0 is the foundation. Orbit is growing into a full local developer workspace —
+integrated terminal, live logs, a Git power center, Docker, databases, an API
+explorer, env management and a plugin SDK.
 
-- **Live process control** — streaming logs and a process manager for long-
-  running dev servers, right in the app.
-- **Deeper dependency intelligence** — "update available" hints and vulnerability
-  flags, computed locally.
-- **Richer ecosystem plugins** — a stable plugin manifest so Blink, Killer, Flux
-  and Beacon (and third parties) can register actions.
-- **Embedded terminal** — a full terminal panel per project.
-- **Workspaces & tags** — group and filter large project collections.
-- **File watching** — auto-refresh git and health as files change.
+See **[ROADMAP.md](ROADMAP.md)** for the sequenced plan and honest status of
+every feature.
 
-Have an idea? [Open a feature request](https://github.com/martin-k-m/orbit/issues/new/choose).
+Have an idea? [Open a feature request](https://github.com/martin-k-m/orbit/issues/new/choose)
+or start a [discussion](https://github.com/martin-k-m/orbit/discussions).
 
 ## 🤝 Contributing
 
