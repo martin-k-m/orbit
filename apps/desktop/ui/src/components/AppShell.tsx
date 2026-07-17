@@ -41,10 +41,11 @@ export function AppShell() {
                 exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
                 className={cn(
-                  // The workspace (project) fills the width like a real IDE; the
-                  // launcher/analytics/settings pages stay comfortably centered.
+                  // The workspace (project) fills the full viewport like a real
+                  // IDE — its own panels scroll internally; the launcher /
+                  // analytics / settings pages stay comfortably centered.
                   inProject
-                    ? "w-full px-4 py-4"
+                    ? "h-full w-full"
                     : "mx-auto w-full max-w-6xl px-8 py-8",
                 )}
               >

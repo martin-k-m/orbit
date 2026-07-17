@@ -115,7 +115,7 @@ export function ProblemsPanel({
   const warnings = problems.length - errors;
 
   return (
-    <div className="flex h-[520px] flex-col overflow-hidden rounded-lg border border-border bg-panel">
+    <div className="flex h-full flex-col overflow-hidden rounded-lg border border-border bg-panel">
       <div className="flex items-center gap-3 border-b border-white/[0.06] px-3 py-2 text-xs text-fg-subtle">
         <span className="inline-flex items-center gap-1.5">
           <AlertCircle className="h-3.5 w-3.5 text-danger" />
