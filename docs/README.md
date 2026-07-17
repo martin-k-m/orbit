@@ -9,6 +9,7 @@ Everything you need to use, build and ship Orbit.
 - [Installation](./installation.md) — per-platform install & uninstall.
 - [Configuration](./configuration.md) — `.project-orbit` profiles and app data.
 - [Workspaces](./workspace.md) — tasks, notes and bookmarks per project.
+- [Editor](./editor.md) — the file explorer and code editor.
 - [Terminal](./terminal.md) — the built-in PTY shell, and which shell it opens.
 - [Updates](./updates.md) — how auto-update works, what it sends (nothing), signing.
 - [Environment variables](./environment.md) — `.env` files, masking, validation.
