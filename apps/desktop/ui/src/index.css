@@ -53,6 +53,24 @@
     --danger: 0 70% 46%;
   }
 
+  /* High Contrast — a dark-based surface with maximal separation for
+     low-vision use: pure-black bg, white text, vivid red accent, bright status
+     colours and strong borders. Higher specificity than the base `:root`. */
+  :root.high-contrast {
+    --bg: 0 0% 0%;
+    --bg-elevated: 0 0% 4%;
+    --panel: 0 0% 7%;
+    --border: 0 0% 45%;
+    --fg: 0 0% 100%;
+    --fg-muted: 0 0% 88%;
+    --fg-subtle: 0 0% 72%;
+    --accent: 0 90% 62%;
+    --accent-2: 350 95% 66%;
+    --success: 140 90% 55%;
+    --warning: 45 100% 62%;
+    --danger: 0 95% 64%;
+  }
+
   * {
     border-color: hsl(var(--border));
   }

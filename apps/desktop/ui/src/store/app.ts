@@ -12,7 +12,7 @@ export type View =
   | { kind: "settings" }
   | { kind: "project"; id: string; path: string };
 
-export type Theme = "dark" | "light" | "system";
+export type Theme = "dark" | "light" | "system" | "high-contrast";
 
 export type ToastVariant = "default" | "success" | "error";
 
@@ -97,8 +97,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   toggleTheme: () => {
-    // Cycle dark → light → system, so the palette's "toggle theme" can reach
-    // every option without a submenu.
+    // The quick toggle cycles the three everyday themes; High Contrast is an
+    // accessibility option chosen from Settings, not part of the rotation.
     const order: Theme[] = ["dark", "light", "system"];
     const next = order[(order.indexOf(get().theme) + 1) % order.length];
     get().setTheme(next);
@@ -128,9 +128,13 @@ function systemPrefersDark(): boolean {
   return window.matchMedia(DARK_QUERY).matches;
 }
 
-/** Turn the user's preference into the surface we actually paint. */
+/** Turn the user's preference into the surface we actually paint. High contrast
+ * is a dark-based surface, so it resolves to "dark" (its overrides come from the
+ * extra `.high-contrast` class). */
 export function resolveTheme(theme: Theme): "dark" | "light" {
-  return theme === "system" ? (systemPrefersDark() ? "dark" : "light") : theme;
+  if (theme === "system") return systemPrefersDark() ? "dark" : "light";
+  if (theme === "high-contrast") return "dark";
+  return theme;
 }
 
 function applyTheme(theme: Theme): void {
@@ -139,6 +143,7 @@ function applyTheme(theme: Theme): void {
   const root = document.documentElement;
   root.classList.toggle("dark", resolved === "dark");
   root.classList.toggle("light", resolved === "light");
+  root.classList.toggle("high-contrast", theme === "high-contrast");
 }
 
 /**

@@ -28,7 +28,7 @@ export default function App() {
       const minShown = new Promise((r) => setTimeout(r, 1100));
 
       const stored = await getSetting("theme");
-      const valid: Theme[] = ["dark", "light", "system"];
+      const valid: Theme[] = ["dark", "light", "system", "high-contrast"];
       if (!cancelled && valid.includes(stored as Theme)) {
         setTheme(stored as Theme);
       } else {

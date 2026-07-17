@@ -3,6 +3,7 @@ import {
   Moon,
   Sun,
   MonitorCog,
+  Contrast,
   FolderLock,
   ShieldCheck,
   HardDrive,
@@ -70,7 +71,7 @@ export function Settings() {
           <CardDescription>Choose how Orbit looks.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-3 sm:max-w-lg">
+          <div className="grid grid-cols-2 gap-3 sm:max-w-lg sm:grid-cols-4">
             <ThemeOption
               active={theme === "dark"}
               onClick={() => setTheme("dark" as Theme)}
@@ -89,11 +90,19 @@ export function Settings() {
               icon={MonitorCog}
               label="System"
             />
+            <ThemeOption
+              active={theme === "high-contrast"}
+              onClick={() => setTheme("high-contrast" as Theme)}
+              icon={Contrast}
+              label="Contrast"
+            />
           </div>
           <p className="mt-3 text-xs text-fg-subtle">
             {theme === "system"
               ? "Following your operating system, and updating live when it changes."
-              : "Your choice is remembered across restarts."}
+              : theme === "high-contrast"
+                ? "Maximum contrast for low-vision use."
+                : "Your choice is remembered across restarts."}
           </p>
         </CardContent>
       </Card>

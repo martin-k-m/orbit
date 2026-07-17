@@ -8,6 +8,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **High Contrast theme** — a fourth theme (alongside Dark / Light / System) in
+  Settings: a pure-black surface with white text, a vivid red accent and strong
+  borders for low-vision use. Persists across restarts like the others.
 - **Commit detail in Source Control** — clicking a commit in the history now
   shows its full patch in the diff viewer (via a new `git show` engine helper,
   unit-tested), so you can review any past change without leaving the panel.
