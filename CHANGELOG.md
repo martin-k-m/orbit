@@ -33,6 +33,9 @@ The first public release.
   TypeScript + Tailwind frontend with a premium dark design.
 - **Auto-update** — the desktop app checks for, downloads and installs signed
   updates from GitHub Releases (Tauri updater).
+- **Environment file manager** — `orbit_core::env` discovers and parses `.env`,
+  `.env.local`, `.env.development`, `.env.production` and `.env.example`, masks
+  secrets, and reports duplicate, empty, invalid and missing variables.
 - **Marketing site & docs** — the Next.js website lives in its own repo,
   [`orbit-web`](https://github.com/martin-k-m/orbit-web) (deployed to
   https://orbit.blinkdev.me).
