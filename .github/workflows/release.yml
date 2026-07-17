@@ -71,8 +71,10 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # The updater signing key is unencrypted, so TAURI_SIGNING_PRIVATE_KEY_PASSWORD
+          # must stay UNSET. Setting it (even to "") makes Tauri pass Some("") and
+          # try to decrypt an unencrypted key: "Wrong password for that key".
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           projectPath: apps/desktop/src-tauri
           tagName: ${{ env.RELEASE_TAG }}
