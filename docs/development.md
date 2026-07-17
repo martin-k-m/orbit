@@ -78,7 +78,8 @@ cargo tauri icon apps/desktop/src-tauri/icons/app-icon.png \
 cargo tauri dev --config apps/desktop/src-tauri/tauri.conf.json
 ```
 
-`cargo tauri dev` runs `beforeDevCommand` (`npm --prefix ../ui run dev`), waits
+`cargo tauri dev` runs `beforeDevCommand` (`npm --prefix ui run dev`, executed
+from the app root `apps/desktop`), waits
 for Vite on `localhost:5173`, then launches the native window pointed at it.
 
 Build a production bundle:
