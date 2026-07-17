@@ -247,6 +247,24 @@ pub fn git_log(path: String, limit: usize) -> Result<Vec<git::Commit>, String> {
     Ok(git::recent_commits(Path::new(&path), limit))
 }
 
+/// Local branch names.
+#[tauri::command]
+pub fn git_branches(path: String) -> Result<Vec<String>, String> {
+    Ok(git::branches(Path::new(&path)))
+}
+
+/// Switch to an existing branch.
+#[tauri::command]
+pub fn git_switch_branch(path: String, name: String) -> Result<(), String> {
+    git::switch_branch(Path::new(&path), &name).map_err(|e| e.to_string())
+}
+
+/// Create a new branch off HEAD and switch to it.
+#[tauri::command]
+pub fn git_create_branch(path: String, name: String) -> Result<(), String> {
+    git::create_branch(Path::new(&path), &name).map_err(|e| e.to_string())
+}
+
 /// Assess how risky a project's command is before running it, so the UI can
 /// show a confirmation dialog for anything destructive.
 #[tauri::command]

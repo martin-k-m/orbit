@@ -694,6 +694,22 @@ export async function gitLog(path: string, limit = 20): Promise<Commit[]> {
   return invoke<Commit[]>("git_log", { path, limit });
 }
 
+/** Local branch names. */
+export async function gitBranches(path: string): Promise<string[]> {
+  if (!isTauri()) return [];
+  return invoke<string[]>("git_branches", { path });
+}
+
+/** Switch to an existing branch. */
+export async function gitSwitchBranch(path: string, name: string): Promise<void> {
+  return invoke<void>("git_switch_branch", { path, name });
+}
+
+/** Create a new branch off HEAD and switch to it. */
+export async function gitCreateBranch(path: string, name: string): Promise<void> {
+  return invoke<void>("git_create_branch", { path, name });
+}
+
 /**
  * Assess how risky a project's command is before running it. Mirrors the
  * engine's `orbit_core::safety` guard so the UI can show a confirmation dialog.

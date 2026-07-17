@@ -11,10 +11,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Source control — the git power center** — a new Source Control tab turns git
   into a first-class panel: staged vs. unstaged/untracked groups with one-click
   stage/unstage (per file or all), an inline coloured diff viewer, a commit box
-  (`Ctrl/Cmd+Enter` to commit) and recent history. Built on `orbit_core::git`,
-  now extended with `status`/`stage`/`unstage`/`diff`/`commit`/`recent_commits`
-  (still shelling out to the `git` binary; unit-tested against a temp repo).
-  `current_branch` now also resolves the branch name before the first commit.
+  (`Ctrl/Cmd+Enter` to commit), recent history, and **branch management**
+  (switch between branches, create a new one). Built on `orbit_core::git`, now
+  extended with `status`/`stage`/`unstage`/`diff`/`commit`/`recent_commits`/
+  `branches`/`switch_branch`/`create_branch` (still shelling out to the `git`
+  binary; unit-tested against a temp repo). `current_branch` now also resolves
+  the branch name before the first commit.
 - **In-editor find, replace & go-to-line** — the editor gained CodeMirror's
   search: `Ctrl/Cmd+F` to find (with match highlighting), `Ctrl/Cmd+H` to
   replace, `F3`/`Ctrl/Cmd+G` for next/previous, and `Ctrl+Alt+G` to jump to a

@@ -318,6 +318,29 @@ pub fn commit(dir: &Path, message: &str) -> crate::Result<Commit> {
     })
 }
 
+/// Local branch names (no ordering guarantee; compare to [`status`]'s `branch`
+/// to find the current one).
+pub fn branches(dir: &Path) -> Vec<String> {
+    match run(dir, &["branch", "--format=%(refname:short)"]) {
+        Some(o) => o
+            .lines()
+            .map(|l| l.trim().to_string())
+            .filter(|l| !l.is_empty())
+            .collect(),
+        None => Vec::new(),
+    }
+}
+
+/// Switch to an existing branch (`git switch`).
+pub fn switch_branch(dir: &Path, name: &str) -> crate::Result<()> {
+    run_ok(dir, &["switch", name]).map(|_| ())
+}
+
+/// Create a new branch off HEAD and switch to it (`git switch -c`).
+pub fn create_branch(dir: &Path, name: &str) -> crate::Result<()> {
+    run_ok(dir, &["switch", "-c", name]).map(|_| ())
+}
+
 /// The most recent commits, newest first (empty if the repo has no history).
 pub fn recent_commits(dir: &Path, limit: usize) -> Vec<Commit> {
     let arg = format!("-{limit}");
@@ -423,6 +446,28 @@ mod tests {
         assert_eq!(status(d).unwrap().staged.len(), 1);
         unstage(d, "a.txt").unwrap();
         assert_eq!(status(d).unwrap().staged.len(), 0);
+    }
+
+    #[test]
+    fn branches_list_create_and_switch() {
+        let tmp = init_repo();
+        let d = tmp.path();
+        fs::write(d.join("a.txt"), "x\n").unwrap();
+        stage(d, "a.txt").unwrap();
+        commit(d, "init").unwrap();
+
+        let start = status(d).unwrap().branch;
+        create_branch(d, "feature/x").unwrap();
+        assert_eq!(status(d).unwrap().branch, "feature/x");
+
+        let bs = branches(d);
+        assert!(bs.contains(&"feature/x".to_string()));
+        assert!(bs.contains(&start));
+
+        switch_branch(d, &start).unwrap();
+        assert_eq!(status(d).unwrap().branch, start);
+        // Switching to a non-existent branch is an error, not a panic.
+        assert!(switch_branch(d, "does-not-exist").is_err());
     }
 
     #[test]

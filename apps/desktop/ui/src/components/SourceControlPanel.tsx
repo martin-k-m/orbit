@@ -5,6 +5,7 @@ import {
   Plus,
   Minus,
   Check,
+  X,
   RefreshCw,
   ArrowUp,
   ArrowDown,
@@ -18,6 +19,9 @@ import {
   gitUnstage,
   gitDiff,
   gitCommit,
+  gitBranches,
+  gitSwitchBranch,
+  gitCreateBranch,
   isTauri,
 } from "@/lib/ipc";
 import { useAppStore } from "@/store/app";
@@ -35,16 +39,24 @@ export function SourceControlPanel({ root }: { root: string }) {
   const pushToast = useAppStore((s) => s.pushToast);
   const [status, setStatus] = useState<GitStatus | null>(null);
   const [commits, setCommits] = useState<Commit[]>([]);
+  const [branches, setBranches] = useState<string[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [selected, setSelected] = useState<Selection>(null);
   const [diff, setDiff] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [newBranch, setNewBranch] = useState("");
 
   const refresh = useCallback(async () => {
-    const [s, log] = await Promise.all([gitStatus(root), gitLog(root, 15)]);
+    const [s, log, brs] = await Promise.all([
+      gitStatus(root),
+      gitLog(root, 15),
+      gitBranches(root),
+    ]);
     setStatus(s);
     setCommits(log);
+    setBranches(brs);
     setLoaded(true);
     // Drop a selection whose file no longer has changes on that side.
     setSelected((sel) => {
@@ -103,6 +115,19 @@ export function SourceControlPanel({ root }: { root: string }) {
     }
   }
 
+  function switchTo(name: string) {
+    if (!status || name === status.branch) return;
+    void mutate(() => gitSwitchBranch(root, name));
+  }
+
+  async function createBranch() {
+    const name = newBranch.trim();
+    if (!name) return;
+    setCreating(false);
+    setNewBranch("");
+    await mutate(() => gitCreateBranch(root, name));
+  }
+
   if (!loaded) {
     return (
       <Frame>
@@ -134,8 +159,68 @@ export function SourceControlPanel({ root }: { root: string }) {
       {/* Left: commit box + change lists */}
       <div className="flex w-[46%] min-w-0 flex-col border-r border-white/[0.06]">
         <div className="flex items-center gap-2 border-b border-white/[0.06] px-3 py-2 text-xs">
-          <GitBranch className="h-3.5 w-3.5 text-accent" />
-          <span className="font-medium text-fg">{status.branch}</span>
+          <GitBranch className="h-3.5 w-3.5 shrink-0 text-accent" />
+          {creating ? (
+            <div className="flex min-w-0 items-center gap-1">
+              <input
+                autoFocus
+                value={newBranch}
+                onChange={(e) => setNewBranch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") void createBranch();
+                  if (e.key === "Escape") {
+                    setCreating(false);
+                    setNewBranch("");
+                  }
+                }}
+                placeholder="new-branch-name"
+                className="no-drag min-w-0 flex-1 rounded border border-white/[0.1] bg-black/30 px-1.5 py-0.5 text-fg outline-none focus:border-accent/40"
+              />
+              <button
+                onClick={() => void createBranch()}
+                className="no-drag rounded p-0.5 text-accent hover:bg-white/[0.06]"
+                title="Create branch"
+              >
+                <Check className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={() => {
+                  setCreating(false);
+                  setNewBranch("");
+                }}
+                className="no-drag rounded p-0.5 text-fg-subtle hover:bg-white/[0.06]"
+                title="Cancel"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ) : (
+            <>
+              <select
+                value={status.branch}
+                disabled={busy}
+                onChange={(e) => switchTo(e.target.value)}
+                className="no-drag max-w-[160px] cursor-pointer truncate rounded border border-transparent bg-transparent py-0.5 pl-1 pr-2 font-medium text-fg outline-none hover:border-white/[0.1] focus:border-accent/40"
+                title="Switch branch"
+              >
+                {(branches.includes(status.branch)
+                  ? branches
+                  : [status.branch, ...branches]
+                ).map((b) => (
+                  <option key={b} value={b} className="bg-panel text-fg">
+                    {b}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() => setCreating(true)}
+                className="no-drag rounded p-0.5 text-fg-subtle transition-colors hover:bg-white/[0.06] hover:text-fg"
+                title="New branch"
+              >
+                <Plus className="h-3.5 w-3.5" />
+              </button>
+            </>
+          )}
           {status.ahead > 0 && (
             <span className="inline-flex items-center gap-0.5 text-fg-subtle">
               <ArrowUp className="h-3 w-3" />
