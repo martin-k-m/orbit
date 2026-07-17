@@ -32,19 +32,24 @@ The engine and the shell around it.
 - ✅ **Local analytics** — time per language, build times. Never uploaded.
 - ✅ **Command palette** (`⌘/Ctrl+K`), tray, native menus.
 - ✅ **CLI companion** — `orbit scan|info|health|deps|git|commands|run|init`.
-- 🚧 **Auto-update** — the updater is wired into the app; publishing signed
-  update artifacts is pending an updater signing key (see docs/releasing.md).
+- ✅ **Auto-update** — Orbit checks GitHub Releases on launch and installs
+  signed updates in place, verified against a key compiled into the app.
+  Enabled from v1.1.0.
 - ✅ **CI/CD** — test, build and release across macOS (Intel + ARM), Windows, Linux.
 
 ---
 
-## v1.1 — Workspaces & the terminal 🚧
+## v1.1 — Workspaces, terminal & editor 🚧
 
 Turning projects into true workspaces.
 
 - 🚧 **Workspace model** — each project remembers its terminals, launch
   commands, env vars, notes, bookmarks, docs links and pinned logs. Switching a
   project restores the whole workspace.
+- 🚧 **File explorer + editor** — a lazy file tree and a CodeMirror 6 editor
+  (syntax highlighting, folding, multi-cursor, save, encoding/line-ending
+  detection). Backed by `orbit_core::files`. Next: multiple tabs, and a language
+  server for go-to-definition and real diagnostics.
 - 🚧 **Integrated terminal** — a real PTY-backed shell per project has landed
   (ConPTY on Windows, openpty elsewhere): ANSI colour, scrollback, resize, and
   shell detection (PowerShell, CMD, bash, zsh, fish). Still to come: multiple
@@ -83,8 +88,8 @@ Turning projects into true workspaces.
   and test frequency, commits, terminal usage, most-used commands. All local.
 - 📋 **System monitor** — CPU, RAM, disk, network, running dev servers and
   active ports, with per-project port attribution.
-- 📋 **File explorer** — search, favourites, recent files, quick preview, reveal
-  in OS explorer, drag & drop.
+- 📋 **Explorer upgrades** — building on the v1.1 file tree: search, favourites,
+  recent files, quick preview, reveal in OS explorer, drag & drop.
 - 📋 **Universal search** — one `⌘/Ctrl+K` across projects, commands, files,
   branches, commits, notes, env vars, terminal history, databases, API requests
   and settings.
@@ -110,7 +115,9 @@ Things Orbit will deliberately **not** do:
 
 - Require an account, a server or a network connection for core features.
 - Collect telemetry or send your code, projects or analytics anywhere.
-- Replace your editor. Orbit sits *beside* it.
+- Bloat into a heavyweight platform. Orbit is growing an editor and IDE
+  features, but the bar for every one is that it stays fast and local-first —
+  it earns its place beside (or as) your editor rather than by feature count.
 
 ## Influencing the roadmap
 
