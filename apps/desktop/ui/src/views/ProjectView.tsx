@@ -15,7 +15,6 @@ import {
   ListTodo,
   Sparkles,
   Search,
-  GitBranch,
 } from "lucide-react";
 import type {
   Command,
