@@ -16,12 +16,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Commit detail in Source Control** — clicking a commit in the history now
   shows its full patch in the diff viewer (via a new `git show` engine helper,
   unit-tested), so you can review any past change without leaving the panel.
-- **LSP protocol foundation** — the base plumbing for a future language-server
-  client: `Content-Length` message framing and JSON-RPC 2.0 helpers, with an
-  incremental stream `Decoder` that reassembles messages split across reads
-  (`orbit_core::lsp`, unit-tested). Transport-only for now — no server is spawned
-  and no editor feature is wired yet — but it's the real first step toward
-  go-to-definition and live diagnostics.
+- **LSP client core** — on top of the base protocol (`Content-Length` framing +
+  JSON-RPC + streaming `Decoder`), a transport-free client **state machine**
+  (`orbit_core::lsp::Session`): the `initialize` handshake, request-id
+  correlation, `didOpen`/`definition`, replies to server-to-client requests, and
+  storing `publishDiagnostics`. Fully unit-tested by scripting a whole
+  conversation — no live server needed. The remaining piece is a driver that
+  spawns a real server (rust-analyzer, typescript-language-server) and surfaces
+  diagnostics / go-to-definition in the UI.
 - **Document outline** — a toggle in the editor status bar opens an Outline
   panel listing the active file's symbols (functions, classes, structs,
   headings…); clicking one jumps the editor to that line. Symbols come from a

@@ -142,6 +142,8 @@ mod tests {
         assert_serialize::<http::HttpResponse>();
         assert_serialize::<http::Header>();
         assert_serialize::<outline::Symbol>();
+        assert_serialize::<lsp::Diagnostic>();
+        assert_serialize::<lsp::Location>();
         #[cfg(feature = "persistence")]
         {
             assert_serialize::<db::Table>();
