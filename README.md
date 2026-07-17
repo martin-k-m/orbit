@@ -54,7 +54,9 @@ Think of it as the calm control room for everything you build:
 | 🩺 **Project health** | A 0–100 score with concrete warnings — oversized files, stray TODOs, heavy artifacts, missing tests. |
 | 📦 **Dependency manager** | The declared dependencies of every ecosystem in a project, read offline from its manifests. |
 | 📊 **Developer analytics** | Local, private time tracking: hours per language, projects touched, build times. Never uploaded. |
-| 🛰 **Ecosystem integration** | First-class hooks for **Blink** (acceleration), **Killer** (security), **Flux** (automation) and **Beacon** (APIs). |
+| 🔐 **Safe by default** | Every command is assessed before it runs — `rm -rf`, `dd`, `mkfs`, `curl \| sh` and force-pushes are refused until you confirm. Secrets in `.env` files are masked. |
+| 🗂 **Workspaces & env** | Pin tasks, notes and links per project; see every `.env` in one place with duplicate and missing-variable detection. |
+| 🛰 **Ecosystem previews** | Clearly-labelled previews for **Blink**, **Killer**, **Flux** and **Beacon** — the real engines land in v2.0 ([roadmap](ROADMAP.md)). |
 | 🖥 **Native & premium** | Tauri 2 app for macOS, Windows and Linux with a tray, native menus, keyboard shortcuts and a dark, glass-panelled design. |
 | ⌨️ **A real CLI** | The same engine as a terminal companion: `orbit scan`, `orbit info`, `orbit health`, `orbit run`. |
 
@@ -78,15 +80,21 @@ labelled previews.
 
 ## 📦 Download
 
-Grab the latest installer from the [**Releases**](https://github.com/martin-k-m/orbit/releases/latest) page:
+**Latest release: [v1.0.0](https://github.com/martin-k-m/orbit/releases/latest)** —
+or download directly:
 
-| Platform | File |
+| Platform | Download |
 | --- | --- |
-| 🍎 **macOS** (Apple Silicon & Intel) | `.dmg` |
-| 🪟 **Windows** | `.msi` / `.exe` |
-| 🐧 **Linux** | `.AppImage` / `.deb` |
+| 🍎 **macOS** (Apple Silicon) | [`Orbit_1.0.0_aarch64.dmg`](https://github.com/martin-k-m/orbit/releases/download/v1.0.0/Orbit_1.0.0_aarch64.dmg) |
+| 🍎 **macOS** (Intel) | [`Orbit_1.0.0_x64.dmg`](https://github.com/martin-k-m/orbit/releases/download/v1.0.0/Orbit_1.0.0_x64.dmg) |
+| 🪟 **Windows** (installer) | [`Orbit_1.0.0_x64_en-US.msi`](https://github.com/martin-k-m/orbit/releases/download/v1.0.0/Orbit_1.0.0_x64_en-US.msi) |
+| 🪟 **Windows** (setup) | [`Orbit_1.0.0_x64-setup.exe`](https://github.com/martin-k-m/orbit/releases/download/v1.0.0/Orbit_1.0.0_x64-setup.exe) |
+| 🐧 **Linux** (portable) | [`Orbit_1.0.0_amd64.AppImage`](https://github.com/martin-k-m/orbit/releases/download/v1.0.0/Orbit_1.0.0_amd64.AppImage) |
+| 🐧 **Linux** (Debian/Ubuntu) | [`Orbit_1.0.0_amd64.deb`](https://github.com/martin-k-m/orbit/releases/download/v1.0.0/Orbit_1.0.0_amd64.deb) |
 
-Or build from source — see [docs/development.md](docs/development.md).
+Verify with [`SHA256SUMS.txt`](https://github.com/martin-k-m/orbit/releases/download/v1.0.0/SHA256SUMS.txt).
+Install notes: [docs/installation.md](docs/installation.md) · Build from source:
+[docs/development.md](docs/development.md).
 
 ## ⌨️ The CLI
 
