@@ -16,7 +16,7 @@ import {
   X,
   ListTree,
 } from "lucide-react";
-import type { Encoding, FileNode, LineEnding, Symbol as DocSymbol } from "@/lib/types";
+import type { FileNode, Symbol as DocSymbol } from "@/lib/types";
 import {
   readDir,
   readFile,
@@ -31,7 +31,6 @@ import {
 import { CodeEditor } from "@/components/CodeEditor";
 import { useEditorStore, activeTab, type EditorTab } from "@/store/editor";
 import { useAppStore } from "@/store/app";
-import { formatBytes } from "@/lib/format";
 import { cn } from "@/lib/cn";
 
 /** File-operation callbacks threaded down the tree. */
@@ -66,7 +65,6 @@ export function ExplorerPanel({ root }: { root: string }) {
   const updateDraft = useEditorStore((s) => s.updateDraft);
   const markSaved = useEditorStore((s) => s.markSaved);
   const revealLine = useEditorStore((s) => s.revealLine);
-  const cursor = useEditorStore((s) => s.cursor);
   const setCursor = useEditorStore((s) => s.setCursor);
   const active = useEditorStore(activeTab);
   const [showOutline, setShowOutline] = useState(false);
@@ -243,26 +241,19 @@ export function ExplorerPanel({ root }: { root: string }) {
             />
 
             {active && (
-              <div className="flex items-center gap-2 border-b border-white/[0.06] px-3 py-1.5 text-xs">
-                <span className="truncate font-mono text-fg-muted">
-                  {relative(root, active.path)}
-                </span>
-                <div className="ml-auto flex items-center gap-2 text-fg-subtle">
-                  {!active.contents.binary && (
-                    <>
-                      <span>
-                        Ln {cursor.line}, Col {cursor.col}
+              <div className="flex items-center gap-2 border-b border-white/[0.06] px-3 py-1 text-xs">
+                {/* Breadcrumbs — the file's path within the project. */}
+                <div className="flex min-w-0 flex-1 items-center gap-1 truncate font-mono text-[11px] text-fg-subtle">
+                  {breadcrumbs(root, active.path).map((seg, i, arr) => (
+                    <span key={i} className="flex shrink-0 items-center gap-1">
+                      {i > 0 && <ChevronRight className="h-3 w-3 opacity-40" />}
+                      <span className={i === arr.length - 1 ? "text-fg-muted" : ""}>
+                        {seg}
                       </span>
-                      <span>·</span>
-                      <span>{active.contents.language ?? "text"}</span>
-                      <span>·</span>
-                      <span>{encodingLabel(active.contents.encoding)}</span>
-                      <span>·</span>
-                      <span>{lineEndingLabel(active.contents.lineEnding)}</span>
-                      <span>·</span>
-                      <span>{formatBytes(active.contents.size)}</span>
-                    </>
-                  )}
+                    </span>
+                  ))}
+                </div>
+                <div className="ml-auto flex items-center gap-2 text-fg-subtle">
                   <button
                     onClick={() => setShowOutline((v) => !v)}
                     title="Toggle outline"
@@ -414,7 +405,7 @@ function TabStrip({
   onClose: (path: string) => void;
 }) {
   return (
-    <div className="scrollbar-thin flex shrink-0 items-stretch overflow-x-auto border-b border-white/[0.06] bg-black/20">
+    <div className="scrollbar-thin flex shrink-0 items-stretch overflow-x-auto border-b border-border bg-panel">
       {tabs.map((tab) => {
         const isActive = tab.path === activePath;
         return (
@@ -422,10 +413,10 @@ function TabStrip({
             key={tab.path}
             onClick={() => onSelect(tab.path)}
             className={cn(
-              "no-drag group flex max-w-[200px] cursor-pointer items-center gap-1.5 border-r border-white/[0.06] px-3 py-2 text-[13px] transition-colors",
+              "no-drag group flex max-w-[200px] cursor-pointer items-center gap-1.5 border-r border-border border-b-2 px-3 py-2 text-[13px] transition-colors",
               isActive
-                ? "bg-white/[0.05] text-fg"
-                : "text-fg-muted hover:bg-white/[0.02]",
+                ? "border-b-accent bg-elevated text-fg"
+                : "border-b-transparent text-fg-muted hover:bg-white/[0.02]",
             )}
             title={tab.path}
           >
@@ -735,9 +726,9 @@ function relative(root: string, path: string): string {
   return path.startsWith(root) ? path.slice(root.length).replace(/^[/\\]/, "") : path;
 }
 
-function encodingLabel(e: Encoding): string {
-  return e === "utf-16-le" ? "UTF-16 LE" : e === "utf-16-be" ? "UTF-16 BE" : "UTF-8";
-}
-function lineEndingLabel(l: LineEnding): string {
-  return l === "crlf" ? "CRLF" : l === "lf" ? "LF" : "—";
+/** The active file's path within the project, as breadcrumb segments. */
+function breadcrumbs(root: string, path: string): string[] {
+  return relative(root, path)
+    .split(/[/\\]/)
+    .filter(Boolean);
 }
