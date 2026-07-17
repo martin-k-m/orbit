@@ -15,6 +15,7 @@ import type {
   GitInfo,
   GitStatus,
   HealthReport,
+  HttpResponse,
   ProjectDetail,
   ProjectSummary,
   SearchResults,
@@ -816,6 +817,23 @@ export async function dbTableRows(path: string, table: string): Promise<DbQueryR
 export async function parseTestOutput(output: string): Promise<TestSummary | null> {
   if (!isTauri()) return null;
   return invoke<TestSummary | null>("parse_test_output", { output });
+}
+
+// --- HTTP (API explorer) ----------------------------------------------------
+
+/** Send an HTTP request (via `curl` in the backend). */
+export async function httpRequest(
+  method: string,
+  url: string,
+  headers: [string, string][],
+  body?: string,
+): Promise<HttpResponse> {
+  return invoke<HttpResponse>("http_request", {
+    method,
+    url,
+    headers,
+    body: body ?? null,
+  });
 }
 
 /**

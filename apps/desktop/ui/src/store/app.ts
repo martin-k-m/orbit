@@ -8,6 +8,7 @@ export type View =
   | { kind: "ecosystem" }
   | { kind: "docker" }
   | { kind: "database" }
+  | { kind: "apis" }
   | { kind: "settings" }
   | { kind: "project"; id: string; path: string };
 

@@ -366,6 +366,17 @@ pub fn parse_test_output(output: String) -> Result<Option<orbit_core::testing::T
     Ok(orbit_core::testing::parse_summary(&output))
 }
 
+/// Send an HTTP request (via `curl`) for the API explorer.
+#[tauri::command]
+pub fn http_request(
+    method: String,
+    url: String,
+    headers: Vec<(String, String)>,
+    body: Option<String>,
+) -> Result<orbit_core::http::HttpResponse, String> {
+    orbit_core::http::request(&method, &url, &headers, body.as_deref()).map_err(|e| e.to_string())
+}
+
 /// Assess how risky a project's command is before running it, so the UI can
 /// show a confirmation dialog for anything destructive.
 #[tauri::command]

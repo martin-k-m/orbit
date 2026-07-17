@@ -8,6 +8,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **API explorer** — a new APIs view: pick a method, enter a URL, add headers
+  and a body, and send. The response comes back with a colour-coded status,
+  timing, headers and a pretty-printed (JSON-aware) body. Built on a new
+  `orbit_core::http` module that shells out to `curl` (so no TLS stack in the
+  engine); the response parser is unit-tested. No collections/auth/history yet.
 - **File operations in the Explorer** — create files and folders (a toolbar for
   the project root, hover actions on any folder), rename entries inline, and
   delete with a two-click confirm. Backed by new guarded `orbit_core::files`

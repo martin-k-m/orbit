@@ -119,6 +119,21 @@ export interface TestSummary {
   framework: string;
 }
 
+/** One HTTP response header (mirrors `orbit_core::http::Header`). */
+export interface HttpHeader {
+  name: string;
+  value: string;
+}
+
+/** An HTTP response (mirrors `orbit_core::http::HttpResponse`). */
+export interface HttpResponse {
+  status: number;
+  statusText: string;
+  headers: HttpHeader[];
+  body: string;
+  elapsedMs: number;
+}
+
 export interface HealthWarning {
   kind: string;
   message: string;

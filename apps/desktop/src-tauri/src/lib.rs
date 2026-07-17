@@ -80,6 +80,7 @@ pub fn run() {
             commands::db_query,
             commands::db_table_rows,
             commands::parse_test_output,
+            commands::http_request,
             commands::assess_command,
             commands::run_command,
             commands::generate_profile,

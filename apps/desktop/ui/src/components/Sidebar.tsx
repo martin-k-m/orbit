@@ -5,6 +5,7 @@ import {
   Boxes,
   Container,
   Database,
+  Globe,
   Settings as SettingsIcon,
   Plus,
   Circle,
@@ -54,6 +55,12 @@ const NAV: NavItem[] = [
     icon: Database,
     view: { kind: "database" },
     match: (v) => v.kind === "database",
+  },
+  {
+    label: "APIs",
+    icon: Globe,
+    view: { kind: "apis" },
+    match: (v) => v.kind === "apis",
   },
   {
     label: "Settings",

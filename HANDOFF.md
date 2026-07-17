@@ -102,7 +102,10 @@ Be very clear about this — do not claim otherwise in any doc or the UI:
   volumes yet.
 - **Database**: a read-only **SQLite** explorer (browse tables, view rows, run
   `SELECT`) via `orbit_core::db` (feature `persistence`). No Postgres/MySQL/Redis
-  and no writes/export yet. **No API-client tooling.**
+  and no writes/export yet.
+- **API explorer**: a REST client (method/URL/headers/body, JSON-aware response)
+  via `orbit_core::http`, which shells out to **`curl`**. No collections/auth/
+  history/GraphQL/WebSockets yet.
 - **No multi-window / dockable / split-pane IDE layout.** The editor has
   multiple tabs now, but there are no split editors, and still one terminal per
   project view.

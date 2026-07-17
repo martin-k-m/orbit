@@ -37,6 +37,7 @@ pub mod error;
 pub mod files;
 pub mod git;
 pub mod health;
+pub mod http;
 pub mod model;
 pub mod process;
 pub mod profile;
@@ -136,6 +137,8 @@ mod tests {
         assert_serialize::<docker::Container>();
         assert_serialize::<docker::Image>();
         assert_serialize::<testing::TestSummary>();
+        assert_serialize::<http::HttpResponse>();
+        assert_serialize::<http::Header>();
         #[cfg(feature = "persistence")]
         {
             assert_serialize::<db::Table>();

@@ -92,9 +92,11 @@ Turning projects into true workspaces.
   shipped: a read-only **SQLite** explorer (browse tables, view rows, run
   `SELECT`), backed by `orbit_core::db`. Other engines + saved queries + export
   are next.
-- 📋 **API explorer** — REST, GraphQL, WebSockets; collections, variables, auth,
+- 🚧 **API explorer** — REST, GraphQL, WebSockets; collections, variables, auth,
   history, response viewer with JSON formatting and highlighting; auto-discovery
-  of local APIs.
+  of local APIs. First slice shipped: a REST client (method/URL/headers/body,
+  JSON-aware response viewer) backed by `orbit_core::http` (via `curl`).
+  Collections, auth, history and GraphQL/WebSockets are next.
 
 ## v1.4 — Insight & search 📋
 
