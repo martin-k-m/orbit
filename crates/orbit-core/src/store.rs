@@ -9,6 +9,7 @@
 
 use crate::analytics::{BuildRecord, Session};
 use crate::model::Language;
+use crate::workspace::Workspace;
 use crate::Result;
 use rusqlite::{params, Connection, OptionalExtension};
 use std::path::{Path, PathBuf};
@@ -103,6 +104,69 @@ impl Store {
             )?;
         }
 
+        if version < 2 {
+            // Workspaces are stored as JSON keyed by project id: the shape
+            // evolves with the UI, and a document keeps that from becoming a
+            // migration per field.
+            self.conn.execute_batch(
+                "CREATE TABLE IF NOT EXISTS workspaces (
+                    project_id TEXT PRIMARY KEY,
+                    data       TEXT NOT NULL,
+                    updated_at INTEGER NOT NULL
+                 );
+                 PRAGMA user_version = 2;",
+            )?;
+        }
+
+        Ok(())
+    }
+
+    // --- Workspaces -------------------------------------------------------
+
+    /// Save a project's workspace, stamping `updated_at`.
+    pub fn save_workspace(&self, workspace: &Workspace, updated_at: i64) -> Result<()> {
+        let mut to_store = workspace.clone();
+        to_store.updated_at = updated_at;
+        let data = serde_json::to_string(&to_store)?;
+        self.conn.execute(
+            "INSERT INTO workspaces (project_id, data, updated_at) VALUES (?1, ?2, ?3)
+             ON CONFLICT(project_id) DO UPDATE SET
+                data = excluded.data,
+                updated_at = excluded.updated_at",
+            params![to_store.project_id, data, updated_at],
+        )?;
+        Ok(())
+    }
+
+    /// Load a project's workspace, or `None` if it has never been saved.
+    pub fn workspace(&self, project_id: &str) -> Result<Option<Workspace>> {
+        let data: Option<String> = self
+            .conn
+            .query_row(
+                "SELECT data FROM workspaces WHERE project_id = ?1",
+                params![project_id],
+                |row| row.get(0),
+            )
+            .optional()?;
+        match data {
+            Some(json) => Ok(Some(serde_json::from_str(&json)?)),
+            None => Ok(None),
+        }
+    }
+
+    /// Load a project's workspace, falling back to an empty one.
+    pub fn workspace_or_default(&self, project_id: &str) -> Result<Workspace> {
+        Ok(self
+            .workspace(project_id)?
+            .unwrap_or_else(|| Workspace::new(project_id)))
+    }
+
+    /// Forget a project's workspace.
+    pub fn remove_workspace(&self, project_id: &str) -> Result<()> {
+        self.conn.execute(
+            "DELETE FROM workspaces WHERE project_id = ?1",
+            params![project_id],
+        )?;
         Ok(())
     }
 

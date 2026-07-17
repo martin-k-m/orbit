@@ -40,6 +40,7 @@ pub mod process;
 pub mod profile;
 pub mod safety;
 pub mod scan;
+pub mod workspace;
 
 #[cfg(feature = "persistence")]
 pub mod store;
@@ -328,5 +329,50 @@ mod tests {
         let sessions = store.sessions_since(0).unwrap();
         assert_eq!(sessions.len(), 1);
         assert_eq!(sessions[0].language, Language::Rust);
+    }
+
+    #[cfg(feature = "persistence")]
+    #[test]
+    fn store_persists_workspaces() {
+        use store::Store;
+        use workspace::{Bookmark, Task, Workspace};
+
+        let store = Store::in_memory().unwrap();
+
+        // An unsaved project falls back to an empty workspace.
+        assert!(store.workspace("nope").unwrap().is_none());
+        assert!(store.workspace_or_default("nope").unwrap().is_empty());
+
+        let mut ws = Workspace::new("abc");
+        ws.notes = "# Setup\n- [ ] install deps".into();
+        ws.upsert_task(Task {
+            id: "t1".into(),
+            name: "dev".into(),
+            command: "cargo run".into(),
+            favorite: true,
+        });
+        ws.upsert_bookmark(Bookmark {
+            id: "b1".into(),
+            label: "Docs".into(),
+            url: "https://orbit.blinkdev.me/docs".into(),
+        });
+        store.save_workspace(&ws, 1_700_000_000).unwrap();
+
+        let loaded = store.workspace("abc").unwrap().unwrap();
+        assert_eq!(loaded.notes, ws.notes);
+        assert_eq!(loaded.tasks.len(), 1);
+        assert_eq!(loaded.bookmarks[0].label, "Docs");
+        assert_eq!(loaded.updated_at, 1_700_000_000, "save stamps updated_at");
+
+        // Saving again updates in place rather than duplicating.
+        let mut edited = loaded.clone();
+        edited.notes = "changed".into();
+        store.save_workspace(&edited, 1_700_000_100).unwrap();
+        let reloaded = store.workspace("abc").unwrap().unwrap();
+        assert_eq!(reloaded.notes, "changed");
+        assert_eq!(reloaded.updated_at, 1_700_000_100);
+
+        store.remove_workspace("abc").unwrap();
+        assert!(store.workspace("abc").unwrap().is_none());
     }
 }
