@@ -1,77 +1,72 @@
-# Orbit v1.1.0 — Release Notes
+# Orbit v1.2.0 — Release Notes
 
-The terminal release. Orbit gains a real embedded shell, signed automatic
-updates, and a theme that follows your OS — plus a pile of correctness fixes.
+**The IDE release.** Orbit grows from a developer command center into a genuine,
+local-first IDE — multi-file editing, universal search, a full git power center,
+Docker/database/API tooling, a testing panel, and live language-server
+diagnostics — wrapped in a new red identity with a launch splashscreen.
 
-Still everything you'd expect: local-first, no account, no telemetry.
+Still everything you'd expect: local-first, no account, no telemetry, fast, and
+cross-platform.
 
 ## Highlights
 
-### 🖥 Integrated terminal
+### ✍️ A real code editor
 
-Every project now has a **real shell built in**, running on a pseudo-terminal
-(ConPTY on Windows, `openpty` on macOS/Linux) — not a piped subprocess. Because
-programs see a TTY, the things that break in most embedded consoles just work:
+- **Multi-file tabs** — every file you open gets its own tab with its own
+  unsaved draft; reopening focuses the existing tab, closing picks a neighbour.
+- **Find, replace & go-to-line** in-editor (`Ctrl/Cmd+F` · `Ctrl/Cmd+H` ·
+  `Ctrl+Alt+G`), a live **Ln, Col** readout, and editor **preferences** (font
+  size, tab size, word wrap) that apply live and persist.
+- **Document outline** — jump around a file by symbol.
+- **File operations** in the Explorer — create, rename and delete, with guards.
 
-- Colours, prompts, spinners and progress bars
-- Full-screen programs — `top`, `vim`, `lazygit`
-- `Ctrl-C`, history, tab completion, reflow on resize
+### 🔎 Search everywhere
 
-It opens in the project directory, in the shell you actually use — Orbit detects
-`pwsh`/PowerShell/cmd on Windows and zsh/fish/bash on macOS/Linux, respecting
-`$SHELL`/`COMSPEC`. `bash`/`zsh` start as login shells so your profile loads.
+- **Workspace search** — fast find-in-files, click a result to open at the line.
+- **Quick-open** — `⌘/Ctrl+K` and type to fuzzy-find any file in the project.
 
-> Tabs, split panes, output search and sessions that survive a restart are on
-> the [roadmap](https://github.com/martin-k-m/orbit/blob/main/ROADMAP.md).
+### 🌱 Git, as a first-class panel
 
-### 🔄 Signed automatic updates
+A complete Source Control tab: staged/unstaged groups with one-click
+stage/unstage, an inline coloured diff, commit, **history with per-commit
+patches**, **branches** (switch/create), **fetch / pull / push**, **stash**, and
+**tags** — all on the `git` binary you already have.
 
-Orbit checks GitHub Releases on launch and offers to install a newer version in
-place. Updates are **signed** and verified against a public key compiled into
-the app, so a tampered or spoofed release can't install itself. Nothing
-downloads or installs without you clicking. See
-[docs/updates.md](https://github.com/martin-k-m/orbit/blob/main/docs/updates.md).
+### 🐳 Containers · 🗄 Database · 🌐 APIs
 
-### 🎨 System theme
+- **Containers** — list Docker containers and images, start/stop/restart.
+- **Database** — open a SQLite file and browse tables, view rows, run `SELECT`s.
+- **APIs** — a REST client: method, URL, headers, body, and a JSON-aware
+  response viewer.
 
-Appearance now offers **Dark / Light / System**. "System" follows your OS and
-updates live when it flips. Your choice is also finally remembered across
-restarts — previously it silently reset to dark every launch.
+### 🧪 Testing & Problems
 
-### 🗂 Workspaces & environments, wired up
+- **Testing** — run a project's test command with a parsed pass/fail summary
+  (cargo, Jest/Vitest, pytest).
+- **Problems** — a unified, navigable diagnostics view that now includes **live
+  language-server diagnostics** for your open files (rust-analyzer,
+  typescript-language-server, pylsp, gopls) when a server is installed.
 
-The workspace model (per-project tasks, notes, bookmarks) and the `.env` manager
-(discovery, secret masking, duplicate/missing-variable detection) are now
-reachable from the app, not just the engine.
+### 🎨 New identity + launch experience
 
-## Fixes
+- A **red** visual identity matched to the website, a redesigned glowing logo,
+  and a **black-and-red launch splashscreen**.
+- A fourth theme: **High Contrast** for low-vision use.
 
-- Desktop bundles wouldn't compile because an IPC type wasn't `Serialize`; a
-  guard test now catches that class of bug in `cargo test`.
-- Fixed the frontend path in the Tauri before-commands that failed every build.
-- Fixed the updater signing key (it was password-protected; CI had no TTY for
-  the prompt).
-- Light mode's status colours were tuned for a dark surface and washed out; they
-  are re-tuned.
+### ⬆️ Updates
 
-## Downloads
+Orbit checks for signed updates on launch, and Settings now has an **on-demand
+"Check for updates"** that downloads, installs and relaunches.
 
-| Platform | File |
-| --- | --- |
-| macOS (Apple Silicon) | `Orbit_1.1.0_aarch64.dmg` |
-| macOS (Intel) | `Orbit_1.1.0_x64.dmg` |
-| Windows | `Orbit_1.1.0_x64_en-US.msi` · `Orbit_1.1.0_x64-setup.exe` |
-| Linux | `Orbit_1.1.0_amd64.AppImage` · `Orbit_1.1.0_amd64.deb` |
+## Under the hood
 
-Verify against `SHA256SUMS.txt`. Full history:
-[CHANGELOG.md](https://github.com/martin-k-m/orbit/blob/main/CHANGELOG.md).
+Multiple new, unit-tested engine modules — `search`, `docker`, `db`, `http`,
+`testing`, `outline`, and an `lsp` client (framing + JSON-RPC + a `Session`
+state machine + a driver that spawns real servers). 100+ engine tests stay
+green, and the desktop bundle builds on macOS (Intel + Apple Silicon), Windows
+and Linux.
 
-## Upgrading
+## Still to come
 
-If you're on v1.0.0, install v1.1.0 over it — your local data (projects,
-workspaces, settings) is preserved; the database migrates automatically. From
-v1.1.0 onward, in-app updates take over.
-
-## Breaking changes
-
-None.
+Split editors, the LSP go-to-definition/hover gestures, a debugger, and a plugin
+SDK — tracked honestly in the [roadmap](https://github.com/martin-k-m/orbit/blob/main/ROADMAP.md).

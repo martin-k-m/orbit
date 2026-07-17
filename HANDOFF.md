@@ -4,7 +4,7 @@ A ground-truth snapshot for whoever (or whatever) picks up Orbit next. This is
 the honest state, including the things the marketing pages don't say. If it
 conflicts with a glossier doc, trust this file and fix the other one.
 
-Last updated at **v1.1.0**.
+Last updated at **v1.2.0** (the IDE release).
 
 ---
 
@@ -40,7 +40,7 @@ orbit/
 `apps/desktop/src-tauri` is intentionally **excluded** from the workspace
 (`Cargo.toml` `exclude`) because it drags in the webview stack.
 
-## What actually exists (v1.1.0)
+## What actually exists (v1.2.0)
 
 Engine modules (`crates/orbit-core/src/`), all unit-tested:
 

@@ -6,8 +6,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.2.0] — 2026-07-17
+
+The IDE release. Orbit grows from a developer command center into a genuine,
+local-first IDE: multi-file editing, universal search, a full git power center,
+Docker/database/API tooling, a testing panel, live language-server diagnostics,
+and a red visual identity with a launch splashscreen — all offline-first and
+private.
+
 ### Added
 
+- **Check for updates, on demand** — Settings now has an Updates section with a
+  "Check for updates" button that finds, downloads and installs a signed update
+  and relaunches, on top of the automatic check on launch.
 - **Git tags** — the Source Control panel now lists a repo's tags and can create
   a lightweight tag at HEAD (new `git::tags`/`create_tag` helpers, unit-tested).
 - **High Contrast theme** — a fourth theme (alongside Dark / Light / System) in
@@ -206,6 +217,7 @@ The first public release.
   workflows, building installers for macOS (Intel + Apple Silicon),
   Windows and Linux.
 
-[Unreleased]: https://github.com/martin-k-m/orbit/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/martin-k-m/orbit/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/martin-k-m/orbit/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/martin-k-m/orbit/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/martin-k-m/orbit/releases/tag/v1.0.0

@@ -15,6 +15,7 @@ import { useAppStore, type Theme } from "@/store/app";
 import { useSettingsStore } from "@/store/settings";
 import { appVersion, getSetting } from "@/lib/ipc";
 import { OrbitGlyph } from "@/components/OrbitGlyph";
+import { UpdateCheck } from "@/components/UpdateCheck";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/cn";
@@ -198,6 +199,20 @@ export function Settings() {
             label="Storage"
             value="Local SQLite database"
           />
+        </CardContent>
+      </Card>
+      )}
+
+      {shows("updates update version auto-update check") && (
+      <Card>
+        <CardHeader>
+          <CardTitle>Updates</CardTitle>
+          <CardDescription>
+            Orbit checks for signed updates on launch, and you can check any time.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <UpdateCheck />
         </CardContent>
       </Card>
       )}
