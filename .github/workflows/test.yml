@@ -47,18 +47,3 @@ jobs:
         run: npm run build
       - name: Unit tests
         run: npm test --if-present
-
-  website:
-    name: Website — typecheck · static export
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/website
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm install
-      - name: Build
-        run: npm run build

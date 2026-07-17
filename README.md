@@ -123,8 +123,7 @@ Orbit is one Rust engine with three thin surfaces:
 ```
 orbit/
 ├── apps/
-│   ├── desktop/         # Tauri 2 app — Rust backend (src-tauri) + React UI (ui)
-│   └── website/         # Next.js marketing site + documentation
+│   └── desktop/         # Tauri 2 app — Rust backend (src-tauri) + React UI (ui)
 ├── crates/
 │   ├── orbit-core/      # the engine: scan · detect · git · health · analytics · SQLite
 │   └── orbit-cli/       # terminal companion (binary `orbit`)
@@ -133,12 +132,15 @@ orbit/
 └── docs/                # architecture · development · contributing
 ```
 
+> The marketing site + docs live in a separate repo,
+> [`orbit-web`](https://github.com/martin-k-m/orbit-web) → https://orbit.blinkdev.me.
+
 All the interesting logic — what a project is, how healthy it is, which
 commands it exposes — lives in **`orbit-core`** and is unit-tested without a UI.
 The desktop app and CLI are shells over it, so behaviour is identical
 everywhere. Read the full write-up in [docs/architecture.md](docs/architecture.md).
 
-**Tech:** Rust · Tauri 2 · React + TypeScript · Tailwind CSS · SQLite · Next.js.
+**Tech:** Rust · Tauri 2 · React + TypeScript · Tailwind CSS · SQLite.
 
 ## 🚀 Quick start (from source)
 
@@ -150,9 +152,6 @@ cargo run -p orbit-cli -- scan ~/code
 # Desktop app
 npm --prefix apps/desktop/ui install
 cargo tauri dev --config apps/desktop/src-tauri/tauri.conf.json
-
-# Website
-npm --prefix apps/website install && npm --prefix apps/website run dev
 ```
 
 Full prerequisites and workflows are in [docs/development.md](docs/development.md).

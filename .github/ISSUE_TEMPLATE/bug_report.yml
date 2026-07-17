@@ -30,7 +30,7 @@ body:
       options:
         - Desktop app (orbit-desktop)
         - CLI (orbit)
-        - Website (orbit-web)
+        - Website (lives in the separate orbit-web repo)
         - Engine (orbit-core)
     validations:
       required: true

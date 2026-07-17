@@ -44,8 +44,3 @@ build: ui-install
 # Regenerate the app icon set from the source PNG
 icons:
     cargo tauri icon apps/desktop/src-tauri/icons/app-icon.png --output apps/desktop/src-tauri/icons
-
-# Run the marketing website in development
-web:
-    npm --prefix apps/website install
-    npm --prefix apps/website run dev

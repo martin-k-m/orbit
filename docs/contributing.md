@@ -34,15 +34,15 @@ cargo clippy --all-targets -- -D warnings
 cargo test
 ```
 
-For frontend or website changes:
+For desktop frontend changes:
 
 ```bash
 npm --prefix apps/desktop/ui run build   # UI typechecks + builds
-npm --prefix apps/website run build                 # site typechecks + exports
 ```
 
 CI will not go green unless formatting, Clippy (warnings denied), tests and the
-frontend/website builds all pass.
+frontend build all pass. (The marketing site lives in the separate
+[`orbit-web`](https://github.com/martin-k-m/orbit-web) repo.)
 
 ## Commit messages
 
