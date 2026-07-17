@@ -8,6 +8,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **File operations in the Explorer** — create files and folders (a toolbar for
+  the project root, hover actions on any folder), rename entries inline, and
+  delete with a two-click confirm. Backed by new guarded `orbit_core::files`
+  helpers (`create_file`/`create_dir`/`rename_path`/`delete_path`) that refuse
+  to clobber an existing path; unit-tested. Deleting or renaming a file closes
+  its editor tab.
 - **Terminal tabs** — the Terminal tab now hosts multiple shells: a `＋` opens a
   new one, a tab strip switches between them, and closing focuses a neighbour.
   Background terminals stay alive (panes stay mounted and refit when shown), so

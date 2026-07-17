@@ -574,6 +574,30 @@ pub fn list_files(path: String) -> Result<Vec<String>, String> {
     Ok(orbit_core::files::list_files(&dir, 5000))
 }
 
+/// Create an empty file (fails if anything already exists at the path).
+#[tauri::command]
+pub fn create_file(path: String) -> Result<(), String> {
+    orbit_core::files::create_file(Path::new(&path)).map_err(|e| e.to_string())
+}
+
+/// Create a directory (fails if anything already exists at the path).
+#[tauri::command]
+pub fn create_dir(path: String) -> Result<(), String> {
+    orbit_core::files::create_dir(Path::new(&path)).map_err(|e| e.to_string())
+}
+
+/// Rename/move a path (fails if the destination already exists).
+#[tauri::command]
+pub fn rename_path(from: String, to: String) -> Result<(), String> {
+    orbit_core::files::rename_path(Path::new(&from), Path::new(&to)).map_err(|e| e.to_string())
+}
+
+/// Delete a file, or a directory and everything under it.
+#[tauri::command]
+pub fn delete_path(path: String) -> Result<(), String> {
+    orbit_core::files::delete_path(Path::new(&path)).map_err(|e| e.to_string())
+}
+
 /// Write text back to a file (the editor's save).
 #[tauri::command]
 pub fn write_file(path: String, contents: String) -> Result<(), String> {

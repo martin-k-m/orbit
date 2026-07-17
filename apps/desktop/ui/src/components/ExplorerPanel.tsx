@@ -3,19 +3,50 @@ import {
   ChevronRight,
   ChevronDown,
   File as FileIcon,
+  FilePlus,
   Folder,
   FolderOpen,
+  FolderPlus,
+  Pencil,
+  Trash2,
   Save,
   Loader2,
   FileWarning,
+  Check,
   X,
 } from "lucide-react";
 import type { Encoding, FileNode, LineEnding } from "@/lib/types";
-import { readDir, readFile, writeFile, isTauri } from "@/lib/ipc";
+import {
+  readDir,
+  readFile,
+  writeFile,
+  createFile,
+  createDir,
+  renamePath,
+  deletePath,
+  isTauri,
+} from "@/lib/ipc";
 import { CodeEditor } from "@/components/CodeEditor";
 import { useEditorStore, activeTab, type EditorTab } from "@/store/editor";
+import { useAppStore } from "@/store/app";
 import { formatBytes } from "@/lib/format";
 import { cn } from "@/lib/cn";
+
+/** File-operation callbacks threaded down the tree. */
+interface TreeOps {
+  refreshToken: number;
+  create: (dir: string, name: string, isDir: boolean) => void;
+  rename: (fromPath: string, toName: string) => void;
+  remove: (path: string) => void;
+}
+
+function joinPath(dir: string, name: string): string {
+  return `${dir.replace(/[/\\]$/, "")}/${name}`;
+}
+function parentDir(p: string): string {
+  const i = Math.max(p.lastIndexOf("/"), p.lastIndexOf("\\"));
+  return i >= 0 ? p.slice(0, i) : p;
+}
 
 /**
  * A lazily-expanded file tree beside a tabbed CodeMirror editor.
@@ -37,6 +68,61 @@ export function ExplorerPanel({ root }: { root: string }) {
   const [loadingPath, setLoadingPath] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [cursor, setCursor] = useState({ line: 1, col: 1 });
+  const [refreshToken, setRefreshToken] = useState(0);
+  const [rootCreate, setRootCreate] = useState<null | "file" | "folder">(null);
+  const pushToast = useAppStore((s) => s.pushToast);
+
+  const bump = useCallback(() => setRefreshToken((n) => n + 1), []);
+
+  // Close any editor tab that pointed at a path we just removed or renamed away.
+  const dropTabsUnder = useCallback((p: string) => {
+    const st = useEditorStore.getState();
+    st.tabs
+      .filter((t) => t.path === p || t.path.startsWith(`${p}/`) || t.path.startsWith(`${p}\\`))
+      .forEach((t) => st.closeTab(t.path));
+  }, []);
+
+  const create = useCallback(
+    (dir: string, name: string, isDir: boolean) => {
+      const target = joinPath(dir, name);
+      void (isDir ? createDir(target) : createFile(target))
+        .then(bump)
+        .catch((e) =>
+          pushToast({ variant: "error", title: "Create failed", description: String(e) }),
+        );
+    },
+    [bump, pushToast],
+  );
+
+  const rename = useCallback(
+    (fromPath: string, toName: string) => {
+      void renamePath(fromPath, joinPath(parentDir(fromPath), toName))
+        .then(() => {
+          dropTabsUnder(fromPath);
+          bump();
+        })
+        .catch((e) =>
+          pushToast({ variant: "error", title: "Rename failed", description: String(e) }),
+        );
+    },
+    [bump, dropTabsUnder, pushToast],
+  );
+
+  const remove = useCallback(
+    (p: string) => {
+      void deletePath(p)
+        .then(() => {
+          dropTabsUnder(p);
+          bump();
+        })
+        .catch((e) =>
+          pushToast({ variant: "error", title: "Delete failed", description: String(e) }),
+        );
+    },
+    [bump, dropTabsUnder, pushToast],
+  );
+
+  const ops: TreeOps = { refreshToken, create, rename, remove };
 
   // The editor store is global, but a switch to another project remounts this
   // panel with a new root while the old project's tabs linger. Drop any tab
@@ -105,8 +191,40 @@ export function ExplorerPanel({ root }: { root: string }) {
 
   return (
     <div className="flex h-[520px] overflow-hidden rounded-xl border border-white/[0.08] bg-black/20">
-      <aside className="scrollbar-thin w-64 shrink-0 overflow-y-auto border-r border-white/[0.06] py-2">
-        <Tree dir={root} depth={0} activePath={activePath} onOpen={openFile} />
+      <aside className="scrollbar-thin flex w-64 shrink-0 flex-col overflow-y-auto border-r border-white/[0.06]">
+        <div className="flex items-center gap-1 border-b border-white/[0.06] px-2 py-1.5">
+          <span className="mr-auto truncate pl-1 text-[11px] font-medium uppercase tracking-wider text-fg-subtle">
+            Explorer
+          </span>
+          <button
+            onClick={() => setRootCreate("file")}
+            title="New file"
+            className="no-drag rounded p-1 text-fg-subtle transition-colors hover:bg-white/[0.06] hover:text-fg"
+          >
+            <FilePlus className="h-3.5 w-3.5" />
+          </button>
+          <button
+            onClick={() => setRootCreate("folder")}
+            title="New folder"
+            className="no-drag rounded p-1 text-fg-subtle transition-colors hover:bg-white/[0.06] hover:text-fg"
+          >
+            <FolderPlus className="h-3.5 w-3.5" />
+          </button>
+        </div>
+        <div className="flex-1 py-2">
+          {rootCreate && (
+            <NameInput
+              icon={rootCreate === "folder" ? "folder" : "file"}
+              depth={0}
+              onSubmit={(name) => {
+                create(root, name, rootCreate === "folder");
+                setRootCreate(null);
+              }}
+              onCancel={() => setRootCreate(null)}
+            />
+          )}
+          <Tree dir={root} depth={0} activePath={activePath} onOpen={openFile} ops={ops} />
+        </div>
       </aside>
 
       <section className="flex min-w-0 flex-1 flex-col">
@@ -265,11 +383,13 @@ function Tree({
   depth,
   activePath,
   onOpen,
+  ops,
 }: {
   dir: string;
   depth: number;
   activePath: string | null;
   onOpen: (path: string) => void;
+  ops: TreeOps;
 }) {
   const [nodes, setNodes] = useState<FileNode[] | null>(null);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -282,7 +402,8 @@ function Tree({
     return () => {
       cancelled = true;
     };
-  }, [dir]);
+    // Re-read when this dir changes or a file op bumps the refresh token.
+  }, [dir, ops.refreshToken]);
 
   if (!nodes) {
     return (
@@ -294,55 +415,238 @@ function Tree({
 
   return (
     <ul>
-      {nodes.map((node) => {
-        const isOpen = expanded.has(node.path);
-        return (
-          <li key={node.path}>
-            <button
-              onClick={() => {
-                if (node.isDir) {
-                  setExpanded((prev) => {
-                    const next = new Set(prev);
-                    if (next.has(node.path)) next.delete(node.path);
-                    else next.add(node.path);
-                    return next;
-                  });
-                } else {
-                  onOpen(node.path);
-                }
-              }}
-              className={cn(
-                "no-drag flex w-full items-center gap-1.5 py-1 pr-2 text-left text-[13px] transition-colors hover:bg-white/[0.04]",
-                activePath === node.path ? "bg-accent/10 text-fg" : "text-fg-muted",
-                node.hidden && "opacity-60",
-              )}
-              style={{ paddingLeft: depth * 12 + 8 }}
-            >
-              {node.isDir ? (
-                <>
-                  {isOpen ? (
-                    <ChevronDown className="h-3.5 w-3.5 shrink-0" />
-                  ) : (
-                    <ChevronRight className="h-3.5 w-3.5 shrink-0" />
-                  )}
-                  {isOpen ? (
-                    <FolderOpen className="h-3.5 w-3.5 shrink-0 text-accent/80" />
-                  ) : (
-                    <Folder className="h-3.5 w-3.5 shrink-0 text-accent/80" />
-                  )}
-                </>
-              ) : (
-                <FileIcon className="ml-[14px] h-3.5 w-3.5 shrink-0 text-fg-subtle" />
-              )}
-              <span className="truncate">{node.name}</span>
-            </button>
-            {node.isDir && isOpen && (
-              <Tree dir={node.path} depth={depth + 1} activePath={activePath} onOpen={onOpen} />
-            )}
-          </li>
-        );
-      })}
+      {nodes.map((node) => (
+        <TreeNode
+          key={node.path}
+          node={node}
+          depth={depth}
+          activePath={activePath}
+          expanded={expanded.has(node.path)}
+          onToggle={() =>
+            setExpanded((prev) => {
+              const next = new Set(prev);
+              if (next.has(node.path)) next.delete(node.path);
+              else next.add(node.path);
+              return next;
+            })
+          }
+          onOpen={onOpen}
+          ops={ops}
+        />
+      ))}
     </ul>
+  );
+}
+
+function TreeNode({
+  node,
+  depth,
+  activePath,
+  expanded,
+  onToggle,
+  onOpen,
+  ops,
+}: {
+  node: FileNode;
+  depth: number;
+  activePath: string | null;
+  expanded: boolean;
+  onToggle: () => void;
+  onOpen: (path: string) => void;
+  ops: TreeOps;
+}) {
+  const [renaming, setRenaming] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [creatingIn, setCreatingIn] = useState<null | "file" | "folder">(null);
+  const pad = depth * 12 + 8;
+
+  if (renaming) {
+    return (
+      <li>
+        <NameInput
+          icon={node.isDir ? "folder" : "file"}
+          depth={depth}
+          initial={node.name}
+          onSubmit={(name) => {
+            setRenaming(false);
+            if (name !== node.name) ops.rename(node.path, name);
+          }}
+          onCancel={() => setRenaming(false)}
+        />
+      </li>
+    );
+  }
+
+  return (
+    <li>
+      <div
+        className={cn(
+          "no-drag group flex items-center gap-1.5 pr-1 text-[13px] transition-colors hover:bg-white/[0.04]",
+          activePath === node.path ? "bg-accent/10 text-fg" : "text-fg-muted",
+          node.hidden && "opacity-60",
+        )}
+      >
+        <button
+          onClick={() => (node.isDir ? onToggle() : onOpen(node.path))}
+          className="no-drag flex min-w-0 flex-1 items-center gap-1.5 py-1 text-left"
+          style={{ paddingLeft: pad }}
+        >
+          {node.isDir ? (
+            <>
+              {expanded ? (
+                <ChevronDown className="h-3.5 w-3.5 shrink-0" />
+              ) : (
+                <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+              )}
+              {expanded ? (
+                <FolderOpen className="h-3.5 w-3.5 shrink-0 text-accent/80" />
+              ) : (
+                <Folder className="h-3.5 w-3.5 shrink-0 text-accent/80" />
+              )}
+            </>
+          ) : (
+            <FileIcon className="ml-[14px] h-3.5 w-3.5 shrink-0 text-fg-subtle" />
+          )}
+          <span className="truncate">{node.name}</span>
+        </button>
+
+        {/* Row actions */}
+        {confirmDelete ? (
+          <span className="flex shrink-0 items-center gap-0.5 pr-1">
+            <span className="text-[10px] text-danger">Delete?</span>
+            <RowBtn label="Confirm delete" onClick={() => ops.remove(node.path)}>
+              <Check className="h-3 w-3 text-danger" />
+            </RowBtn>
+            <RowBtn label="Cancel" onClick={() => setConfirmDelete(false)}>
+              <X className="h-3 w-3" />
+            </RowBtn>
+          </span>
+        ) : (
+          <span className="flex shrink-0 items-center gap-0.5 pr-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+            {node.isDir && (
+              <>
+                <RowBtn
+                  label="New file"
+                  onClick={() => {
+                    if (!expanded) onToggle();
+                    setCreatingIn("file");
+                  }}
+                >
+                  <FilePlus className="h-3 w-3" />
+                </RowBtn>
+                <RowBtn
+                  label="New folder"
+                  onClick={() => {
+                    if (!expanded) onToggle();
+                    setCreatingIn("folder");
+                  }}
+                >
+                  <FolderPlus className="h-3 w-3" />
+                </RowBtn>
+              </>
+            )}
+            <RowBtn label="Rename" onClick={() => setRenaming(true)}>
+              <Pencil className="h-3 w-3" />
+            </RowBtn>
+            <RowBtn label="Delete" onClick={() => setConfirmDelete(true)}>
+              <Trash2 className="h-3 w-3" />
+            </RowBtn>
+          </span>
+        )}
+      </div>
+
+      {node.isDir && expanded && (
+        <>
+          {creatingIn && (
+            <NameInput
+              icon={creatingIn === "folder" ? "folder" : "file"}
+              depth={depth + 1}
+              onSubmit={(name) => {
+                ops.create(node.path, name, creatingIn === "folder");
+                setCreatingIn(null);
+              }}
+              onCancel={() => setCreatingIn(null)}
+            />
+          )}
+          <Tree
+            dir={node.path}
+            depth={depth + 1}
+            activePath={activePath}
+            onOpen={onOpen}
+            ops={ops}
+          />
+        </>
+      )}
+    </li>
+  );
+}
+
+function RowBtn({
+  children,
+  onClick,
+  label,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  label: string;
+}) {
+  return (
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+      aria-label={label}
+      title={label}
+      className="no-drag flex h-5 w-5 items-center justify-center rounded text-fg-subtle hover:bg-white/[0.08] hover:text-fg"
+    >
+      {children}
+    </button>
+  );
+}
+
+/** An inline text input for naming a new/renamed entry. */
+function NameInput({
+  icon,
+  depth,
+  initial = "",
+  onSubmit,
+  onCancel,
+}: {
+  icon: "file" | "folder";
+  depth: number;
+  initial?: string;
+  onSubmit: (name: string) => void;
+  onCancel: () => void;
+}) {
+  const [value, setValue] = useState(initial);
+  return (
+    <div
+      className="flex items-center gap-1.5 py-0.5 pr-2"
+      style={{ paddingLeft: depth * 12 + 8 }}
+    >
+      {icon === "folder" ? (
+        <Folder className="h-3.5 w-3.5 shrink-0 text-accent/80" />
+      ) : (
+        <FileIcon className="h-3.5 w-3.5 shrink-0 text-fg-subtle" />
+      )}
+      <input
+        autoFocus
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onBlur={onCancel}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            const name = value.trim();
+            if (name) onSubmit(name);
+            else onCancel();
+          } else if (e.key === "Escape") {
+            onCancel();
+          }
+        }}
+        className="no-drag min-w-0 flex-1 rounded border border-accent/40 bg-black/40 px-1 py-0.5 text-[13px] text-fg outline-none"
+      />
+    </div>
   );
 }
 

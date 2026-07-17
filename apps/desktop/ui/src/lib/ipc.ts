@@ -973,6 +973,26 @@ export async function listFiles(path: string): Promise<string[]> {
   return invoke<string[]>("list_files", { path });
 }
 
+/** Create an empty file (fails if the path already exists). */
+export async function createFile(path: string): Promise<void> {
+  return invoke<void>("create_file", { path });
+}
+
+/** Create a directory (fails if the path already exists). */
+export async function createDir(path: string): Promise<void> {
+  return invoke<void>("create_dir", { path });
+}
+
+/** Rename/move a path (fails if the destination exists). */
+export async function renamePath(from: string, to: string): Promise<void> {
+  return invoke<void>("rename_path", { from, to });
+}
+
+/** Delete a file, or a directory and everything under it. */
+export async function deletePath(path: string): Promise<void> {
+  return invoke<void>("delete_path", { path });
+}
+
 /**
  * Search a project for a literal string ("find in files"). Ignored, binary and
  * oversized files are skipped in the engine; results are capped.

@@ -241,6 +241,53 @@ fn skip_dir(dir: &Path) -> bool {
     }
 }
 
+/// Create an empty file. Errors if anything already exists at `path` (so an
+/// accidental "new file" never clobbers real content).
+pub fn create_file(path: &Path) -> crate::Result<()> {
+    if path.exists() {
+        return Err(already_exists(path));
+    }
+    std::fs::File::create(path)
+        .map(|_| ())
+        .map_err(|e| crate::Error::io(path, e))
+}
+
+/// Create a directory. Errors if anything already exists at `path`. The parent
+/// must exist (this is a single `mkdir`, not `mkdir -p`).
+pub fn create_dir(path: &Path) -> crate::Result<()> {
+    if path.exists() {
+        return Err(already_exists(path));
+    }
+    std::fs::create_dir(path).map_err(|e| crate::Error::io(path, e))
+}
+
+/// Rename/move `from` to `to`. Errors if `to` already exists, to avoid a silent
+/// overwrite.
+pub fn rename_path(from: &Path, to: &Path) -> crate::Result<()> {
+    if to.exists() {
+        return Err(already_exists(to));
+    }
+    std::fs::rename(from, to).map_err(|e| crate::Error::io(from, e))
+}
+
+/// Delete a file, or a directory and everything under it. Destructive — the UI
+/// confirms before calling this.
+pub fn delete_path(path: &Path) -> crate::Result<()> {
+    let meta = std::fs::symlink_metadata(path).map_err(|e| crate::Error::io(path, e))?;
+    if meta.is_dir() {
+        std::fs::remove_dir_all(path).map_err(|e| crate::Error::io(path, e))
+    } else {
+        std::fs::remove_file(path).map_err(|e| crate::Error::io(path, e))
+    }
+}
+
+fn already_exists(path: &Path) -> crate::Error {
+    crate::Error::io(
+        path,
+        std::io::Error::new(std::io::ErrorKind::AlreadyExists, "already exists"),
+    )
+}
+
 /// Read a file for the editor: decode it, and report encoding, line ending,
 /// language, and whether it was binary or truncated.
 pub fn read_text_file(path: &Path) -> crate::Result<FileContents> {
@@ -455,6 +502,41 @@ mod tests {
             fs::write(tmp.path().join(format!("f{i}.txt")), "").unwrap();
         }
         assert_eq!(list_files(tmp.path(), 5).len(), 5);
+    }
+
+    #[test]
+    fn file_ops_create_rename_delete() {
+        let tmp = tempfile::tempdir().unwrap();
+        let root = tmp.path();
+
+        // Create a file, then refuse to clobber it.
+        let a = root.join("a.txt");
+        create_file(&a).unwrap();
+        assert!(a.is_file());
+        assert!(
+            create_file(&a).is_err(),
+            "must not overwrite an existing file"
+        );
+
+        // Create a directory, and refuse to clobber it too.
+        let dir = root.join("sub");
+        create_dir(&dir).unwrap();
+        assert!(dir.is_dir());
+        assert!(create_dir(&dir).is_err());
+
+        // Rename, but never onto an existing path.
+        let b = root.join("b.txt");
+        rename_path(&a, &b).unwrap();
+        assert!(!a.exists() && b.is_file());
+        fs::write(root.join("c.txt"), "x").unwrap();
+        assert!(rename_path(&b, &root.join("c.txt")).is_err());
+
+        // Delete a file and a (recursive) directory.
+        fs::write(dir.join("nested.txt"), "y").unwrap();
+        delete_path(&b).unwrap();
+        assert!(!b.exists());
+        delete_path(&dir).unwrap();
+        assert!(!dir.exists());
     }
 
     #[test]
