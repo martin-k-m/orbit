@@ -14,6 +14,11 @@ import {
   syntaxHighlighting,
   defaultHighlightStyle,
 } from "@codemirror/language";
+import {
+  search,
+  searchKeymap,
+  highlightSelectionMatches,
+} from "@codemirror/search";
 import { languageExtension } from "@/lib/editorLang";
 
 // Orbit-flavoured editor theme, matched to the app's dark surface.
@@ -43,6 +48,36 @@ const orbitTheme = EditorView.theme(
       backgroundColor: "hsl(0 72% 58% / 0.25)",
     },
     ".cm-cursor": { borderLeftColor: "hsl(0 72% 62%)" },
+    // Matches highlighted by find, and the active one.
+    ".cm-searchMatch": {
+      backgroundColor: "hsl(350 89% 60% / 0.22)",
+      outline: "1px solid hsl(0 72% 58% / 0.4)",
+    },
+    ".cm-searchMatch-selected": {
+      backgroundColor: "hsl(0 72% 55% / 0.45)",
+    },
+    ".cm-selectionMatch": { backgroundColor: "hsl(240 10% 100% / 0.06)" },
+    // The find / replace / go-to-line panel, themed to the app's dark surface.
+    ".cm-panels": {
+      backgroundColor: "hsl(240 9% 8%)",
+      color: "hsl(240 10% 90%)",
+      borderColor: "hsl(240 10% 18%)",
+    },
+    ".cm-panel.cm-search": { padding: "6px 8px" },
+    ".cm-panel.cm-search input, .cm-panel.cm-search button, .cm-textfield": {
+      backgroundColor: "hsl(240 10% 12%)",
+      color: "hsl(240 10% 90%)",
+      border: "1px solid hsl(240 10% 20%)",
+      borderRadius: "6px",
+      padding: "2px 6px",
+    },
+    ".cm-panel.cm-search button": { cursor: "pointer" },
+    ".cm-panel.cm-search button[name='close']": { color: "hsl(240 6% 62%)" },
+    ".cm-button": {
+      backgroundImage: "none",
+      backgroundColor: "hsl(0 72% 51% / 0.15)",
+      color: "hsl(0 72% 72%)",
+    },
   },
   { dark: true },
 );
@@ -56,8 +91,17 @@ function baseExtensions(readOnly: boolean, onChange?: (v: string) => void): Exte
     indentOnInput(),
     bracketMatching(),
     highlightActiveLine(),
+    highlightSelectionMatches(),
+    // `top: true` docks the find bar above the editor rather than at the bottom.
+    search({ top: true }),
     syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
-    keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
+    keymap.of([
+      // Ctrl/Cmd+F find, Ctrl/Cmd+H replace, F3/Ctrl+G next, Ctrl+Alt+G go-to-line.
+      ...searchKeymap,
+      ...defaultKeymap,
+      ...historyKeymap,
+      indentWithTab,
+    ]),
     orbitTheme,
     EditorView.lineWrapping,
     EditorState.readOnly.of(readOnly),
