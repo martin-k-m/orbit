@@ -40,6 +40,7 @@ pub mod process;
 pub mod profile;
 pub mod safety;
 pub mod scan;
+pub mod shell;
 pub mod workspace;
 
 #[cfg(feature = "persistence")]
