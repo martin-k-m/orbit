@@ -10,9 +10,11 @@ import {
   Search,
   Minus,
   Plus,
+  Bot,
 } from "lucide-react";
 import { useAppStore, type Theme } from "@/store/app";
 import { useSettingsStore } from "@/store/settings";
+import { useAiStore } from "@/store/ai";
 import { appVersion, getSetting } from "@/lib/ipc";
 import { OrbitGlyph } from "@/components/OrbitGlyph";
 import { UpdateCheck } from "@/components/UpdateCheck";
@@ -29,6 +31,7 @@ export function Settings() {
   const setFontSize = useSettingsStore((s) => s.setFontSize);
   const setTabSize = useSettingsStore((s) => s.setTabSize);
   const setWordWrap = useSettingsStore((s) => s.setWordWrap);
+  const ai = useAiStore();
   const [version, setVersion] = useState("");
   const [dataLocation, setDataLocation] = useState<string | null>(null);
   const [query, setQuery] = useState("");
@@ -172,6 +175,77 @@ export function Settings() {
       </Card>
       )}
 
+      {shows("ai assistant model llm ollama openai anthropic local agent chat") && (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bot className="h-4 w-4 text-accent" /> AI
+          </CardTitle>
+          <CardDescription>
+            Optional and local-first. Point Orbit at any OpenAI-compatible
+            endpoint — a local runtime like Ollama or LM Studio, or a hosted
+            provider. Off until you enable it; the key and settings are stored
+            only on this device.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-sm text-fg-muted">Enable AI</span>
+            <button
+              role="switch"
+              aria-checked={ai.enabled}
+              aria-label="Enable AI"
+              onClick={() => ai.setEnabled(!ai.enabled)}
+              className={cn(
+                "no-drag relative h-6 w-11 rounded-full transition-colors",
+                ai.enabled ? "bg-accent" : "bg-white/[0.12]",
+              )}
+            >
+              <span
+                className={cn(
+                  "absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform",
+                  ai.enabled ? "translate-x-[22px]" : "translate-x-0.5",
+                )}
+              />
+            </button>
+          </div>
+          <Separator />
+          <Field
+            label="Endpoint (base URL)"
+            hint="OpenAI-compatible root. Ollama: http://localhost:11434/v1"
+          >
+            <input
+              value={ai.baseUrl}
+              onChange={(e) => ai.setBaseUrl(e.target.value)}
+              spellCheck={false}
+              placeholder="http://localhost:11434/v1"
+              className="no-drag w-full rounded-lg border border-white/[0.08] bg-black/30 px-2.5 py-1.5 font-mono text-[13px] text-fg outline-none placeholder:text-fg-subtle focus:border-accent/40"
+            />
+          </Field>
+          <Field label="Model" hint="e.g. llama3.2, qwen2.5-coder, gpt-4o-mini">
+            <input
+              value={ai.model}
+              onChange={(e) => ai.setModel(e.target.value)}
+              spellCheck={false}
+              placeholder="llama3.2"
+              className="no-drag w-full rounded-lg border border-white/[0.08] bg-black/30 px-2.5 py-1.5 font-mono text-[13px] text-fg outline-none placeholder:text-fg-subtle focus:border-accent/40"
+            />
+          </Field>
+          <Field label="API key" hint="Leave empty for local servers that need none.">
+            <input
+              type="password"
+              value={ai.apiKey}
+              onChange={(e) => ai.setApiKey(e.target.value)}
+              spellCheck={false}
+              autoComplete="off"
+              placeholder="(none)"
+              className="no-drag w-full rounded-lg border border-white/[0.08] bg-black/30 px-2.5 py-1.5 font-mono text-[13px] text-fg outline-none placeholder:text-fg-subtle focus:border-accent/40"
+            />
+          </Field>
+        </CardContent>
+      </Card>
+      )}
+
       {shows("data privacy telemetry storage location") && (
       <Card>
         <CardHeader>
@@ -291,6 +365,24 @@ function ThemeOption({
       </span>
       <span className="text-sm font-medium text-fg">{label}</span>
     </button>
+  );
+}
+
+function Field({
+  label,
+  hint,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="flex flex-col gap-1.5">
+      <span className="text-sm text-fg-muted">{label}</span>
+      {children}
+      {hint && <span className="text-[11px] text-fg-subtle">{hint}</span>}
+    </label>
   );
 }
 

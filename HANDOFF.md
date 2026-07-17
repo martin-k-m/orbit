@@ -46,6 +46,7 @@ Engine modules (`crates/orbit-core/src/`), all unit-tested:
 
 | Module | Does |
 | --- | --- |
+| `ai` | Local-first chat over an OpenAI-compatible endpoint (via `curl`); pure request/response builder + parser unit-tested |
 | `scan` / `detect` | Find projects, detect ecosystem (Rust/TS/JS/Python/Go/Docker) |
 | `model` | The shared serde data model (the IPC contract's source of truth) |
 | `profile` | `.project-orbit` TOML read/write |
@@ -91,6 +92,13 @@ Desktop features that are **built and wired to the UI**:
   groups, one-click stage/unstage, inline diff, commit, recent history, branch
   switch/create, and fetch/pull/push (pull is ff-only). Backed by
   `orbit_core::git`. No merge/rebase/cherry-pick/commit-graph yet.
+- **AI assistant (local-first, optional)** — an **AI** tool window: a
+  project-aware chat backed by any OpenAI-compatible endpoint the user sets in
+  Settings → AI (defaults to a local Ollama URL). Off by default; config + key in
+  the settings table (`store/ai.ts`), conversation in-memory. Engine:
+  `orbit_core::ai` (request/response pure + unit-tested, `curl` for the call —
+  compile-proven in CI's bundle only, like `http`/`lsp`). **Non-streaming, single
+  conversation, no codebase indexing / multi-agent / plugin SDK yet.**
 - Standalone views (in the left sidebar): Containers (Docker), Database (SQLite),
   APIs (REST client), Analytics, Settings
 - System tray, native menu, Dark/Light/High-Contrast/**System** theme (persisted)
