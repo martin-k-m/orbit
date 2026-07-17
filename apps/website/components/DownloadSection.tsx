@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Apple, MonitorDown, Terminal } from "lucide-react";
 import { Reveal, Section } from "./Section";
 
@@ -20,10 +21,10 @@ const platforms = [
   },
   {
     name: "Linux",
-    detail: "AppImage & .deb — coming soon",
+    detail: "AppImage & .deb · x64",
     icon: Terminal,
     href: RELEASES_URL,
-    available: false,
+    available: true,
   },
 ];
 
@@ -80,18 +81,26 @@ export function DownloadSection() {
             })}
           </div>
 
-          <p className="mt-8 text-center text-xs text-slate-500">
-            All builds are published to{" "}
-            <a
-              href={RELEASES_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="text-slate-300 underline underline-offset-4 hover:text-white"
+          <div className="mt-8 flex flex-col items-center gap-2 text-center text-xs text-slate-500">
+            <Link
+              href="/download"
+              className="text-brand-violet underline underline-offset-4 hover:text-white"
             >
-              GitHub Releases
-            </a>
-            . Prefer to build from source? See the docs.
-          </p>
+              See all download options →
+            </Link>
+            <p>
+              All builds are published to{" "}
+              <a
+                href={RELEASES_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="text-slate-300 underline underline-offset-4 hover:text-white"
+              >
+                GitHub Releases
+              </a>
+              . Prefer to build from source? See the docs.
+            </p>
+          </div>
         </div>
       </Reveal>
     </Section>

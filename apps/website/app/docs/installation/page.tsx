@@ -22,20 +22,42 @@ export default function InstallationPage() {
       <DocHeader
         eyebrow="Overview"
         title="Installation"
-        intro="Orbit ships prebuilt binaries for macOS and Windows, with Linux on the way. You can also build the whole toolchain from source."
+        intro="Orbit ships prebuilt installers for macOS, Windows and Linux. You can also build the whole toolchain from source."
       />
       <Prose>
+        <DocP>
+          Grab the latest installer for your platform from the{" "}
+          <a
+            href="/download"
+            className="text-brand-violet underline underline-offset-4"
+          >
+            download page
+          </a>{" "}
+          or{" "}
+          <a
+            href="https://github.com/martin-k-m/orbit/releases/latest"
+            target="_blank"
+            rel="noreferrer"
+            className="text-brand-violet underline underline-offset-4"
+          >
+            GitHub Releases
+          </a>
+          .
+        </DocP>
+
         <DocHeading id="macos">macOS</DocHeading>
         <DocP>
-          Orbit provides a universal build for both Apple Silicon and Intel Macs.
+          Download the <InlineCode>.dmg</InlineCode> for your chip — Apple Silicon
+          or Intel — open it, and drag Orbit to Applications.
         </DocP>
         <DocCode
           title="macOS"
           lines={[
-            { text: "# Homebrew (recommended)", tone: "comment" },
-            { text: "$ brew install --cask orbit", tone: "prompt" },
+            { text: "# Download Orbit_<version>_aarch64.dmg (Apple Silicon)", tone: "comment" },
+            { text: "# or Orbit_<version>_x64.dmg (Intel) from Releases", tone: "comment" },
+            { text: "# then drag Orbit to /Applications", tone: "comment" },
             { text: "", tone: "muted" },
-            { text: "# Or download Orbit.dmg from Releases and drag to /Applications", tone: "comment" },
+            { text: "# Homebrew cask — planned", tone: "muted" },
           ]}
         />
         <DocCallout type="info">
@@ -46,32 +68,47 @@ export default function InstallationPage() {
         <DocHeading id="windows">Windows</DocHeading>
         <DocP>Orbit supports Windows 10 and 11 (x64).</DocP>
         <DocCode
-          title="Windows (PowerShell)"
+          title="Windows"
           lines={[
-            { text: "# winget", tone: "comment" },
-            { text: "> winget install Orbit.Orbit", tone: "prompt" },
+            { text: "# Run the .msi installer from Releases (recommended),", tone: "comment" },
+            { text: "# or the NSIS .exe. WebView2 installs automatically.", tone: "comment" },
             { text: "", tone: "muted" },
-            { text: "# Or run the Orbit-Setup.exe installer from Releases", tone: "comment" },
+            { text: "# winget package — planned", tone: "muted" },
+          ]}
+        />
+        <DocCallout type="info">
+          On unsigned pre-1.0 builds SmartScreen may appear — choose{" "}
+          <strong>More info → Run anyway</strong>.
+        </DocCallout>
+
+        <DocHeading id="linux">Linux</DocHeading>
+        <DocP>
+          Choose the format your distro prefers. Runtime deps:{" "}
+          <InlineCode>webkit2gtk-4.1</InlineCode> and{" "}
+          <InlineCode>libayatana-appindicator3</InlineCode>.
+        </DocP>
+        <DocCode
+          title="Linux"
+          lines={[
+            { text: "# AppImage — portable, no install", tone: "comment" },
+            { text: "$ chmod +x Orbit_*.AppImage && ./Orbit_*.AppImage", tone: "prompt" },
+            { text: "", tone: "muted" },
+            { text: "# Debian / Ubuntu", tone: "comment" },
+            { text: "$ sudo apt install ./orbit_*.deb", tone: "prompt" },
           ]}
         />
 
-        <DocHeading id="linux">Linux</DocHeading>
-        <DocCallout type="warn" title="Coming soon">
-          Native Linux builds (AppImage and <InlineCode>.deb</InlineCode>) are in
-          progress. In the meantime, build from source using the steps below.
-        </DocCallout>
-
         <DocHeading id="cli">CLI only</DocHeading>
         <DocP>
-          Prefer the terminal? Install just the <InlineCode>orbit</InlineCode> CLI via
-          Cargo.
+          Prefer the terminal? Install just the <InlineCode>orbit</InlineCode> CLI
+          from a clone of the repo with Cargo.
         </DocP>
         <DocCode
           title="cargo"
           lines={[
-            { text: "$ cargo install orbit-cli", tone: "prompt" },
+            { text: "$ cargo install --path crates/orbit-cli", tone: "prompt" },
             { text: "$ orbit --version", tone: "prompt" },
-            { text: "  orbit 0.4.0", tone: "muted" },
+            { text: "  orbit 1.0.0", tone: "muted" },
           ]}
         />
 

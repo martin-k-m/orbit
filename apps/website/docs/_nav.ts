@@ -22,6 +22,7 @@ export const docsNav: DocGroup[] = [
     items: [
       { title: "Architecture", href: "/docs/architecture" },
       { title: "Project profiles", href: "/docs/profiles" },
+      { title: "Configuration", href: "/docs/configuration" },
     ],
   },
   {
@@ -29,6 +30,7 @@ export const docsNav: DocGroup[] = [
     items: [
       { title: "CLI reference", href: "/docs/cli" },
       { title: "Plugins & ecosystem", href: "/docs/plugins" },
+      { title: "Troubleshooting", href: "/docs/troubleshooting" },
     ],
   },
 ];

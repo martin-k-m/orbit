@@ -12,7 +12,7 @@ const columns = [
       { label: "Features", href: "/#features" },
       { label: "Product tour", href: "/#demo" },
       { label: "Ecosystem", href: "/#ecosystem" },
-      { label: "Download", href: "/#download" },
+      { label: "Download", href: "/download" },
     ],
   },
   {

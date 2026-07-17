@@ -6,7 +6,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- **Website:** a dedicated `/download` page with per-architecture installers
+  (macOS Apple Silicon + Intel, Windows MSI/EXE, Linux AppImage/deb), and new
+  `Configuration` and `Troubleshooting` documentation pages.
 
 ## [1.0.0] — 2026-07-16
 

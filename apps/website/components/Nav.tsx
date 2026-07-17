@@ -7,12 +7,11 @@ import { OrbitGlyph } from "./OrbitGlyph";
 import { cn } from "./cn";
 
 const GITHUB_URL = "https://github.com/martin-k-m/orbit";
-const RELEASES_URL = "https://github.com/martin-k-m/orbit/releases/latest";
 
 const links = [
   { label: "Features", href: "/#features" },
   { label: "Docs", href: "/docs" },
-  { label: "Download", href: "/#download" },
+  { label: "Download", href: "/download" },
 ];
 
 export function Nav() {
@@ -87,9 +86,9 @@ export function Nav() {
           >
             <Github className="h-4 w-4" />
           </a>
-          <a href={RELEASES_URL} target="_blank" rel="noreferrer" className="btn-primary px-4 py-2">
+          <Link href="/download" className="btn-primary px-4 py-2">
             Download
-          </a>
+          </Link>
         </div>
 
         <button
@@ -125,15 +124,13 @@ export function Nav() {
             >
               <Github className="h-4 w-4" /> GitHub
             </a>
-            <a
-              href={RELEASES_URL}
-              target="_blank"
-              rel="noreferrer"
+            <Link
+              href="/download"
               onClick={() => setOpen(false)}
               className="btn-primary mt-2"
             >
               Download Orbit
-            </a>
+            </Link>
           </div>
         </div>
       ) : null}
