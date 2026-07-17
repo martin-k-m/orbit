@@ -6,7 +6,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- **File explorer + code editor** — a project Explorer tab with a lazy file
+  tree and a CodeMirror 6 editor: syntax highlighting for 7 languages, folding,
+  multi-cursor, save, and a status line showing language/encoding/line-ending.
+  Binary files are detected; files over 5 MB open read-only. Backed by the new
+  `orbit_core::files` module (encoding, line-ending and language detection).
 
 ## [1.1.0] — 2026-07-17
 
