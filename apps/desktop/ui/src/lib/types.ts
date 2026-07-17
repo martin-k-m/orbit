@@ -74,6 +74,12 @@ export interface GitStatus {
   behind: number;
 }
 
+/** One entry on the stash stack (mirrors `orbit_core::git::StashEntry`). */
+export interface StashEntry {
+  reference: string;
+  message: string;
+}
+
 export interface HealthWarning {
   kind: string;
   message: string;

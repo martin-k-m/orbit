@@ -15,6 +15,7 @@ import type {
   ProjectSummary,
   SearchResults,
   Shell,
+  StashEntry,
   TerminalExit,
   TerminalOutput,
   Workspace,
@@ -723,6 +724,27 @@ export async function gitPull(path: string): Promise<void> {
 /** Push the current branch to its upstream. */
 export async function gitPush(path: string): Promise<void> {
   return invoke<void>("git_push", { path });
+}
+
+/** Stash working-tree + index changes (including untracked). */
+export async function gitStashSave(path: string, message?: string): Promise<void> {
+  return invoke<void>("git_stash_save", { path, message: message ?? null });
+}
+
+/** The stash stack, newest first. */
+export async function gitStashList(path: string): Promise<StashEntry[]> {
+  if (!isTauri()) return [];
+  return invoke<StashEntry[]>("git_stash_list", { path });
+}
+
+/** Apply and remove a stash entry. */
+export async function gitStashPop(path: string, reference: string): Promise<void> {
+  return invoke<void>("git_stash_pop", { path, reference });
+}
+
+/** Discard a stash entry without applying it. */
+export async function gitStashDrop(path: string, reference: string): Promise<void> {
+  return invoke<void>("git_stash_drop", { path, reference });
 }
 
 /**

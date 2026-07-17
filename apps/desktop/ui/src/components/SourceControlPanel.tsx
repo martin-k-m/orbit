@@ -9,9 +9,12 @@ import {
   RefreshCw,
   ArrowUpToLine,
   ArrowDownToLine,
+  Archive,
+  ArchiveRestore,
+  Trash2,
   Loader2,
 } from "lucide-react";
-import type { Commit, GitStatus, GitStatusEntry } from "@/lib/types";
+import type { Commit, GitStatus, GitStatusEntry, StashEntry } from "@/lib/types";
 import {
   gitStatus,
   gitLog,
@@ -24,6 +27,10 @@ import {
   gitCreateBranch,
   gitPull,
   gitPush,
+  gitStashSave,
+  gitStashList,
+  gitStashPop,
+  gitStashDrop,
   isTauri,
 } from "@/lib/ipc";
 import { useAppStore } from "@/store/app";
@@ -42,6 +49,7 @@ export function SourceControlPanel({ root }: { root: string }) {
   const [status, setStatus] = useState<GitStatus | null>(null);
   const [commits, setCommits] = useState<Commit[]>([]);
   const [branches, setBranches] = useState<string[]>([]);
+  const [stashes, setStashes] = useState<StashEntry[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
@@ -51,14 +59,16 @@ export function SourceControlPanel({ root }: { root: string }) {
   const [newBranch, setNewBranch] = useState("");
 
   const refresh = useCallback(async () => {
-    const [s, log, brs] = await Promise.all([
+    const [s, log, brs, sts] = await Promise.all([
       gitStatus(root),
       gitLog(root, 15),
       gitBranches(root),
+      gitStashList(root),
     ]);
     setStatus(s);
     setCommits(log);
     setBranches(brs);
+    setStashes(sts);
     setLoaded(true);
     // Drop a selection whose file no longer has changes on that side.
     setSelected((sel) => {
@@ -141,6 +151,18 @@ export function SourceControlPanel({ root }: { root: string }) {
     } finally {
       setBusy(false);
     }
+  }
+
+  const hasChanges =
+    (status?.staged.length ?? 0) + (status?.unstaged.length ?? 0) > 0;
+
+  function stash() {
+    if (!hasChanges) return;
+    const label = message.trim() || undefined;
+    void sync(async () => {
+      await gitStashSave(root, label);
+      setMessage("");
+    }, "Stashed");
   }
 
   if (!loaded) {
@@ -238,6 +260,14 @@ export function SourceControlPanel({ root }: { root: string }) {
           )}
           <div className="ml-auto flex items-center gap-0.5">
             <button
+              onClick={stash}
+              disabled={busy || !hasChanges}
+              className="no-drag inline-flex items-center rounded px-1.5 py-1 text-fg-subtle transition-colors hover:bg-white/[0.06] hover:text-fg disabled:opacity-50"
+              title="Stash changes"
+            >
+              <Archive className="h-3.5 w-3.5" />
+            </button>
+            <button
               onClick={() => void sync(() => gitPull(root), "Pulled")}
               disabled={busy}
               className="no-drag inline-flex items-center gap-1 rounded px-1.5 py-1 text-fg-subtle transition-colors hover:bg-white/[0.06] hover:text-fg disabled:opacity-50"
@@ -332,6 +362,41 @@ export function SourceControlPanel({ root }: { root: string }) {
             <p className="px-3 py-6 text-center text-xs text-fg-subtle">
               Nothing to commit — working tree clean.
             </p>
+          )}
+
+          {/* Stashes */}
+          {stashes.length > 0 && (
+            <div className="mt-2 border-t border-white/[0.06] pt-2">
+              <div className="px-3 pb-1 text-[11px] font-medium uppercase tracking-wider text-fg-subtle">
+                Stashes
+              </div>
+              {stashes.map((s) => (
+                <div
+                  key={s.reference}
+                  className="group flex items-center gap-2 px-3 py-1 text-[12px]"
+                  title={s.reference}
+                >
+                  <Archive className="h-3.5 w-3.5 shrink-0 text-fg-subtle" />
+                  <span className="truncate text-fg-muted">{s.message || s.reference}</span>
+                  <div className="ml-auto flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+                    <button
+                      onClick={() => void sync(() => gitStashPop(root, s.reference), "Stash popped")}
+                      className="no-drag rounded p-0.5 text-fg-subtle hover:bg-white/[0.08] hover:text-fg"
+                      title="Pop (apply and remove)"
+                    >
+                      <ArchiveRestore className="h-3.5 w-3.5" />
+                    </button>
+                    <button
+                      onClick={() => void sync(() => gitStashDrop(root, s.reference), "Stash dropped")}
+                      className="no-drag rounded p-0.5 text-fg-subtle hover:bg-white/[0.08] hover:text-danger"
+                      title="Drop (discard)"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
 
           {/* Recent history */}

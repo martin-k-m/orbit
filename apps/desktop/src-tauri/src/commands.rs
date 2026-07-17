@@ -283,6 +283,30 @@ pub fn git_push(path: String) -> Result<(), String> {
     git::push(Path::new(&path)).map_err(|e| e.to_string())
 }
 
+/// Stash working-tree + index changes (including untracked).
+#[tauri::command]
+pub fn git_stash_save(path: String, message: Option<String>) -> Result<(), String> {
+    git::stash_save(Path::new(&path), message.as_deref()).map_err(|e| e.to_string())
+}
+
+/// The stash stack, newest first.
+#[tauri::command]
+pub fn git_stash_list(path: String) -> Result<Vec<git::StashEntry>, String> {
+    Ok(git::stash_list(Path::new(&path)))
+}
+
+/// Apply and remove a stash entry.
+#[tauri::command]
+pub fn git_stash_pop(path: String, reference: String) -> Result<(), String> {
+    git::stash_pop(Path::new(&path), &reference).map_err(|e| e.to_string())
+}
+
+/// Discard a stash entry without applying it.
+#[tauri::command]
+pub fn git_stash_drop(path: String, reference: String) -> Result<(), String> {
+    git::stash_drop(Path::new(&path), &reference).map_err(|e| e.to_string())
+}
+
 /// Assess how risky a project's command is before running it, so the UI can
 /// show a confirmation dialog for anything destructive.
 #[tauri::command]

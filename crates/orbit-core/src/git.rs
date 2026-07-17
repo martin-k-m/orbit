@@ -360,6 +360,57 @@ pub fn push(dir: &Path) -> crate::Result<()> {
     run_ok(dir, &["push"]).map(|_| ())
 }
 
+/// One entry on the stash stack.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StashEntry {
+    /// The stash ref, e.g. `stash@{0}`.
+    pub reference: String,
+    /// The stash's subject line.
+    pub message: String,
+}
+
+/// Stash the working-tree and index changes (including untracked files).
+pub fn stash_save(dir: &Path, message: Option<&str>) -> crate::Result<()> {
+    let mut args = vec!["stash", "push", "--include-untracked"];
+    if let Some(m) = message.map(str::trim).filter(|m| !m.is_empty()) {
+        args.push("-m");
+        args.push(m);
+    }
+    run_ok(dir, &args).map(|_| ())
+}
+
+/// The stash stack, newest (`stash@{0}`) first.
+pub fn stash_list(dir: &Path) -> Vec<StashEntry> {
+    match run(dir, &["stash", "list", "--pretty=format:%gd\x1f%gs"]) {
+        Some(o) => o
+            .lines()
+            .filter_map(|l| {
+                let mut f = l.split('\x1f');
+                let reference = f.next()?.to_string();
+                if reference.is_empty() {
+                    return None;
+                }
+                Some(StashEntry {
+                    reference,
+                    message: f.next().unwrap_or("").to_string(),
+                })
+            })
+            .collect(),
+        None => Vec::new(),
+    }
+}
+
+/// Apply a stash entry and remove it from the stack (`git stash pop`).
+pub fn stash_pop(dir: &Path, reference: &str) -> crate::Result<()> {
+    run_ok(dir, &["stash", "pop", reference]).map(|_| ())
+}
+
+/// Discard a stash entry without applying it (`git stash drop`).
+pub fn stash_drop(dir: &Path, reference: &str) -> crate::Result<()> {
+    run_ok(dir, &["stash", "drop", reference]).map(|_| ())
+}
+
 /// The most recent commits, newest first (empty if the repo has no history).
 pub fn recent_commits(dir: &Path, limit: usize) -> Vec<Commit> {
     let arg = format!("-{limit}");
@@ -530,6 +581,37 @@ mod tests {
             b.path().join("f2.txt").exists(),
             "pull should bring f2 across"
         );
+    }
+
+    #[test]
+    fn stash_save_list_and_pop() {
+        let tmp = init_repo();
+        let d = tmp.path();
+        fs::write(d.join("a.txt"), "one\n").unwrap();
+        stage(d, "a.txt").unwrap();
+        commit(d, "init").unwrap();
+
+        // A working-tree change is stashed away, leaving the tree clean.
+        fs::write(d.join("a.txt"), "one\ntwo\n").unwrap();
+        assert!(!status(d).unwrap().unstaged.is_empty());
+        stash_save(d, Some("wip")).unwrap();
+        assert!(
+            status(d).unwrap().unstaged.is_empty(),
+            "stash should clean the tree"
+        );
+
+        let list = stash_list(d);
+        assert_eq!(list.len(), 1);
+        assert_eq!(list[0].reference, "stash@{0}");
+        assert!(list[0].message.contains("wip"));
+
+        // Popping restores the change.
+        stash_pop(d, &list[0].reference).unwrap();
+        assert!(
+            !status(d).unwrap().unstaged.is_empty(),
+            "pop restores the change"
+        );
+        assert!(stash_list(d).is_empty());
     }
 
     #[test]

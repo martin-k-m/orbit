@@ -23,12 +23,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   into a first-class panel: staged vs. unstaged/untracked groups with one-click
   stage/unstage (per file or all), an inline coloured diff viewer, a commit box
   (`Ctrl/Cmd+Enter` to commit), recent history, **branch management** (switch,
-  create) and **fetch / pull / push** (pull is fast-forward-only so a one-click
-  pull never opens a merge editor). Built on `orbit_core::git`, now extended with
-  `status`/`stage`/`unstage`/`diff`/`commit`/`recent_commits`/`branches`/
-  `switch_branch`/`create_branch`/`fetch`/`pull`/`push` (still shelling out to
-  the `git` binary; unit-tested against temp repos, incl. a local bare remote).
-  `current_branch` now also resolves the branch name before the first commit.
+  create), **fetch / pull / push** (pull is fast-forward-only so a one-click
+  pull never opens a merge editor) and **stashes** (stash changes, pop, drop).
+  Built on `orbit_core::git`, now extended with `status`/`stage`/`unstage`/
+  `diff`/`commit`/`recent_commits`/`branches`/`switch_branch`/`create_branch`/
+  `fetch`/`pull`/`push`/`stash_save`/`stash_list`/`stash_pop`/`stash_drop` (still
+  shelling out to the `git` binary; unit-tested against temp repos, incl. a local
+  bare remote). `current_branch` now also resolves the branch name before the
+  first commit.
 - **In-editor find, replace & go-to-line** — the editor gained CodeMirror's
   search: `Ctrl/Cmd+F` to find (with match highlighting), `Ctrl/Cmd+H` to
   replace, `F3`/`Ctrl/Cmd+G` for next/previous, and `Ctrl+Alt+G` to jump to a
