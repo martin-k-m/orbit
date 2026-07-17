@@ -36,6 +36,7 @@ export function ExplorerPanel({ root }: { root: string }) {
 
   const [loadingPath, setLoadingPath] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [cursor, setCursor] = useState({ line: 1, col: 1 });
 
   // The editor store is global, but a switch to another project remounts this
   // panel with a new root while the old project's tabs linger. Drop any tab
@@ -126,6 +127,10 @@ export function ExplorerPanel({ root }: { root: string }) {
                 <div className="ml-auto flex items-center gap-2 text-fg-subtle">
                   {!active.contents.binary && (
                     <>
+                      <span>
+                        Ln {cursor.line}, Col {cursor.col}
+                      </span>
+                      <span>·</span>
                       <span>{active.contents.language ?? "text"}</span>
                       <span>·</span>
                       <span>{encodingLabel(active.contents.encoding)}</span>
@@ -176,6 +181,7 @@ export function ExplorerPanel({ root }: { root: string }) {
                   readOnly={active.contents.truncated}
                   reveal={active.reveal}
                   onChange={(v) => updateDraft(active.path, v)}
+                  onCursor={(line, col) => setCursor({ line, col })}
                 />
               ) : null}
             </div>

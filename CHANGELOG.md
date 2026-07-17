@@ -11,7 +11,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **In-editor find, replace & go-to-line** — the editor gained CodeMirror's
   search: `Ctrl/Cmd+F` to find (with match highlighting), `Ctrl/Cmd+H` to
   replace, `F3`/`Ctrl/Cmd+G` for next/previous, and `Ctrl+Alt+G` to jump to a
-  line. The find panel is themed to Orbit's dark-red surface.
+  line. The find panel is themed to Orbit's dark-red surface. The editor status
+  row now also shows the live caret position (**Ln, Col**).
 - **Red brand identity + launch splashscreen** — the app now wears Orbit's red
   (red-600 → rose-500, matched to the website): retuned accent tokens, a
   redesigned glowing orbit logo, a gradient wordmark in the titlebar, and a

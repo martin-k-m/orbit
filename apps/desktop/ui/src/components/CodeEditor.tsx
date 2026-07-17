@@ -83,7 +83,11 @@ const orbitTheme = EditorView.theme(
 );
 
 /** The non-language editing extensions, shared by every document. */
-function baseExtensions(readOnly: boolean, onChange?: (v: string) => void): Extension[] {
+function baseExtensions(
+  readOnly: boolean,
+  onChange?: (v: string) => void,
+  onCursor?: (line: number, col: number) => void,
+): Extension[] {
   return [
     lineNumbers(),
     foldGutter(),
@@ -108,6 +112,11 @@ function baseExtensions(readOnly: boolean, onChange?: (v: string) => void): Exte
     EditorView.editable.of(!readOnly),
     EditorView.updateListener.of((u) => {
       if (u.docChanged && onChange) onChange(u.state.doc.toString());
+      if ((u.docChanged || u.selectionSet) && onCursor) {
+        const head = u.state.selection.main.head;
+        const line = u.state.doc.lineAt(head);
+        onCursor(line.number, head - line.from + 1);
+      }
     }),
   ];
 }
@@ -126,6 +135,7 @@ export function CodeEditor({
   language,
   readOnly = false,
   onChange,
+  onCursor,
   reveal,
 }: {
   path: string;
@@ -133,14 +143,18 @@ export function CodeEditor({
   language?: string | null;
   readOnly?: boolean;
   onChange?: (value: string) => void;
+  /** Report the caret's 1-based line and column, for a status bar. */
+  onCursor?: (line: number, col: number) => void;
   /** Scroll to a 1-based line; the `nonce` re-triggers a jump to the same line. */
   reveal?: { line: number; nonce: number };
 }) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef<EditorView | null>(null);
-  // Keep the latest onChange without forcing the editor to rebuild on each render.
+  // Keep the latest callbacks without forcing the editor to rebuild on each render.
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+  const onCursorRef = useRef(onCursor);
+  onCursorRef.current = onCursor;
 
   useEffect(() => {
     const host = hostRef.current;
@@ -149,12 +163,18 @@ export function CodeEditor({
     const state = EditorState.create({
       doc: value,
       extensions: [
-        ...baseExtensions(readOnly, (v) => onChangeRef.current?.(v)),
+        ...baseExtensions(
+          readOnly,
+          (v) => onChangeRef.current?.(v),
+          (line, col) => onCursorRef.current?.(line, col),
+        ),
         ...languageExtension(language),
       ],
     });
     const view = new EditorView({ state, parent: host });
     viewRef.current = view;
+    // Emit the initial caret position so the status bar isn't blank on open.
+    onCursorRef.current?.(1, 1);
 
     return () => {
       view.destroy();
