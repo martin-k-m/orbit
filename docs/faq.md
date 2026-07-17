@@ -85,9 +85,11 @@ time, or allow it in **System Settings → Privacy & Security**.
 
 Yes — [MIT](../LICENSE). Free and open source, no paid tier.
 
-## What about the terminal / Docker / database / API features?
+## What about Docker / database / API features?
 
-Not built yet. The [ROADMAP](../ROADMAP.md) marks exactly what's shipped (✅),
+Not built yet. The terminal **is** built — every project has a real PTY-backed
+shell (see [terminal.md](./terminal.md)); tabs, splits, search and
+survive-a-restart sessions are still to come. The [ROADMAP](../ROADMAP.md) marks exactly what's shipped (✅),
 in progress (🚧) and planned (📋) — deliberately honest, so you can tell what
 you're downloading. v1.0 is the foundation: projects, commands, git, health,
 dependencies, analytics, env files and workspaces.
