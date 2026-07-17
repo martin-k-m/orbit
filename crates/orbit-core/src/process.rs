@@ -7,6 +7,7 @@
 
 use crate::model::Command;
 use crate::{Error, Result};
+use serde::{Deserialize, Serialize};
 use std::path::Path;
 use std::process::{Child, Command as OsCommand, Stdio};
 
@@ -88,7 +89,11 @@ pub fn run_to_completion(dir: &Path, command: &Command) -> Result<CommandOutput>
 }
 
 /// The captured result of a completed command.
-#[derive(Debug, Clone, PartialEq, Eq)]
+///
+/// This crosses the Tauri IPC boundary (it is the return type of the
+/// `run_command` handler), so it must be `Serialize`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct CommandOutput {
     /// Process exit code (`-1` if it was killed by a signal).
     pub code: i32,

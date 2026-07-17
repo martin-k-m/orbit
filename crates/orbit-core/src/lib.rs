@@ -105,6 +105,40 @@ mod tests {
         fs::write(path, contents).unwrap();
     }
 
+    /// Every type returned by a Tauri command handler must be `Serialize`, or
+    /// `tauri::generate_handler!` fails to compile with a confusing
+    /// `async_kind`/E0599 error. The desktop crate lives outside this workspace
+    /// (it needs the platform webview stack), so this guard catches the mistake
+    /// in a plain `cargo test` instead of only in a CI bundle job.
+    #[test]
+    fn ipc_types_are_serializable() {
+        fn assert_serialize<T: serde::Serialize>() {}
+        fn assert_deserialize<T: serde::de::DeserializeOwned>() {}
+
+        assert_serialize::<Project>();
+        assert_serialize::<Command>();
+        assert_serialize::<Ecosystem>();
+        assert_serialize::<ProjectDetail>();
+        assert_serialize::<git::GitInfo>();
+        assert_serialize::<git::Commit>();
+        assert_serialize::<health::HealthReport>();
+        assert_serialize::<health::Warning>();
+        assert_serialize::<deps::Dependency>();
+        assert_serialize::<process::CommandOutput>();
+        assert_serialize::<safety::Assessment>();
+        assert_serialize::<safety::Risk>();
+        assert_serialize::<analytics::ActivityReport>();
+        assert_serialize::<analytics::Session>();
+        assert_serialize::<analytics::BuildRecord>();
+        assert_serialize::<Language>();
+        assert_serialize::<EcosystemLink>();
+
+        // Types the frontend also sends back must round-trip.
+        assert_deserialize::<Project>();
+        assert_deserialize::<process::CommandOutput>();
+        assert_deserialize::<safety::Assessment>();
+    }
+
     #[test]
     fn detects_a_rust_project() {
         let tmp = tempfile::tempdir().unwrap();
