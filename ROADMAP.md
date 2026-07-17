@@ -58,9 +58,11 @@ Turning projects into true workspaces.
 - 📋 **Git power center** — staged/unstaged/untracked files, commit, stage,
   push/pull/fetch, branch create/switch/delete, merge, rebase, cherry-pick,
   stashes, tags, contributors, and a commit-graph visualisation.
-- 📋 **Environment variable manager** — visual editor across `.env`,
-  `.env.local`, `.env.development`, `.env.production`; validation, secret
-  masking, duplicate and missing-variable detection.
+- 🚧 **Environment variable manager** — the engine is in
+  (`orbit_core::env`: discovery across `.env`, `.env.local`, `.env.development`,
+  `.env.production`, `.env.example`; dotenv parsing, secret detection + masking,
+  duplicate / empty / invalid-key / missing-vs-template reporting). The visual
+  editor UI is next.
 - 📋 **Workspace notes** — Markdown notes per project (checklists, code blocks,
   links), stored locally.
 
