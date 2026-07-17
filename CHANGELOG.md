@@ -8,6 +8,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **LSP protocol foundation** — the base plumbing for a future language-server
+  client: `Content-Length` message framing and JSON-RPC 2.0 helpers, with an
+  incremental stream `Decoder` that reassembles messages split across reads
+  (`orbit_core::lsp`, unit-tested). Transport-only for now — no server is spawned
+  and no editor feature is wired yet — but it's the real first step toward
+  go-to-definition and live diagnostics.
 - **Document outline** — a toggle in the editor status bar opens an Outline
   panel listing the active file's symbols (functions, classes, structs,
   headings…); clicking one jumps the editor to that line. Symbols come from a

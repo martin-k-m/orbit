@@ -92,6 +92,9 @@ Be very clear about this — do not claim otherwise in any doc or the UI:
 
 - **No LSP / semantic code intelligence** — the editor is syntactic only. No
   go-to-definition, find-references, rename, hover types, real diagnostics.
+  (The *wire foundation* exists — `orbit_core::lsp`: Content-Length framing +
+  JSON-RPC + a streaming decoder, unit-tested — but nothing spawns a server or
+  wires a feature yet. Outline and Problems are heuristic stand-ins.)
 - **No debugger (DAP)**. A **Testing panel** runs the project's `test` command
   and parses cargo/Jest/Vitest/pytest summaries (`orbit_core::testing`), but
   there is no per-test tree/discovery or coverage yet. The **Problems panel**

@@ -38,6 +38,7 @@ pub mod files;
 pub mod git;
 pub mod health;
 pub mod http;
+pub mod lsp;
 pub mod model;
 pub mod outline;
 pub mod process;
