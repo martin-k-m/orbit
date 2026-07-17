@@ -21,6 +21,7 @@ import type {
   SearchResults,
   Shell,
   StashEntry,
+  Symbol,
   TestSummary,
   TerminalExit,
   TerminalOutput,
@@ -817,6 +818,12 @@ export async function dbTableRows(path: string, table: string): Promise<DbQueryR
 export async function parseTestOutput(output: string): Promise<TestSummary | null> {
   if (!isTauri()) return null;
   return invoke<TestSummary | null>("parse_test_output", { output });
+}
+
+/** A syntactic document outline (symbols) for a file's text. */
+export async function fileSymbols(text: string, language?: string | null): Promise<Symbol[]> {
+  if (!isTauri()) return [];
+  return invoke<Symbol[]>("file_symbols", { text, language: language ?? null });
 }
 
 // --- HTTP (API explorer) ----------------------------------------------------

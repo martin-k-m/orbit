@@ -8,6 +8,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Document outline** — a toggle in the editor status bar opens an Outline
+  panel listing the active file's symbols (functions, classes, structs,
+  headings…); clicking one jumps the editor to that line. Symbols come from a
+  new syntactic `orbit_core::outline` module (Rust/TS/JS/Python/Go/Markdown,
+  unit-tested) — approximate by design, since there's no language server yet.
 - **API explorer** — a new APIs view: pick a method, enter a URL, add headers
   and a body, and send. The response comes back with a colour-coded status,
   timing, headers and a pretty-printed (JSON-aware) body. Built on a new

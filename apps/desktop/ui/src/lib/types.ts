@@ -119,6 +119,13 @@ export interface TestSummary {
   framework: string;
 }
 
+/** A document symbol for the Outline (mirrors `orbit_core::outline::Symbol`). */
+export interface Symbol {
+  name: string;
+  kind: string;
+  line: number;
+}
+
 /** One HTTP response header (mirrors `orbit_core::http::Header`). */
 export interface HttpHeader {
   name: string;

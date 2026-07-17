@@ -14,8 +14,9 @@ import {
   FileWarning,
   Check,
   X,
+  ListTree,
 } from "lucide-react";
-import type { Encoding, FileNode, LineEnding } from "@/lib/types";
+import type { Encoding, FileNode, LineEnding, Symbol as DocSymbol } from "@/lib/types";
 import {
   readDir,
   readFile,
@@ -24,6 +25,7 @@ import {
   createDir,
   renamePath,
   deletePath,
+  fileSymbols,
   isTauri,
 } from "@/lib/ipc";
 import { CodeEditor } from "@/components/CodeEditor";
@@ -63,7 +65,9 @@ export function ExplorerPanel({ root }: { root: string }) {
   const closeTab = useEditorStore((s) => s.closeTab);
   const updateDraft = useEditorStore((s) => s.updateDraft);
   const markSaved = useEditorStore((s) => s.markSaved);
+  const revealLine = useEditorStore((s) => s.revealLine);
   const active = useEditorStore(activeTab);
+  const [showOutline, setShowOutline] = useState(false);
 
   const [loadingPath, setLoadingPath] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -259,6 +263,16 @@ export function ExplorerPanel({ root }: { root: string }) {
                     </>
                   )}
                   <button
+                    onClick={() => setShowOutline((v) => !v)}
+                    title="Toggle outline"
+                    className={cn(
+                      "no-drag ml-1 inline-flex items-center rounded-md px-1.5 py-1 transition-colors",
+                      showOutline ? "bg-accent/15 text-accent" : "text-fg-subtle hover:text-fg",
+                    )}
+                  >
+                    <ListTree className="h-3.5 w-3.5" />
+                  </button>
+                  <button
                     onClick={save}
                     disabled={!active.dirty || saving || active.contents.truncated}
                     className={cn(
@@ -320,7 +334,69 @@ export function ExplorerPanel({ root }: { root: string }) {
           </Centered>
         )}
       </section>
+
+      {showOutline && active && !active.contents.binary && (
+        <OutlinePanel
+          text={active.draft}
+          language={active.contents.language}
+          onReveal={(line) => revealLine(active.path, line)}
+        />
+      )}
     </div>
+  );
+}
+
+/** A syntactic symbol outline for the active file; click to jump to the line. */
+function OutlinePanel({
+  text,
+  language,
+  onReveal,
+}: {
+  text: string;
+  language?: string | null;
+  onReveal: (line: number) => void;
+}) {
+  const [symbols, setSymbols] = useState<DocSymbol[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const t = setTimeout(() => {
+      fileSymbols(text, language).then((s) => {
+        if (!cancelled) setSymbols(s);
+      });
+    }, 200);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [text, language]);
+
+  return (
+    <aside className="scrollbar-thin flex w-56 shrink-0 flex-col overflow-y-auto border-l border-white/[0.06]">
+      <div className="border-b border-white/[0.06] px-3 py-1.5 text-[11px] font-medium uppercase tracking-wider text-fg-subtle">
+        Outline
+      </div>
+      {symbols.length === 0 ? (
+        <p className="px-3 py-3 text-xs text-fg-subtle">No symbols.</p>
+      ) : (
+        <ul className="py-1">
+          {symbols.map((s, i) => (
+            <li key={`${s.line}:${i}`}>
+              <button
+                onClick={() => onReveal(s.line)}
+                className="no-drag flex w-full items-center gap-2 px-3 py-1 text-left text-[13px] text-fg-muted transition-colors hover:bg-white/[0.04]"
+                title={`${s.kind} · line ${s.line}`}
+              >
+                <span className="w-8 shrink-0 rounded bg-white/[0.06] px-1 text-center text-[9px] uppercase text-fg-subtle">
+                  {s.kind.slice(0, 3)}
+                </span>
+                <span className="truncate">{s.name}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </aside>
   );
 }
 

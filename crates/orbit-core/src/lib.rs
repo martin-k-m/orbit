@@ -39,6 +39,7 @@ pub mod git;
 pub mod health;
 pub mod http;
 pub mod model;
+pub mod outline;
 pub mod process;
 pub mod profile;
 pub mod safety;
@@ -139,6 +140,7 @@ mod tests {
         assert_serialize::<testing::TestSummary>();
         assert_serialize::<http::HttpResponse>();
         assert_serialize::<http::Header>();
+        assert_serialize::<outline::Symbol>();
         #[cfg(feature = "persistence")]
         {
             assert_serialize::<db::Table>();

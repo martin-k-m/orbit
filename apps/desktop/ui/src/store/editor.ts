@@ -40,6 +40,8 @@ interface EditorState {
   openTab: (path: string, contents: FileContents, revealLine?: number) => void;
   /** Focus an already-open tab. No-op if the path isn't open. */
   setActive: (path: string) => void;
+  /** Scroll an already-open tab to a 1-based line (e.g. from the Outline). */
+  revealLine: (path: string, line: number) => void;
   /**
    * Close a tab. If it was the active one, focus its right neighbour, falling
    * back to the left — the same rule as VS Code, Zed and friends.
@@ -104,6 +106,14 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
   setActive: (path) =>
     set((s) => (s.tabs.some((t) => t.path === path) ? { activePath: path } : s)),
+
+  revealLine: (path, line) =>
+    set((s) => ({
+      activePath: s.tabs.some((t) => t.path === path) ? path : s.activePath,
+      tabs: s.tabs.map((t) =>
+        t.path === path ? { ...t, reveal: { line, nonce: ++revealSeq } } : t,
+      ),
+    })),
 
   closeTab: (path) =>
     set((s) => {

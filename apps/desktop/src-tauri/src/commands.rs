@@ -366,6 +366,12 @@ pub fn parse_test_output(output: String) -> Result<Option<orbit_core::testing::T
     Ok(orbit_core::testing::parse_summary(&output))
 }
 
+/// A syntactic document outline (symbols) for the editor's Outline panel.
+#[tauri::command]
+pub fn file_symbols(text: String, language: Option<String>) -> Vec<orbit_core::outline::Symbol> {
+    orbit_core::outline::symbols(&text, language.as_deref())
+}
+
 /// Send an HTTP request (via `curl`) for the API explorer.
 #[tauri::command]
 pub fn http_request(

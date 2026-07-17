@@ -136,6 +136,19 @@ describe("editor store", () => {
     expect(tab.reveal!.nonce).toBeGreaterThan(firstNonce);
   });
 
+  it("revealLine sets a reveal on an open tab and focuses it", () => {
+    s().openTab("/p/a.ts", file("a"));
+    s().openTab("/p/b.ts", file("b"));
+    s().revealLine("/p/a.ts", 20);
+    const tab = s().tabs.find((t) => t.path === "/p/a.ts")!;
+    expect(tab.reveal?.line).toBe(20);
+    expect(s().activePath).toBe("/p/a.ts");
+    // Unknown path is a no-op.
+    const before = s().activePath;
+    s().revealLine("/nope", 5);
+    expect(s().activePath).toBe(before);
+  });
+
   it("closeAll clears everything", () => {
     s().openTab("/p/a.ts", file("a"));
     s().openTab("/p/b.ts", file("b"));
