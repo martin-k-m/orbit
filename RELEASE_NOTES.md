@@ -1,70 +1,62 @@
-# Orbit v1.2.0 — Release Notes
+# Orbit v1.3.0 — Release Notes
 
-**The IDE release.** Orbit grows from a developer command center into a genuine,
-local-first IDE — multi-file editing, universal search, a full git power center,
-Docker/database/API tooling, a testing panel, and live language-server
-diagnostics — wrapped in a new red identity with a launch splashscreen.
+**The IntelliJ-style workspace overhaul.** Orbit's IDE grows a real
+tool-window layout — a permanent editor centre with a docked bottom tool-window
+strip, a live status bar, and flatter, more professional chrome. The old
+Ecosystem previews are gone; the Dashboard is now a focused Projects launcher.
 
 Still everything you'd expect: local-first, no account, no telemetry, fast, and
 cross-platform.
 
 ## Highlights
 
-### ✍️ A real code editor
+### 🧭 A real IDE layout
 
-- **Multi-file tabs** — every file you open gets its own tab with its own
-  unsaved draft; reopening focuses the existing tab, closing picks a neighbour.
-- **Find, replace & go-to-line** in-editor (`Ctrl/Cmd+F` · `Ctrl/Cmd+H` ·
-  `Ctrl+Alt+G`), a live **Ln, Col** readout, and editor **preferences** (font
-  size, tab size, word wrap) that apply live and persist.
-- **Document outline** — jump around a file by symbol.
-- **File operations** in the Explorer — create, rename and delete, with guards.
+A project now opens like IntelliJ IDEA:
 
-### 🔎 Search everywhere
+- A **top toolbar** with the project, its language, and a live git readout
+  (branch, clean/changed, ahead/behind).
+- The **editor is the permanent centre** — file tree, tabs, breadcrumbs and the
+  CodeMirror editor fill the full height of the window.
+- A collapsible **bottom tool-window strip** docks one tool at a time below the
+  editor: **Problems · Git · Search · Testing · Terminal · Overview · Commands ·
+  Health · Dependencies**. Click a tool to dock it, click again to collapse —
+  exactly like IntelliJ's tool windows. The old in-project tab bar is gone.
 
-- **Workspace search** — fast find-in-files, click a result to open at the line.
-- **Quick-open** — `⌘/Ctrl+K` and type to fuzzy-find any file in the project.
+### 📊 A live status bar
 
-### 🌱 Git, as a first-class panel
+A slim status bar runs across the bottom of the window: the current git branch,
+the active editor's caret position (**Ln, Col**), and the file's **language /
+encoding / line ending** — always visible, IDE-style.
 
-A complete Source Control tab: staged/unstaged groups with one-click
-stage/unstage, an inline coloured diff, commit, **history with per-commit
-patches**, **branches** (switch/create), **fetch / pull / push**, **stash**, and
-**tags** — all on the `git` binary you already have.
+### 🎨 Flatter, more professional chrome
 
-### 🐳 Containers · 🗄 Database · 🌐 APIs
+The marketing gradient washes are gone. Panels are solid, the title bar and the
+tool sidebar are denser, tabs use a clean underline, and a project fills the full
+width of the window like a real IDE.
 
-- **Containers** — list Docker containers and images, start/stop/restart.
-- **Database** — open a SQLite file and browse tables, view rows, run `SELECT`s.
-- **APIs** — a REST client: method, URL, headers, body, and a JSON-aware
-  response viewer.
+### 🧹 Focused navigation
 
-### 🧪 Testing & Problems
+- The **Ecosystem previews** (Blink/Killer/Flux/Beacon) — which were never
+  backed by real engines — have been **removed** entirely.
+- The old Dashboard is now a lean **Projects** launcher; its coding stats moved
+  into **Analytics**, and live per-project context lives in the new status bar.
+- The command palette and sidebar navigate the real tools — Containers,
+  Database, APIs, Analytics, Settings.
 
-- **Testing** — run a project's test command with a parsed pass/fail summary
-  (cargo, Jest/Vitest, pytest).
-- **Problems** — a unified, navigable diagnostics view that now includes **live
-  language-server diagnostics** for your open files (rust-analyzer,
-  typescript-language-server, pylsp, gopls) when a server is installed.
+## Everything from v1.2.0, still here
 
-### 🎨 New identity + launch experience
-
-- A **red** visual identity matched to the website, a redesigned glowing logo,
-  and a **black-and-red launch splashscreen**.
-- A fourth theme: **High Contrast** for low-vision use.
-
-### ⬆️ Updates
-
-Orbit checks for signed updates on launch, and Settings now has an **on-demand
-"Check for updates"** that downloads, installs and relaunches.
+Multi-file editing, workspace search, quick-open, the full git power center
+(stage/diff/commit/history/branches/stash/tags), Containers · Database · APIs,
+the Testing panel, live language-server diagnostics in Problems, the red identity
++ launch splashscreen, the High-Contrast theme, and signed auto-update with an
+on-demand "Check for updates" in Settings.
 
 ## Under the hood
 
-Multiple new, unit-tested engine modules — `search`, `docker`, `db`, `http`,
-`testing`, `outline`, and an `lsp` client (framing + JSON-RPC + a `Session`
-state machine + a driver that spawns real servers). 100+ engine tests stay
-green, and the desktop bundle builds on macOS (Intel + Apple Silicon), Windows
-and Linux.
+A pure UI/layout release — no engine changes. The 100+ `orbit_core` tests stay
+green and the desktop bundle builds on macOS (Intel + Apple Silicon), Windows and
+Linux.
 
 ## Still to come
 

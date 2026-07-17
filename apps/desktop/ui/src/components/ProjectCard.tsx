@@ -10,7 +10,6 @@ import {
   Circle,
 } from "lucide-react";
 import type { ProjectSummary } from "@/lib/types";
-import { ECOSYSTEM_META } from "@/lib/types";
 import { LanguageChip } from "@/components/LanguageChip";
 import { Badge } from "@/components/ui/badge";
 import { Hint } from "@/components/ui/tooltip";
@@ -29,10 +28,6 @@ export function ProjectCard({
   const openProject = useAppStore((s) => s.openProject);
   const setProjects = useAppStore((s) => s.setProjects);
   const pushToast = useAppStore((s) => s.pushToast);
-
-  const eco = project.ecosystemLink
-    ? ECOSYSTEM_META[project.ecosystemLink]
-    : null;
 
   async function togglePin(e: MouseEvent) {
     e.stopPropagation();
@@ -59,11 +54,7 @@ export function ProjectCard({
       {/* Accent glow on hover */}
       <div
         className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-100"
-        style={{
-          background: eco
-            ? `${eco.accent}33`
-            : "hsl(var(--accent) / 0.22)",
-        }}
+        style={{ background: "hsl(var(--accent) / 0.22)" }}
       />
 
       <div className="relative flex items-start justify-between">
@@ -110,11 +101,6 @@ export function ProjectCard({
 
       <div className="relative mt-4 flex flex-wrap items-center gap-1.5">
         <LanguageChip language={project.primaryLanguage} />
-        {eco && (
-          <Badge variant="accent" style={{ color: eco.accent }}>
-            {eco.label}
-          </Badge>
-        )}
         {project.hasProfile && (
           <Hint label="Has an Orbit profile">
             <span>

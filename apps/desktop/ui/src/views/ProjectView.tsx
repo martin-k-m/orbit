@@ -2,11 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   GitBranch,
-  GitCommitHorizontal,
   ArrowUp,
   ArrowDown,
   CircleCheck,
-  CircleDot,
   Play,
   Loader2,
   Terminal,
@@ -17,6 +15,8 @@ import {
   Search,
   Plus,
   X,
+  FlaskConical,
+  Gauge,
 } from "lucide-react";
 import type {
   Command,
@@ -33,7 +33,6 @@ import {
   generateProfile,
   readFile,
 } from "@/lib/ipc";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TerminalPane } from "@/components/TerminalPane";
 import { ExplorerPanel } from "@/components/ExplorerPanel";
 import { SearchPanel } from "@/components/SearchPanel";
@@ -47,7 +46,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LanguageChip } from "@/components/LanguageChip";
 import { useAppStore } from "@/store/app";
-import { relativeTime } from "@/lib/format";
 import { cn } from "@/lib/cn";
 
 export function ProjectView({
@@ -58,7 +56,9 @@ export function ProjectView({
   path: string;
 }) {
   const [detail, setDetail] = useState<ProjectDetail | null>(null);
-  const [tab, setTab] = useState("overview");
+  // Which tool window is docked at the bottom (null = collapsed). The editor
+  // (Explorer) is the permanent centre, IntelliJ-style.
+  const [bottomTool, setBottomTool] = useState<string | null>(null);
   const pushToast = useAppStore((s) => s.pushToast);
   const pendingFile = useAppStore((s) => s.pendingFile);
   const clearPendingFile = useAppStore((s) => s.clearPendingFile);
@@ -83,7 +83,6 @@ export function ProjectView({
     (async () => {
       const contents = await readFile(filePath);
       openInEditor(filePath, contents, line);
-      setTab("explorer");
     })();
   }, [pendingFile, projectId, clearPendingFile, openInEditor]);
 
@@ -111,157 +110,152 @@ export function ProjectView({
     });
   }
 
-  // Open a file in the editor (optionally at a line), then reveal the Explorer tab.
+  // Open a file in the centre editor (optionally at a line).
   async function openSearchResult(filePath: string, line?: number) {
     const contents = await readFile(filePath);
     openInEditor(filePath, contents, line);
-    setTab("explorer");
   }
 
+  const git = detail.git;
+  const toggleTool = (id: string) =>
+    setBottomTool((cur) => (cur === id ? null : id));
+
+  const BOTTOM_TOOLS: { id: string; label: string; icon: typeof Terminal; badge?: number }[] = [
+    { id: "problems", label: "Problems", icon: ListTodo, badge: health.warnings.length || undefined },
+    { id: "source-control", label: "Git", icon: GitBranch },
+    { id: "search", label: "Search", icon: Search },
+    { id: "testing", label: "Testing", icon: FlaskConical },
+    { id: "terminal", label: "Terminal", icon: Terminal },
+    { id: "overview", label: "Overview", icon: FileCode2 },
+    { id: "commands", label: "Commands", icon: Play },
+    { id: "health", label: "Health", icon: Gauge },
+    { id: "dependencies", label: "Dependencies", icon: Package, badge: dependencies.length || undefined },
+  ];
+
   return (
-    <div className="flex flex-col gap-6">
-      {/* Header */}
-      <header className="flex flex-col gap-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04] text-lg font-semibold text-fg">
-              {project.name.slice(0, 1)}
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-semibold tracking-tight text-fg">
-                  {project.name}
-                </h1>
-                <LanguageChip language={project.primaryLanguage} />
-                {project.ecosystemLink && (
-                  <Badge variant="accent">{project.ecosystemLink}</Badge>
-                )}
-              </div>
-              <p className="mt-0.5 font-mono text-xs text-fg-subtle">{path}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="secondary" size="sm" onClick={handleProfile}>
-              <Sparkles className="h-3.5 w-3.5" />
-              {project.hasProfile ? "Regenerate profile" : "Generate profile"}
-            </Button>
-            <Button variant="secondary" size="sm" onClick={handleTerminal}>
-              <Terminal className="h-3.5 w-3.5" /> Terminal
-            </Button>
-          </div>
-        </div>
-
-        <GitBar detail={detail} />
-      </header>
-
-      {/* Tabs */}
-      <Tabs value={tab} onValueChange={setTab}>
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="commands">Commands</TabsTrigger>
-          <TabsTrigger value="health">Health</TabsTrigger>
-          <TabsTrigger value="dependencies">
-            Dependencies
-            <span className="ml-1 rounded bg-white/[0.08] px-1 text-[10px]">
-              {dependencies.length}
-            </span>
-          </TabsTrigger>
-          <TabsTrigger value="explorer">Explorer</TabsTrigger>
-          <TabsTrigger value="search">
-            <Search className="h-3.5 w-3.5" /> Search
-          </TabsTrigger>
-          <TabsTrigger value="source-control">
-            <GitBranch className="h-3.5 w-3.5" /> Source Control
-          </TabsTrigger>
-          <TabsTrigger value="problems">
-            Problems
-            {health.warnings.length > 0 && (
-              <span className="ml-1 rounded bg-warning/20 px-1 text-[10px] text-warning">
-                {health.warnings.length}
+    <div className="flex h-full flex-col">
+      {/* Main toolbar */}
+      <div className="flex items-center gap-2.5 border-b border-border bg-elevated px-3 py-1.5">
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-panel text-xs font-semibold text-fg">
+          {project.name.slice(0, 1)}
+        </span>
+        <span className="truncate text-sm font-semibold text-fg">{project.name}</span>
+        <LanguageChip language={project.primaryLanguage} />
+        {git && (
+          <span className="hidden items-center gap-1.5 text-xs text-fg-subtle sm:flex">
+            <GitBranch className="h-3.5 w-3.5" />
+            {git.branch}
+            {git.isClean ? (
+              <CircleCheck className="h-3 w-3 text-success" />
+            ) : (
+              <span className="text-warning">{git.changedFiles} changed</span>
+            )}
+            {git.ahead > 0 && (
+              <span className="inline-flex items-center">
+                <ArrowUp className="h-3 w-3" />
+                {git.ahead}
               </span>
             )}
-          </TabsTrigger>
-          <TabsTrigger value="testing">Testing</TabsTrigger>
-          <TabsTrigger value="terminal">Terminal</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview">
-          <OverviewTab detail={detail} />
-        </TabsContent>
-        <TabsContent value="commands">
-          <CommandsTab commands={project.commands} path={path} />
-        </TabsContent>
-        <TabsContent value="health">
-          <HealthView health={health} />
-        </TabsContent>
-        <TabsContent value="dependencies">
-          <DependenciesTab dependencies={dependencies} />
-        </TabsContent>
-        <TabsContent value="explorer">
-          <ExplorerPanel root={path} />
-        </TabsContent>
-        <TabsContent value="search">
-          <SearchPanel root={path} onOpen={openSearchResult} />
-        </TabsContent>
-        <TabsContent value="source-control">
-          <SourceControlPanel root={path} />
-        </TabsContent>
-        <TabsContent value="problems">
-          <ProblemsPanel root={path} health={health} onOpen={openSearchResult} />
-        </TabsContent>
-        <TabsContent value="testing">
-          <TestingPanel path={path} commands={project.commands} />
-        </TabsContent>
-        <TabsContent value="terminal">
-          <TerminalTab path={path} onOpen={handleTerminal} />
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-}
-
-function GitBar({ detail }: { detail: ProjectDetail }) {
-  const { git } = detail;
-  if (!git) {
-    return (
-      <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-2.5 text-xs text-fg-subtle">
-        Not a git repository.
+            {git.behind > 0 && (
+              <span className="inline-flex items-center">
+                <ArrowDown className="h-3 w-3" />
+                {git.behind}
+              </span>
+            )}
+          </span>
+        )}
+        <div className="ml-auto flex items-center gap-1.5">
+          <Button variant="secondary" size="sm" onClick={handleProfile}>
+            <Sparkles className="h-3.5 w-3.5" />
+            {project.hasProfile ? "Regenerate profile" : "Generate profile"}
+          </Button>
+          <Button variant="secondary" size="sm" onClick={() => setBottomTool("terminal")}>
+            <Terminal className="h-3.5 w-3.5" /> Terminal
+          </Button>
+        </div>
       </div>
-    );
-  }
-  return (
-    <div className="flex flex-wrap items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-2.5 text-xs">
-      <span className="flex items-center gap-1.5 text-fg">
-        <GitBranch className="h-3.5 w-3.5 text-accent" />
-        <span className="font-medium">{git.branch}</span>
-      </span>
-      {git.isClean ? (
-        <Badge variant="success">
-          <CircleCheck className="h-3 w-3" /> clean
-        </Badge>
-      ) : (
-        <Badge variant="warning">
-          <CircleDot className="h-3 w-3" /> {git.changedFiles} changed
-        </Badge>
+
+      {/* Centre: the editor workspace (file tree + tabs + editor + outline) */}
+      <div className="flex min-h-0 flex-1 p-2">
+        <ExplorerPanel root={path} />
+      </div>
+
+      {/* Bottom tool window (docked) */}
+      {bottomTool && (
+        <div className="flex h-[300px] min-h-0 flex-col border-t border-border bg-bg">
+          <div className="flex items-center gap-2 border-b border-border bg-elevated px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-fg-subtle">
+            {BOTTOM_TOOLS.find((t) => t.id === bottomTool)?.label}
+            <button
+              onClick={() => setBottomTool(null)}
+              aria-label="Close tool window"
+              className="no-drag ml-auto rounded p-0.5 hover:bg-white/[0.06] hover:text-fg"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          <div className="min-h-0 flex-1 p-2">
+            {bottomTool === "search" && (
+              <SearchPanel root={path} onOpen={openSearchResult} />
+            )}
+            {bottomTool === "source-control" && <SourceControlPanel root={path} />}
+            {bottomTool === "problems" && (
+              <ProblemsPanel root={path} health={health} onOpen={openSearchResult} />
+            )}
+            {bottomTool === "terminal" && (
+              <TerminalTab path={path} onOpen={handleTerminal} />
+            )}
+            {bottomTool === "testing" && (
+              <div className="scrollbar-thin h-full overflow-y-auto">
+                <TestingPanel path={path} commands={project.commands} />
+              </div>
+            )}
+            {bottomTool === "overview" && (
+              <div className="scrollbar-thin h-full overflow-y-auto">
+                <OverviewTab detail={detail} />
+              </div>
+            )}
+            {bottomTool === "commands" && (
+              <div className="scrollbar-thin h-full overflow-y-auto">
+                <CommandsTab commands={project.commands} path={path} />
+              </div>
+            )}
+            {bottomTool === "health" && (
+              <div className="scrollbar-thin h-full overflow-y-auto">
+                <HealthView health={health} />
+              </div>
+            )}
+            {bottomTool === "dependencies" && (
+              <div className="scrollbar-thin h-full overflow-y-auto">
+                <DependenciesTab dependencies={dependencies} />
+              </div>
+            )}
+          </div>
+        </div>
       )}
-      {git.ahead > 0 && (
-        <span className="flex items-center gap-0.5 text-fg-muted">
-          <ArrowUp className="h-3 w-3" /> {git.ahead}
-        </span>
-      )}
-      {git.behind > 0 && (
-        <span className="flex items-center gap-0.5 text-fg-muted">
-          <ArrowDown className="h-3 w-3" /> {git.behind}
-        </span>
-      )}
-      {git.lastCommit && (
-        <span className="flex min-w-0 items-center gap-1.5 text-fg-subtle">
-          <GitCommitHorizontal className="h-3.5 w-3.5 shrink-0" />
-          <span className="font-mono">{git.lastCommit.shortHash}</span>
-          <span className="truncate">{git.lastCommit.summary}</span>
-          <span className="shrink-0">· {relativeTime(git.lastCommit.timestamp)}</span>
-        </span>
-      )}
+
+      {/* Bottom tool-window stripe */}
+      <div className="scrollbar-thin flex items-center gap-0.5 overflow-x-auto border-t border-border bg-elevated px-2 py-0.5">
+        {BOTTOM_TOOLS.map((t) => {
+          const Icon = t.icon;
+          const on = bottomTool === t.id;
+          return (
+            <button
+              key={t.id}
+              onClick={() => toggleTool(t.id)}
+              className={cn(
+                "no-drag flex shrink-0 items-center gap-1.5 rounded px-2 py-1 text-[11px] transition-colors",
+                on ? "bg-accent/15 text-accent" : "text-fg-subtle hover:text-fg",
+              )}
+            >
+              <Icon className="h-3 w-3" />
+              {t.label}
+              {t.badge != null && (
+                <span className="rounded bg-white/[0.1] px-1 text-[9px]">{t.badge}</span>
+              )}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -671,19 +665,9 @@ function TerminalTab({ path, onOpen }: { path: string; onOpen: () => void }) {
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-fg-muted">
-          Real shells, running in{" "}
-          <span className="font-mono text-fg-subtle">{path}</span>.
-        </p>
-        <Button variant="secondary" size="sm" onClick={onOpen}>
-          <Terminal className="h-3.5 w-3.5" /> Open system terminal
-        </Button>
-      </div>
-
+    <div className="flex h-full flex-col overflow-hidden rounded-lg border border-border bg-panel">
       {/* Tab strip */}
-      <div className="flex items-center gap-1 border-b border-white/[0.06]">
+      <div className="flex items-center gap-1 border-b border-border px-1">
         {tabs.map((id, i) => (
           <div
             key={id}
@@ -718,14 +702,20 @@ function TerminalTab({ path, onOpen }: { path: string; onOpen: () => void }) {
         >
           <Plus className="h-4 w-4" />
         </button>
+        <Button variant="ghost" size="sm" className="ml-auto" onClick={onOpen}>
+          <Terminal className="h-3.5 w-3.5" /> System terminal
+        </Button>
       </div>
 
       {/* Panes stay mounted so background shells keep running; hide inactive
           ones. TerminalPane's ResizeObserver refits when it becomes visible. */}
-      <div className="relative">
+      <div className="relative min-h-0 flex-1">
         {tabs.map((id) => (
-          <div key={id} className={id === active ? "block" : "hidden"}>
-            <TerminalPane path={path} className="h-[440px]" />
+          <div
+            key={id}
+            className={cn("absolute inset-0", id === active ? "block" : "hidden")}
+          >
+            <TerminalPane path={path} className="h-full" />
           </div>
         ))}
       </div>

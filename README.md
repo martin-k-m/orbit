@@ -57,32 +57,13 @@ Think of it as the calm control room for everything you build:
 | 📊 **Developer analytics** | Local, private time tracking: hours per language, projects touched, build times. Never uploaded. |
 | 🔐 **Safe by default** | Every command is assessed before it runs — `rm -rf`, `dd`, `mkfs`, `curl \| sh` and force-pushes are refused until you confirm. Secrets in `.env` files are masked. |
 | 🗂 **Workspaces & env** | Pin tasks, notes and links per project; see every `.env` in one place with duplicate and missing-variable detection. |
-| 🛰 **Ecosystem previews** | Clearly-labelled previews for **Blink**, **Killer**, **Flux** and **Beacon** — the real engines land in v2.0 ([roadmap](ROADMAP.md)). |
-| 🖥 **Native & premium** | Tauri 2 app for macOS, Windows and Linux with a tray, native menus, keyboard shortcuts and a dark, glass-panelled design. |
+| 🖥 **Native IDE feel** | Tauri 2 app for macOS, Windows and Linux with a tray, native menus, keyboard shortcuts, a status bar, and a flat, dark, professional design. |
 | 🖥 **Built-in terminal** | A real PTY-backed shell per project — colours, `top`/`vim`, Ctrl-C and reflow all work. Opens in your shell (`$SHELL`/`COMSPEC`), in the project directory. |
 | 📝 **Code editor** | A tabbed CodeMirror editor — multi-file tabs, find/replace, go-to-line, a document outline, font/tab/wrap preferences, plus create/rename/delete in the file tree. |
 | 🔎 **Search & quick-open** | Fast find-in-files across a project, and `⌘/Ctrl+K` fuzzy quick-open to jump to any file. |
 | 🐳 **Docker · 🗄 Database · 🌐 APIs** | List and control Docker containers/images; browse a SQLite database and run `SELECT`s; send REST requests with a JSON-aware response viewer. |
 | 🧪 **Testing & problems** | Run a project's tests with a parsed pass/fail summary (cargo, Jest/Vitest, pytest), and a unified Problems panel with **live language-server diagnostics** (rust-analyzer, tsserver, pylsp, gopls) for your open files. |
 | ⌨️ **A real CLI** | The same engine as a terminal companion: `orbit scan`, `orbit info`, `orbit health`, `orbit run`. |
-
-## 🧭 The ecosystem
-
-Orbit is the hub that ties a family of local developer tools together:
-
-```
-                       Orbit
-                         │
-      ┌─────────┬────────┼────────┬─────────┐
-      │         │        │        │         │
-    Blink     Flux     Killer   Beacon   (your project)
-    build   automate  security   API
-```
-
-Detect a sibling project and Orbit surfaces the right action — *Accelerate with
-Blink*, *Security scan with Killer*, *Automate with Flux*, *Monitor with
-Beacon*. Integrations that don't have an engine present are shown as clearly
-labelled previews.
 
 ## 📦 Download
 

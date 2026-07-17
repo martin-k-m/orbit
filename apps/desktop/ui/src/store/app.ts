@@ -5,7 +5,6 @@ import type { ProjectSummary } from "@/lib/types";
 export type View =
   | { kind: "dashboard" }
   | { kind: "analytics" }
-  | { kind: "ecosystem" }
   | { kind: "docker" }
   | { kind: "database" }
   | { kind: "apis" }

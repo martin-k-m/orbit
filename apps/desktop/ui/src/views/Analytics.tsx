@@ -11,7 +11,7 @@ import {
   Tooltip as RTooltip,
   CartesianGrid,
 } from "recharts";
-import { Clock, Gauge, Layers } from "lucide-react";
+import { Clock, Gauge, Layers, FolderGit2 } from "lucide-react";
 import { activityReport } from "@/lib/ipc";
 import type { ActivityReport } from "@/lib/types";
 import { LANGUAGE_META } from "@/lib/types";
@@ -59,11 +59,16 @@ export function Analytics() {
         </p>
       </header>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <SummaryCard
           icon={Clock}
           label="Total time"
           value={formatHours(totalSeconds)}
+        />
+        <SummaryCard
+          icon={FolderGit2}
+          label="Projects touched"
+          value={String(report?.projectsTouched ?? 0)}
         />
         <SummaryCard
           icon={Layers}

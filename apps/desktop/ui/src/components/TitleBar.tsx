@@ -25,7 +25,7 @@ export function TitleBar() {
   return (
     <div
       data-tauri-drag-region
-      className="relative z-30 flex h-11 shrink-0 items-center justify-between border-b border-white/[0.05] bg-bg/70 backdrop-blur-xl"
+      className="relative z-30 flex h-10 shrink-0 items-center justify-between border-b border-border bg-elevated"
       style={{ paddingLeft: pad, paddingRight: 12 }}
     >
       <div

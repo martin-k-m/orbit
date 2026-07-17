@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
   BarChart3,
-  Boxes,
   Container,
   Database,
   Globe,
@@ -27,7 +26,7 @@ interface NavItem {
 
 const NAV: NavItem[] = [
   {
-    label: "Dashboard",
+    label: "Projects",
     icon: LayoutDashboard,
     view: { kind: "dashboard" },
     match: (v) => v.kind === "dashboard" || v.kind === "project",
@@ -37,12 +36,6 @@ const NAV: NavItem[] = [
     icon: BarChart3,
     view: { kind: "analytics" },
     match: (v) => v.kind === "analytics",
-  },
-  {
-    label: "Ecosystem",
-    icon: Boxes,
-    view: { kind: "ecosystem" },
-    match: (v) => v.kind === "ecosystem",
   },
   {
     label: "Containers",
@@ -101,7 +94,7 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="flex w-64 shrink-0 flex-col border-r border-white/[0.05] bg-bg/40">
+    <aside className="flex w-60 shrink-0 flex-col border-r border-border bg-elevated">
       {/* Brand */}
       <button
         onClick={() => navigate({ kind: "dashboard" })}

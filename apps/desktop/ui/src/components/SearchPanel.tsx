@@ -61,7 +61,7 @@ export function SearchPanel({
   }, [query, caseSensitive, wholeWord, run]);
 
   return (
-    <div className="flex h-[520px] flex-col overflow-hidden rounded-xl border border-white/[0.08] bg-black/20">
+    <div className="flex h-full flex-col overflow-hidden rounded-lg border border-border bg-panel">
       <div className="flex items-center gap-2 border-b border-white/[0.06] px-3 py-2">
         <SearchIcon className="h-4 w-4 shrink-0 text-fg-subtle" />
         <input
