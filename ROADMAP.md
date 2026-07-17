@@ -55,8 +55,9 @@ Turning projects into true workspaces.
   buffers), and a language server for go-to-definition and real diagnostics.
 - 🚧 **Integrated terminal** — a real PTY-backed shell per project has landed
   (ConPTY on Windows, openpty elsewhere): ANSI colour, scrollback, resize, and
-  shell detection (PowerShell, CMD, bash, zsh, fish). Still to come: multiple
-  tabs, split panes, search, and sessions that survive restarts.
+  shell detection (PowerShell, CMD, bash, zsh, fish), and **multiple tabs**
+  (background shells keep running). Still to come: split panes, search, and
+  sessions that survive restarts.
 - 📋 **Live log viewer** — per-process, colourised, searchable, filter to
   errors/warnings, copy/save/export, side-by-side logs, error surfacing.
 - 📋 **Task runner** — build/test/lint/format/bench/deploy + custom scripts,

@@ -107,7 +107,8 @@ Be very clear about this — do not claim otherwise in any doc or the UI:
   multiple tabs now, but there are no split editors, and still one terminal per
   project view.
 - **No plugin SDK/runtime.**
-- Terminal has no tabs/splits/search/session-persistence yet.
+- Terminal now has **multiple tabs** (background shells stay alive); still no
+  splits/search/session-persistence.
 
 The [ROADMAP](ROADMAP.md) marks all of this honestly (✅ / 🚧 / 📋). Several
 prompt "phases" asked to *finish* or *verify* these as if they existed; they

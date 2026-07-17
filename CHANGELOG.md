@@ -8,6 +8,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Terminal tabs** — the Terminal tab now hosts multiple shells: a `＋` opens a
+  new one, a tab strip switches between them, and closing focuses a neighbour.
+  Background terminals stay alive (panes stay mounted and refit when shown), so
+  a build can keep running in one tab while you work in another. Splits, search
+  and cross-restart persistence are still to come.
 - **Editor preferences + searchable settings** — the Settings page gained a
   search box that filters its sections, and a new Editor section with **font
   size**, **tab size** and **word wrap** controls that apply live to every open
