@@ -47,6 +47,16 @@ export interface Commit {
   timestamp: number;
 }
 
+/** A commit plus commit-graph lane data for drawing a history rail. */
+export interface GraphCommit {
+  commit: Commit;
+  parents: string[];
+  /** The column this commit's node sits in. */
+  lane: number;
+  /** Every column with a line passing through this commit's row. */
+  rails: number[];
+}
+
 export interface GitInfo {
   branch: string;
   isClean: boolean;

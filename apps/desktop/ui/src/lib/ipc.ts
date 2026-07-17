@@ -4,6 +4,7 @@ import type {
   Assessment,
   CommandOutput,
   Commit,
+  GraphCommit,
   DbQueryResult,
   DbTable,
   Dependency,
@@ -707,6 +708,12 @@ export async function gitCommit(path: string, message: string): Promise<Commit> 
 export async function gitLog(path: string, limit = 20): Promise<Commit[]> {
   if (!isTauri()) return [];
   return invoke<Commit[]>("git_log", { path, limit });
+}
+
+/** Recent commits with commit-graph lane data, newest first. */
+export async function gitGraph(path: string, limit = 20): Promise<GraphCommit[]> {
+  if (!isTauri()) return [];
+  return invoke<GraphCommit[]>("git_graph", { path, limit });
 }
 
 /** Local branch names. */

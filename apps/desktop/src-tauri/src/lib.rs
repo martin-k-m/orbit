@@ -63,6 +63,7 @@ pub fn run() {
             commands::git_show,
             commands::git_commit,
             commands::git_log,
+            commands::git_graph,
             commands::git_branches,
             commands::git_switch_branch,
             commands::git_create_branch,

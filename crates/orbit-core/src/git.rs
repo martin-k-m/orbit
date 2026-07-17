@@ -457,10 +457,167 @@ pub fn recent_commits(dir: &Path, limit: usize) -> Vec<Commit> {
         .collect()
 }
 
+/// A commit plus the data needed to draw a history graph rail: its parent
+/// hashes, the column (`lane`) its node sits in, and every column that has a
+/// line passing through its row (`rails`). The layout is a pure function of the
+/// commit list, so it is unit-tested without a repo.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GraphCommit {
+    pub commit: Commit,
+    pub parents: Vec<String>,
+    pub lane: usize,
+    pub rails: Vec<usize>,
+}
+
+/// Recent commits with commit-graph lane data, newest first.
+pub fn recent_graph(dir: &Path, limit: usize) -> Vec<GraphCommit> {
+    let arg = format!("-{limit}");
+    let out = match run(
+        dir,
+        &[
+            "log",
+            &arg,
+            "--pretty=format:%H\x1f%h\x1f%an\x1f%at\x1f%s\x1f%P",
+        ],
+    ) {
+        Some(o) => o,
+        None => return Vec::new(),
+    };
+    let items: Vec<(Commit, Vec<String>)> = out.lines().filter_map(parse_graph_line).collect();
+    layout(items)
+}
+
+/// Parse one `%H…%P` log line into a commit plus its parent hashes.
+fn parse_graph_line(line: &str) -> Option<(Commit, Vec<String>)> {
+    let mut f = line.split('\x1f');
+    let commit = Commit {
+        hash: f.next()?.to_string(),
+        short_hash: f.next()?.to_string(),
+        author: f.next()?.to_string(),
+        timestamp: f.next()?.trim().parse().ok()?,
+        summary: f.next().unwrap_or("").to_string(),
+    };
+    let parents = f
+        .next()
+        .unwrap_or("")
+        .split_whitespace()
+        .map(|s| s.to_string())
+        .collect();
+    Some((commit, parents))
+}
+
+/// Assign each commit (newest-first) a lane and the rails passing through its
+/// row, tracking pending child→parent edges as columns. The mainline follows a
+/// commit's first parent in the same lane; extra parents (merges) open new
+/// lanes, and lanes waiting on a commit converge when it is reached.
+fn layout(items: Vec<(Commit, Vec<String>)>) -> Vec<GraphCommit> {
+    // Each column holds the hash it is currently waiting to draw next.
+    let mut lanes: Vec<Option<String>> = Vec::new();
+    let mut rows = Vec::with_capacity(items.len());
+
+    for (commit, parents) in items {
+        let lane = if let Some(i) = lanes
+            .iter()
+            .position(|l| l.as_deref() == Some(commit.hash.as_str()))
+        {
+            i
+        } else if let Some(i) = lanes.iter().position(|l| l.is_none()) {
+            i
+        } else {
+            lanes.push(None);
+            lanes.len() - 1
+        };
+
+        // Rails through this row = every occupied column, plus this node's lane.
+        let mut rails: Vec<usize> = lanes
+            .iter()
+            .enumerate()
+            .filter_map(|(i, l)| l.as_ref().map(|_| i))
+            .collect();
+        if !rails.contains(&lane) {
+            rails.push(lane);
+        }
+        rails.sort_unstable();
+        rails.dedup();
+
+        // Any lane waiting for this commit converges into it.
+        for l in lanes.iter_mut() {
+            if l.as_deref() == Some(commit.hash.as_str()) {
+                *l = None;
+            }
+        }
+        if lane >= lanes.len() {
+            lanes.resize(lane + 1, None);
+        }
+        // The mainline continues with the first parent; merges branch off.
+        lanes[lane] = parents.first().cloned();
+        for p in parents.iter().skip(1) {
+            match lanes.iter().position(|l| l.is_none()) {
+                Some(i) => lanes[i] = Some(p.clone()),
+                None => lanes.push(Some(p.clone())),
+            }
+        }
+
+        rows.push(GraphCommit {
+            commit,
+            parents,
+            lane,
+            rails,
+        });
+    }
+    rows
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use std::fs;
+
+    /// A bare commit with a given hash, for exercising the pure graph layout.
+    fn fake_commit(hash: &str) -> Commit {
+        Commit {
+            hash: hash.to_string(),
+            short_hash: hash.to_string(),
+            summary: String::new(),
+            author: "t".to_string(),
+            timestamp: 0,
+        }
+    }
+
+    #[test]
+    fn graph_layout_keeps_linear_history_in_one_lane() {
+        let items = vec![
+            (fake_commit("C"), vec!["B".to_string()]),
+            (fake_commit("B"), vec!["A".to_string()]),
+            (fake_commit("A"), vec![]),
+        ];
+        let rows = layout(items);
+        assert!(rows.iter().all(|r| r.lane == 0));
+        assert!(rows.iter().all(|r| r.rails == vec![0]));
+    }
+
+    #[test]
+    fn graph_layout_opens_a_lane_for_a_merge() {
+        // M merges B and C, which both descend from root A.
+        let items = vec![
+            (fake_commit("M"), vec!["B".to_string(), "C".to_string()]),
+            (fake_commit("C"), vec!["A".to_string()]),
+            (fake_commit("B"), vec!["A".to_string()]),
+            (fake_commit("A"), vec![]),
+        ];
+        let rows = layout(items);
+        assert_eq!(rows[0].lane, 0, "merge commit sits on the mainline");
+        assert_eq!(rows[1].lane, 1, "the second parent gets its own lane");
+        assert_eq!(rows[2].lane, 0, "the first parent stays on the mainline");
+        assert_eq!(rows[3].lane, 0, "the shared root converges back to lane 0");
+        let width = rows
+            .iter()
+            .flat_map(|r| r.rails.iter().copied())
+            .max()
+            .unwrap();
+        assert_eq!(width, 1, "two lanes in play");
+    }
 
     #[test]
     fn parse_status_groups_staged_unstaged_and_untracked() {
