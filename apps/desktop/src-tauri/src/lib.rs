@@ -86,6 +86,7 @@ pub fn run() {
             commands::file_symbols,
             commands::lsp_diagnostics,
             commands::http_request,
+            commands::ai_chat,
             commands::assess_command,
             commands::run_command,
             commands::generate_profile,

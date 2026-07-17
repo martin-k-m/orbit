@@ -28,6 +28,7 @@
 //! }
 //! ```
 
+pub mod ai;
 pub mod analytics;
 pub mod deps;
 pub mod detect;

@@ -17,6 +17,7 @@ import {
   X,
   FlaskConical,
   Gauge,
+  Bot,
 } from "lucide-react";
 import type {
   Command,
@@ -39,6 +40,7 @@ import { SearchPanel } from "@/components/SearchPanel";
 import { SourceControlPanel } from "@/components/SourceControlPanel";
 import { ProblemsPanel } from "@/components/ProblemsPanel";
 import { TestingPanel } from "@/components/TestingPanel";
+import { AiChatPanel } from "@/components/AiChatPanel";
 import { useEditorStore } from "@/store/editor";
 import { useWorkspaceStore } from "@/store/workspace";
 import { nextActiveAfterClose } from "@/lib/tabs";
@@ -125,6 +127,7 @@ export function ProjectView({
   const git = detail.git;
 
   const BOTTOM_TOOLS: { id: string; label: string; icon: typeof Terminal; badge?: number }[] = [
+    { id: "ai", label: "AI", icon: Bot },
     { id: "problems", label: "Problems", icon: ListTodo, badge: health.warnings.length || undefined },
     { id: "source-control", label: "Git", icon: GitBranch },
     { id: "search", label: "Search", icon: Search },
@@ -202,6 +205,7 @@ export function ProjectView({
             </button>
           </div>
           <div className="min-h-0 flex-1 p-2">
+            {bottomTool === "ai" && <AiChatPanel projectName={project.name} />}
             {bottomTool === "search" && (
               <SearchPanel root={path} onOpen={openSearchResult} />
             )}

@@ -4,6 +4,7 @@ import { Splash } from "@/components/Splash";
 import { useAppStore, watchSystemTheme } from "@/store/app";
 import { loadEditorPrefs } from "@/store/settings";
 import { loadWorkspaceLayout } from "@/store/workspace";
+import { loadAiConfig } from "@/store/ai";
 import { isTauri, listProjects, getSetting } from "@/lib/ipc";
 import type { Theme } from "@/store/app";
 
@@ -37,6 +38,7 @@ export default function App() {
       }
       await loadEditorPrefs();
       await loadWorkspaceLayout();
+      await loadAiConfig();
       const projects = await listProjects();
       if (!cancelled) setProjects(projects);
 

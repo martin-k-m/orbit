@@ -443,6 +443,17 @@ pub fn http_request(
     orbit_core::http::request(&method, &url, &headers, body.as_deref()).map_err(|e| e.to_string())
 }
 
+/// Send a conversation to a user-configured, OpenAI-compatible model endpoint
+/// (local or hosted) and return the assistant's reply. Nothing is contacted
+/// unless the user configured a provider and hit send.
+#[tauri::command]
+pub fn ai_chat(
+    provider: orbit_core::ai::Provider,
+    messages: Vec<orbit_core::ai::ChatMessage>,
+) -> Result<String, String> {
+    orbit_core::ai::chat(&provider, &messages).map_err(|e| e.to_string())
+}
+
 /// Assess how risky a project's command is before running it, so the UI can
 /// show a confirmation dialog for anything destructive.
 #[tauri::command]

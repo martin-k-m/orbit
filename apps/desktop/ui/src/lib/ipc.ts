@@ -882,6 +882,34 @@ export async function httpRequest(
   });
 }
 
+/** A configured, OpenAI-compatible model endpoint (local or hosted). */
+export interface AiProvider {
+  baseUrl: string;
+  model: string;
+  apiKey?: string;
+}
+
+/** One turn in an AI conversation. */
+export interface AiMessage {
+  role: "system" | "user" | "assistant";
+  content: string;
+}
+
+/**
+ * Send a conversation to the configured model endpoint and return the reply.
+ * Local-first: this only reaches the network when the user has set up a
+ * provider (e.g. a local Ollama server) and sent a message.
+ */
+export async function aiChat(
+  provider: AiProvider,
+  messages: AiMessage[],
+): Promise<string> {
+  if (!isTauri()) {
+    return "AI preview — open the desktop app and point Orbit at a model endpoint (a local Ollama/LM Studio server, or a hosted one) in Settings → AI to chat.";
+  }
+  return invoke<string>("ai_chat", { provider, messages });
+}
+
 /**
  * Assess how risky a project's command is before running it. Mirrors the
  * engine's `orbit_core::safety` guard so the UI can show a confirmation dialog.

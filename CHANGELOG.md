@@ -6,6 +6,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **AI assistant — local-first and optional.** A new **AI** tool window brings a
+  project-aware chat to the workspace, backed by any **OpenAI-compatible**
+  endpoint you configure in Settings → AI: a local runtime (Ollama, LM Studio, a
+  llama.cpp server) or a hosted provider. It is **off by default**, the endpoint,
+  model and key are stored only on your device, and Orbit contacts nothing until
+  you enable it and send a message. Built on a new unit-tested `orbit_core::ai`
+  module (OpenAI-compatible request/response over `curl`, like the API explorer),
+  so a model on `localhost` and a cloud endpoint share one code path.
+
 ## [1.3.1] — 2026-07-17
 
 Finishing touches on the IntelliJ-style tool-window system.
