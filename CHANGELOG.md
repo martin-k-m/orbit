@@ -8,6 +8,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Testing panel** — a new Testing tab runs a project's `test` command and
+  shows a parsed pass/fail summary (badges + framework) alongside the raw output
+  and exit code. Summaries are parsed by a new `orbit_core::testing` module that
+  recognises `cargo test`, Jest/Vitest and pytest output (unit-tested);
+  unrecognised runners still show their output.
 - **Database explorer (SQLite)** — a new Database view opens a `.sqlite`/`.db`
   file **read-only**, lists its tables/views with row counts, shows the first
   rows of any table, and runs ad-hoc `SELECT` queries (`Ctrl/Cmd+Enter`), with a

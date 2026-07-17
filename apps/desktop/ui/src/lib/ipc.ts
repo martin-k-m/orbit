@@ -20,6 +20,7 @@ import type {
   SearchResults,
   Shell,
   StashEntry,
+  TestSummary,
   TerminalExit,
   TerminalOutput,
   Workspace,
@@ -807,6 +808,14 @@ export async function dbQuery(path: string, sql: string): Promise<DbQueryResult>
 /** The first rows of a table. */
 export async function dbTableRows(path: string, table: string): Promise<DbQueryResult> {
   return invoke<DbQueryResult>("db_table_rows", { path, table });
+}
+
+// --- Testing ----------------------------------------------------------------
+
+/** Parse test-runner output into a pass/fail summary (null if unrecognised). */
+export async function parseTestOutput(output: string): Promise<TestSummary | null> {
+  if (!isTauri()) return null;
+  return invoke<TestSummary | null>("parse_test_output", { output });
 }
 
 /**

@@ -359,6 +359,13 @@ pub fn db_table_rows(path: String, table: String) -> Result<orbit_core::db::Quer
     orbit_core::db::table_rows(Path::new(&path), &table, 200).map_err(|e| e.to_string())
 }
 
+/// Parse captured test-runner output into a pass/fail summary (`null` if no
+/// known format is recognised).
+#[tauri::command]
+pub fn parse_test_output(output: String) -> Result<Option<orbit_core::testing::TestSummary>, String> {
+    Ok(orbit_core::testing::parse_summary(&output))
+}
+
 /// Assess how risky a project's command is before running it, so the UI can
 /// show a confirmation dialog for anything destructive.
 #[tauri::command]

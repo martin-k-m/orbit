@@ -37,6 +37,7 @@ import { ExplorerPanel } from "@/components/ExplorerPanel";
 import { SearchPanel } from "@/components/SearchPanel";
 import { SourceControlPanel } from "@/components/SourceControlPanel";
 import { ProblemsPanel } from "@/components/ProblemsPanel";
+import { TestingPanel } from "@/components/TestingPanel";
 import { useEditorStore } from "@/store/editor";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -177,6 +178,7 @@ export function ProjectView({
               </span>
             )}
           </TabsTrigger>
+          <TabsTrigger value="testing">Testing</TabsTrigger>
           <TabsTrigger value="terminal">Terminal</TabsTrigger>
         </TabsList>
 
@@ -203,6 +205,9 @@ export function ProjectView({
         </TabsContent>
         <TabsContent value="problems">
           <ProblemsPanel root={path} health={health} onOpen={openSearchResult} />
+        </TabsContent>
+        <TabsContent value="testing">
+          <TestingPanel path={path} commands={project.commands} />
         </TabsContent>
         <TabsContent value="terminal">
           <TerminalTab path={path} onOpen={handleTerminal} />

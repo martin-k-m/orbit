@@ -44,6 +44,7 @@ pub mod safety;
 pub mod scan;
 pub mod search;
 pub mod shell;
+pub mod testing;
 pub mod workspace;
 
 #[cfg(feature = "persistence")]
@@ -134,6 +135,7 @@ mod tests {
         assert_serialize::<git::StashEntry>();
         assert_serialize::<docker::Container>();
         assert_serialize::<docker::Image>();
+        assert_serialize::<testing::TestSummary>();
         #[cfg(feature = "persistence")]
         {
             assert_serialize::<db::Table>();

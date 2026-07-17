@@ -111,6 +111,14 @@ export interface DbQueryResult {
   rowCount: number;
 }
 
+/** A parsed test run (mirrors `orbit_core::testing::TestSummary`). */
+export interface TestSummary {
+  passed: number;
+  failed: number;
+  total: number;
+  framework: string;
+}
+
 export interface HealthWarning {
   kind: string;
   message: string;
