@@ -1,6 +1,10 @@
 import { cn } from "@/lib/cn";
 
-/** Inline indigo orbit ring with a glowing core dot. */
+/**
+ * Orbit's mark: a glowing red core inside a tilted orbit ring with a travelling
+ * electron, matched to the website's red-600 → rose-500 brand. Pass `spin` to
+ * set the ring in slow motion (used on the splash and loading states).
+ */
 export function OrbitGlyph({
   className,
   spin = false,
@@ -17,36 +21,55 @@ export function OrbitGlyph({
       aria-hidden="true"
     >
       <defs>
-        <linearGradient id="orbit-core" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#818CF8" />
-          <stop offset="1" stopColor="#8B5CF6" />
-        </linearGradient>
+        <radialGradient id="orbit-core" cx="0.4" cy="0.35" r="0.75">
+          <stop offset="0" stopColor="#FDA4AF" />
+          <stop offset="0.45" stopColor="#F43F5E" />
+          <stop offset="1" stopColor="#DC2626" />
+        </radialGradient>
         <linearGradient id="orbit-ring" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#6366F1" />
-          <stop offset="1" stopColor="#A78BFA" />
+          <stop offset="0" stopColor="#DC2626" />
+          <stop offset="1" stopColor="#FB7185" />
         </linearGradient>
+        <filter id="orbit-glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="1.4" />
+        </filter>
       </defs>
+
+      {/* Soft halo behind the core. */}
+      <circle
+        cx="16"
+        cy="16"
+        r="6"
+        fill="#F43F5E"
+        filter="url(#orbit-glow)"
+        opacity="0.55"
+      >
+        <animate
+          attributeName="opacity"
+          values="0.35;0.7;0.35"
+          dur="3s"
+          repeatCount="indefinite"
+        />
+      </circle>
+
+      {/* Orbit ring + travelling electron. */}
       <g className={spin ? "origin-center animate-spin-slow" : undefined}>
         <ellipse
           cx="16"
           cy="16"
           rx="13"
-          ry="6"
+          ry="5.5"
           stroke="url(#orbit-ring)"
           strokeWidth="1.75"
-          transform="rotate(-30 16 16)"
+          transform="rotate(-28 16 16)"
         />
-        <circle cx="27" cy="10" r="1.75" fill="#A78BFA" />
+        <circle cx="27.2" cy="10.4" r="2" fill="#FB7185" />
+        <circle cx="27.2" cy="10.4" r="2" fill="#FB7185" opacity="0.5" filter="url(#orbit-glow)" />
       </g>
+
+      {/* Glowing core. */}
       <circle cx="16" cy="16" r="5" fill="url(#orbit-core)" />
-      <circle cx="16" cy="16" r="5" fill="url(#orbit-core)" opacity="0.5">
-        <animate
-          attributeName="r"
-          values="5;6.5;5"
-          dur="3s"
-          repeatCount="indefinite"
-        />
-      </circle>
+      <circle cx="16" cy="16" r="5" stroke="#FECACA" strokeOpacity="0.25" strokeWidth="0.75" />
     </svg>
   );
 }

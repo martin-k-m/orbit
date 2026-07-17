@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Command, Search, Sun, Moon } from "lucide-react";
 import { useAppStore } from "@/store/app";
+import { OrbitGlyph } from "@/components/OrbitGlyph";
 import { Button } from "@/components/ui/button";
 import { Hint } from "@/components/ui/tooltip";
 
@@ -29,10 +30,11 @@ export function TitleBar() {
     >
       <div
         data-tauri-drag-region
-        className="pointer-events-none flex items-center gap-2 text-xs text-fg-subtle"
+        className="pointer-events-none flex items-center gap-2 text-xs"
       >
-        <span className="font-medium text-fg-muted">Orbit</span>
-        <span className="text-fg-subtle">Developer Command Center</span>
+        <OrbitGlyph className="h-4 w-4" />
+        <span className="text-sm font-semibold tracking-tight text-gradient">Orbit</span>
+        <span className="ml-1 text-fg-subtle">Developer IDE</span>
       </div>
 
       <div className="flex items-center gap-1.5 no-drag">

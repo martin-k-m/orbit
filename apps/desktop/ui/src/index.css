@@ -24,11 +24,12 @@
     --fg-muted: 240 6% 62%;
     --fg-subtle: 240 5% 46%;
 
-    --accent: 243 75% 59%;
-    --accent-2: 258 90% 66%;
+    /* Orbit's brand red, matched to the website: red-600 → rose-500. */
+    --accent: 0 72% 51%;
+    --accent-2: 350 89% 60%;
     --success: 152 60% 46%;
     --warning: 38 92% 55%;
-    --danger: 0 72% 58%;
+    --danger: 4 74% 54%;
 
     --radius: 0.75rem;
   }
@@ -41,8 +42,8 @@
     --fg: 240 20% 12%;
     --fg-muted: 240 8% 40%;
     --fg-subtle: 240 6% 55%;
-    --accent: 243 75% 56%;
-    --accent-2: 258 82% 60%;
+    --accent: 0 72% 51%;
+    --accent-2: 350 80% 55%;
 
     /* Status colours must be re-tuned, not inherited: the dark values are
        lightened for contrast against a near-black surface, and washed out on

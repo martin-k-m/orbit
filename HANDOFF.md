@@ -75,6 +75,8 @@ Desktop features that are **built and wired to the UI**:
   project-scoped content search, **not** the cross-source universal palette yet.
 - Environment report; local analytics
 - System tray, native menu, Dark/Light/**System** theme (persisted)
+- **Red brand identity** (red-600 → rose-500, matching the website) + a
+  black-and-red **launch splashscreen** that fades into the app on boot
 - **Signed auto-update** (from v1.1.0)
 
 Ecosystem integrations (Blink/Killer/Flux/Beacon) are **UI previews only** — no
@@ -161,6 +163,11 @@ Windows and Linux, plus `latest.json` and `SHA256SUMS.txt`, and creates a
   Merge one at a time with CI watching; don't bulk-merge onto a green release.
 - The `docs/` set covers only shipped features by design. If you build Docker/DB/
   API/LSP, add their docs *then*, not before.
+- **The OS launcher icon set is still the old indigo mark.** The new red brand
+  master lives at `apps/desktop/src-tauri/icons/app-icon.svg`, but the raster
+  set (`.ico`/`.icns`/PNGs) wasn't regenerated — the dev box has no SVG
+  rasteriser or Tauri CLI. Export the SVG to `app-icon.png` (1024²) and run
+  `scripts/gen-icons.sh`. The *in-app* logo, favicon and splash are already red.
 
 ## How to keep this honest
 

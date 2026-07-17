@@ -8,6 +8,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Red brand identity + launch splashscreen** — the app now wears Orbit's red
+  (red-600 → rose-500, matched to the website): retuned accent tokens, a
+  redesigned glowing orbit logo, a gradient wordmark in the titlebar, and a
+  red favicon. Launch shows a black-and-red splashscreen — an animated logo,
+  wordmark and loading bar — that fades into the app once projects have loaded.
+  A red master `app-icon.svg` is committed as the source for the OS launcher
+  icon (regenerate the raster set with `scripts/gen-icons.sh` + the Tauri CLI).
 - **Workspace search — find in files** — a new Search tab in each project runs a
   literal, ASCII-case-insensitive (optionally case-sensitive or whole-word)
   content search across the project, powered by the new `orbit_core::search`

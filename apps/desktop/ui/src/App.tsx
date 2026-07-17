@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
+import { Splash } from "@/components/Splash";
 import { useAppStore, watchSystemTheme } from "@/store/app";
 import { isTauri, listProjects, getSetting } from "@/lib/ipc";
 import type { Theme } from "@/store/app";
@@ -9,6 +10,11 @@ export default function App() {
   const setTheme = useAppStore((s) => s.setTheme);
   const setPaletteOpen = useAppStore((s) => s.setPaletteOpen);
 
+  // `booting` drives the splash: true until bootstrap finishes (with a small
+  // minimum so it never flashes); `showSplash` keeps it mounted through the fade.
+  const [booting, setBooting] = useState(true);
+  const [showSplash, setShowSplash] = useState(true);
+
   // Bootstrap: load persisted theme + projects.
   useEffect(() => {
     let cancelled = false;
@@ -17,6 +23,9 @@ export default function App() {
     const unwatch = watchSystemTheme();
 
     (async () => {
+      // Hold the splash at least this long so a fast boot still reads as a launch.
+      const minShown = new Promise((r) => setTimeout(r, 1100));
+
       const stored = await getSetting("theme");
       const valid: Theme[] = ["dark", "light", "system"];
       if (!cancelled && valid.includes(stored as Theme)) {
@@ -26,6 +35,9 @@ export default function App() {
       }
       const projects = await listProjects();
       if (!cancelled) setProjects(projects);
+
+      await minShown;
+      if (!cancelled) setBooting(false);
     })();
 
     return () => {
@@ -51,5 +63,12 @@ export default function App() {
     };
   }, [setPaletteOpen]);
 
-  return <AppShell />;
+  return (
+    <>
+      <AppShell />
+      {showSplash && (
+        <Splash hidden={!booting} onHidden={() => setShowSplash(false)} />
+      )}
+    </>
+  );
 }
