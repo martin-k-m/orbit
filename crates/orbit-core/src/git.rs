@@ -323,6 +323,23 @@ pub fn commit(dir: &Path, message: &str) -> crate::Result<Commit> {
     })
 }
 
+/// Tags, most recently created first.
+pub fn tags(dir: &Path) -> Vec<String> {
+    match run(dir, &["tag", "--sort=-creatordate"]) {
+        Some(o) => o
+            .lines()
+            .map(|l| l.trim().to_string())
+            .filter(|l| !l.is_empty())
+            .collect(),
+        None => Vec::new(),
+    }
+}
+
+/// Create a lightweight tag at HEAD.
+pub fn create_tag(dir: &Path, name: &str) -> crate::Result<()> {
+    run_ok(dir, &["tag", name]).map(|_| ())
+}
+
 /// Local branch names (no ordering guarantee; compare to [`status`]'s `branch`
 /// to find the current one).
 pub fn branches(dir: &Path) -> Vec<String> {
@@ -521,6 +538,21 @@ mod tests {
         assert_eq!(status(d).unwrap().staged.len(), 1);
         unstage(d, "a.txt").unwrap();
         assert_eq!(status(d).unwrap().staged.len(), 0);
+    }
+
+    #[test]
+    fn tags_create_and_list() {
+        let tmp = init_repo();
+        let d = tmp.path();
+        fs::write(d.join("a.txt"), "x\n").unwrap();
+        stage(d, "a.txt").unwrap();
+        commit(d, "init").unwrap();
+
+        assert!(tags(d).is_empty());
+        create_tag(d, "v1.0.0").unwrap();
+        assert_eq!(tags(d), vec!["v1.0.0"]);
+        // A duplicate tag is an error, not a panic.
+        assert!(create_tag(d, "v1.0.0").is_err());
     }
 
     #[test]

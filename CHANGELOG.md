@@ -8,6 +8,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Git tags** — the Source Control panel now lists a repo's tags and can create
+  a lightweight tag at HEAD (new `git::tags`/`create_tag` helpers, unit-tested).
 - **High Contrast theme** — a fourth theme (alongside Dark / Light / System) in
   Settings: a pure-black surface with white text, a vivid red accent and strong
   borders for low-vision use. Persists across restarts like the others.

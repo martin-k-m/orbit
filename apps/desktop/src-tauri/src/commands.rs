@@ -271,6 +271,18 @@ pub fn git_create_branch(path: String, name: String) -> Result<(), String> {
     git::create_branch(Path::new(&path), &name).map_err(|e| e.to_string())
 }
 
+/// Tags, most recent first.
+#[tauri::command]
+pub fn git_tags(path: String) -> Result<Vec<String>, String> {
+    Ok(git::tags(Path::new(&path)))
+}
+
+/// Create a lightweight tag at HEAD.
+#[tauri::command]
+pub fn git_create_tag(path: String, name: String) -> Result<(), String> {
+    git::create_tag(Path::new(&path), &name).map_err(|e| e.to_string())
+}
+
 /// Fetch remote-tracking refs.
 #[tauri::command]
 pub fn git_fetch(path: String) -> Result<(), String> {

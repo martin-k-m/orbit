@@ -66,6 +66,8 @@ pub fn run() {
             commands::git_branches,
             commands::git_switch_branch,
             commands::git_create_branch,
+            commands::git_tags,
+            commands::git_create_tag,
             commands::git_fetch,
             commands::git_pull,
             commands::git_push,

@@ -12,6 +12,7 @@ import {
   Archive,
   ArchiveRestore,
   Trash2,
+  Tag,
   Loader2,
 } from "lucide-react";
 import type { Commit, GitStatus, GitStatusEntry, StashEntry } from "@/lib/types";
@@ -32,6 +33,8 @@ import {
   gitStashList,
   gitStashPop,
   gitStashDrop,
+  gitTags,
+  gitCreateTag,
   isTauri,
 } from "@/lib/ipc";
 import { useAppStore } from "@/store/app";
@@ -51,6 +54,9 @@ export function SourceControlPanel({ root }: { root: string }) {
   const [commits, setCommits] = useState<Commit[]>([]);
   const [branches, setBranches] = useState<string[]>([]);
   const [stashes, setStashes] = useState<StashEntry[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagging, setTagging] = useState(false);
+  const [newTag, setNewTag] = useState("");
   const [loaded, setLoaded] = useState(false);
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
@@ -62,16 +68,18 @@ export function SourceControlPanel({ root }: { root: string }) {
   const [newBranch, setNewBranch] = useState("");
 
   const refresh = useCallback(async () => {
-    const [s, log, brs, sts] = await Promise.all([
+    const [s, log, brs, sts, tgs] = await Promise.all([
       gitStatus(root),
       gitLog(root, 15),
       gitBranches(root),
       gitStashList(root),
+      gitTags(root),
     ]);
     setStatus(s);
     setCommits(log);
     setBranches(brs);
     setStashes(sts);
+    setTags(tgs);
     setLoaded(true);
     // Drop a selection whose file no longer has changes on that side.
     setSelected((sel) => {
@@ -186,6 +194,14 @@ export function SourceControlPanel({ root }: { root: string }) {
       await gitStashSave(root, label);
       setMessage("");
     }, "Stashed");
+  }
+
+  function createTag() {
+    const name = newTag.trim();
+    if (!name) return;
+    setTagging(false);
+    setNewTag("");
+    void sync(() => gitCreateTag(root, name), "Tagged");
   }
 
   if (!loaded) {
@@ -386,6 +402,60 @@ export function SourceControlPanel({ root }: { root: string }) {
               Nothing to commit — working tree clean.
             </p>
           )}
+
+          {/* Tags */}
+          <div className="mt-2 border-t border-white/[0.06] pt-2">
+            <div className="flex items-center gap-2 px-3 pb-1 text-[11px] font-medium uppercase tracking-wider text-fg-subtle">
+              <span>Tags</span>
+              <button
+                onClick={() => setTagging((v) => !v)}
+                className="no-drag ml-auto rounded p-0.5 text-fg-subtle transition-colors hover:bg-white/[0.06] hover:text-fg"
+                title="New tag at HEAD"
+              >
+                <Plus className="h-3 w-3" />
+              </button>
+            </div>
+            {tagging && (
+              <div className="flex items-center gap-1 px-3 pb-1">
+                <input
+                  autoFocus
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") createTag();
+                    if (e.key === "Escape") {
+                      setTagging(false);
+                      setNewTag("");
+                    }
+                  }}
+                  placeholder="v1.0.0"
+                  className="no-drag min-w-0 flex-1 rounded border border-white/[0.1] bg-black/30 px-1.5 py-0.5 text-[12px] text-fg outline-none focus:border-accent/40"
+                />
+                <button
+                  onClick={createTag}
+                  className="no-drag rounded p-0.5 text-accent hover:bg-white/[0.06]"
+                  title="Create tag"
+                >
+                  <Check className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
+            {tags.length === 0 && !tagging ? (
+              <p className="px-3 py-1 text-[11px] text-fg-subtle">No tags.</p>
+            ) : (
+              <div className="flex flex-wrap gap-1 px-3 pb-1">
+                {tags.map((t) => (
+                  <span
+                    key={t}
+                    className="inline-flex items-center gap-1 rounded bg-white/[0.06] px-1.5 py-0.5 text-[11px] text-fg-muted"
+                  >
+                    <Tag className="h-3 w-3 text-accent/80" />
+                    {t}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Stashes */}
           {stashes.length > 0 && (

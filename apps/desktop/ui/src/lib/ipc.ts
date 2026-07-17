@@ -724,6 +724,17 @@ export async function gitCreateBranch(path: string, name: string): Promise<void>
   return invoke<void>("git_create_branch", { path, name });
 }
 
+/** Tags, most recent first. */
+export async function gitTags(path: string): Promise<string[]> {
+  if (!isTauri()) return [];
+  return invoke<string[]>("git_tags", { path });
+}
+
+/** Create a lightweight tag at HEAD. */
+export async function gitCreateTag(path: string, name: string): Promise<void> {
+  return invoke<void>("git_create_tag", { path, name });
+}
+
 /** Fetch remote-tracking refs. */
 export async function gitFetch(path: string): Promise<void> {
   return invoke<void>("git_fetch", { path });
