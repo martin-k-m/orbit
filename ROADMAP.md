@@ -32,7 +32,8 @@ The engine and the shell around it.
 - ✅ **Local analytics** — time per language, build times. Never uploaded.
 - ✅ **Command palette** (`⌘/Ctrl+K`), tray, native menus.
 - ✅ **CLI companion** — `orbit scan|info|health|deps|git|commands|run|init`.
-- ✅ **Auto-update** — signed updates via GitHub Releases.
+- 🚧 **Auto-update** — the updater is wired into the app; publishing signed
+  update artifacts is pending an updater signing key (see docs/releasing.md).
 - ✅ **CI/CD** — test, build and release across macOS (Intel + ARM), Windows, Linux.
 
 ---

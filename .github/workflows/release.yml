@@ -25,16 +25,16 @@ jobs:
         include:
           - label: macOS (Apple Silicon)
             os: macos-latest
-            args: "--target aarch64-apple-darwin --config tauri.release.json"
+            args: "--target aarch64-apple-darwin"
           - label: macOS (Intel)
             os: macos-latest
-            args: "--target x86_64-apple-darwin --config tauri.release.json"
+            args: "--target x86_64-apple-darwin"
           - label: Linux (x64)
             os: ubuntu-latest
-            args: "--config tauri.release.json"
+            args: ""
           - label: Windows (x64)
             os: windows-latest
-            args: "--config tauri.release.json"
+            args: ""
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -71,9 +71,8 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # The updater signing key is unencrypted, so TAURI_SIGNING_PRIVATE_KEY_PASSWORD
-          # must stay UNSET. Setting it (even to "") makes Tauri pass Some("") and
-          # try to decrypt an unencrypted key: "Wrong password for that key".
+          # Updater artifacts (which require a signing key) are opt-in; see
+          # docs/releasing.md to enable signed auto-updates.
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
         with:
           projectPath: apps/desktop/src-tauri
@@ -82,7 +81,7 @@ jobs:
           releaseBody: "Building assets… release notes and checksums are attached when all platforms finish."
           releaseDraft: true
           prerelease: false
-          includeUpdaterJson: true
+          includeUpdaterJson: false
           args: ${{ matrix.args }}
 
   finalize:

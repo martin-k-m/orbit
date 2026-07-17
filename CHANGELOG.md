@@ -31,8 +31,10 @@ The first public release.
   a command palette, project dashboard, project detail views, health, a
   dependency manager, local analytics and ecosystem integrations. React +
   TypeScript + Tailwind frontend with a premium dark design.
-- **Auto-update** — the desktop app checks for, downloads and installs signed
-  updates from GitHub Releases (Tauri updater).
+- **Auto-update (opt-in)** — the desktop app ships the Tauri updater and checks
+  GitHub Releases on launch. Signed update artifacts are not published in
+  v1.0.0: enabling them needs an updater signing key (see docs/releasing.md).
+  Update checks no-op safely until then; installers are the supported path.
 - **Environment file manager** — `orbit_core::env` discovers and parses `.env`,
   `.env.local`, `.env.development`, `.env.production` and `.env.example`, masks
   secrets, and reports duplicate, empty, invalid and missing variables.
