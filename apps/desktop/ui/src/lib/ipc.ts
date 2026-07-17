@@ -16,6 +16,7 @@ import type {
   GitStatus,
   HealthReport,
   HttpResponse,
+  LspDiagnostic,
   ProjectDetail,
   ProjectSummary,
   SearchResults,
@@ -841,6 +842,27 @@ export async function parseTestOutput(output: string): Promise<TestSummary | nul
 export async function fileSymbols(text: string, language?: string | null): Promise<Symbol[]> {
   if (!isTauri()) return [];
   return invoke<Symbol[]>("file_symbols", { text, language: language ?? null });
+}
+
+/** Convert an absolute filesystem path to a `file://` URI (Windows-aware). */
+export function pathToUri(path: string): string {
+  const p = path.replace(/\\/g, "/");
+  return p.startsWith("/") ? `file://${p}` : `file:///${p}`;
+}
+
+/**
+ * Language-server diagnostics for an open document. Starts a server lazily on
+ * the backend and returns whatever it has published (poll for updates). Empty
+ * when no server is installed for the language.
+ */
+export async function lspDiagnostics(
+  rootUri: string,
+  language: string,
+  uri: string,
+  text: string,
+): Promise<LspDiagnostic[]> {
+  if (!isTauri()) return [];
+  return invoke<LspDiagnostic[]>("lsp_diagnostics", { rootUri, language, uri, text });
 }
 
 // --- HTTP (API explorer) ----------------------------------------------------

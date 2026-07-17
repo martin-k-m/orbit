@@ -84,6 +84,7 @@ pub fn run() {
             commands::db_table_rows,
             commands::parse_test_output,
             commands::file_symbols,
+            commands::lsp_diagnostics,
             commands::http_request,
             commands::assess_command,
             commands::run_command,

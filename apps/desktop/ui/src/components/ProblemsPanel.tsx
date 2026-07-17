@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import type { EnvReport, HealthReport } from "@/lib/types";
-import { envReport, isTauri } from "@/lib/ipc";
+import { envReport, lspDiagnostics, pathToUri, isTauri } from "@/lib/ipc";
+import { useEditorStore } from "@/store/editor";
 import { cn } from "@/lib/cn";
 
 type Severity = "error" | "warning";
@@ -30,6 +31,7 @@ export function ProblemsPanel({
   onOpen: (path: string, line?: number) => void;
 }) {
   const [env, setEnv] = useState<EnvReport | null>(null);
+  const [lspProblems, setLspProblems] = useState<Problem[]>([]);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -40,6 +42,44 @@ export function ProblemsPanel({
       .finally(() => !cancelled && setLoaded(true));
     return () => {
       cancelled = true;
+    };
+  }, [root]);
+
+  // Poll language-server diagnostics for the files currently open in the editor.
+  // The backend starts a server lazily and diagnostics arrive asynchronously, so
+  // we re-poll on an interval while the panel is mounted.
+  useEffect(() => {
+    let cancelled = false;
+    const rootUri = pathToUri(root);
+    async function poll() {
+      const tabs = useEditorStore
+        .getState()
+        .tabs.filter((t) => t.path.startsWith(root) && t.contents.language && !t.contents.binary);
+      const batches = await Promise.all(
+        tabs.map(async (t) => {
+          const diags = await lspDiagnostics(
+            rootUri,
+            t.contents.language as string,
+            pathToUri(t.path),
+            t.draft,
+          ).catch(() => []);
+          return diags.map<Problem>((d) => ({
+            severity: d.severity === 1 ? "error" : "warning",
+            source: "LSP",
+            kind: severityKind(d.severity),
+            message: d.message,
+            path: t.path,
+            line: d.range.start.line + 1,
+          }));
+        }),
+      );
+      if (!cancelled) setLspProblems(batches.flat());
+    }
+    void poll();
+    const iv = setInterval(poll, 3000);
+    return () => {
+      cancelled = true;
+      clearInterval(iv);
     };
   }, [root]);
 
@@ -66,9 +106,10 @@ export function ProblemsPanel({
         });
       }
     }
+    list.push(...lspProblems);
     // Errors first, then warnings; stable within each.
     return list.sort((a, b) => rank(a.severity) - rank(b.severity));
-  }, [health, env]);
+  }, [health, env, lspProblems]);
 
   const errors = problems.filter((p) => p.severity === "error").length;
   const warnings = problems.length - errors;
@@ -84,7 +125,7 @@ export function ProblemsPanel({
           <AlertTriangle className="h-3.5 w-3.5 text-warning" />
           {warnings} {warnings === 1 ? "warning" : "warnings"}
         </span>
-        <span className="ml-auto text-fg-subtle/70">Orbit diagnostics · health + environment</span>
+        <span className="ml-auto text-fg-subtle/70">health · environment · language server</span>
       </div>
 
       <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto">
@@ -145,6 +186,19 @@ export function ProblemsPanel({
 
 function rank(s: Severity): number {
   return s === "error" ? 0 : 1;
+}
+
+function severityKind(severity: number): string {
+  switch (severity) {
+    case 1:
+      return "error";
+    case 2:
+      return "warning";
+    case 3:
+      return "info";
+    default:
+      return "hint";
+  }
 }
 
 /** Find the line of an env issue by locating its key in the parsed file. */

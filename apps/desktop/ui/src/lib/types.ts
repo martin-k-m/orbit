@@ -126,6 +126,18 @@ export interface Symbol {
   line: number;
 }
 
+/** A language-server diagnostic (mirrors `orbit_core::lsp::Diagnostic`). */
+export interface LspDiagnostic {
+  range: {
+    start: { line: number; character: number };
+    end: { line: number; character: number };
+  };
+  /** 1 error, 2 warning, 3 information, 4 hint. */
+  severity: number;
+  message: string;
+  source?: string | null;
+}
+
 /** One HTTP response header (mirrors `orbit_core::http::Header`). */
 export interface HttpHeader {
   name: string;

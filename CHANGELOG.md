@@ -16,14 +16,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Commit detail in Source Control** — clicking a commit in the history now
   shows its full patch in the diff viewer (via a new `git show` engine helper,
   unit-tested), so you can review any past change without leaving the panel.
-- **LSP client core** — on top of the base protocol (`Content-Length` framing +
-  JSON-RPC + streaming `Decoder`), a transport-free client **state machine**
-  (`orbit_core::lsp::Session`): the `initialize` handshake, request-id
-  correlation, `didOpen`/`definition`, replies to server-to-client requests, and
-  storing `publishDiagnostics`. Fully unit-tested by scripting a whole
-  conversation — no live server needed. The remaining piece is a driver that
-  spawns a real server (rust-analyzer, typescript-language-server) and surfaces
-  diagnostics / go-to-definition in the UI.
+- **Language-server diagnostics** — first real LSP integration: the Problems
+  panel now shows **live diagnostics from a language server** for the files you
+  have open, merged with the health/environment diagnostics. It's built on a new
+  full LSP client in `orbit_core::lsp` — base protocol (`Content-Length` framing
+  + JSON-RPC + streaming `Decoder`), a transport-free `Session` state machine
+  (handshake, id correlation, `didOpen`/`definition`, `publishDiagnostics`), and
+  an `LspDriver` that spawns a real server and pumps its stdio through the
+  session on a background thread. The pure parts are fully unit-tested; a server
+  is started lazily per language when one is installed (rust-analyzer,
+  typescript-language-server, pylsp, gopls) and Orbit degrades quietly when none
+  is. Go-to-definition plumbing is in place; wiring it to an editor gesture is
+  next.
 - **Document outline** — a toggle in the editor status bar opens an Outline
   panel listing the active file's symbols (functions, classes, structs,
   headings…); clicking one jumps the editor to that line. Symbols come from a

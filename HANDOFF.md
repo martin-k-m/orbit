@@ -90,15 +90,17 @@ real engines behind them.
 
 Be very clear about this — do not claim otherwise in any doc or the UI:
 
-- **No LSP / semantic code intelligence** — the editor is syntactic only. No
-  go-to-definition, find-references, rename, hover types, real diagnostics.
-  (The *client core* exists — `orbit_core::lsp`: Content-Length framing +
-  JSON-RPC + streaming decoder **and** a transport-free `Session` state machine
-  (initialize handshake, id correlation, didOpen/definition, diagnostics store),
-  all unit-tested. What's missing is the **driver** that spawns a real server and
-  pumps its stdio through `Session`, plus the UI wiring — that needs a live
-  server + the Tauri backend, so it only proves out in CI's bundle build.
-  Outline and Problems remain heuristic stand-ins until then.)
+- **LSP is now partially real.** `orbit_core::lsp` is a full client: Content-
+  Length framing + JSON-RPC + streaming decoder, a unit-tested `Session` state
+  machine (handshake/id-correlation/didOpen/definition/diagnostics), and an
+  `LspDriver` that spawns a real server and pumps stdio through the session on a
+  thread. The Tauri `lsp_diagnostics` command starts a server lazily (held in
+  `AppState.lsp`) and the **Problems panel shows live server diagnostics** for
+  open files. Caveats: it re-sends `didOpen` on each 3s poll (no `didChange`
+  yet); **go-to-definition/hover/rename are not wired to an editor gesture**; and
+  the driver + Tauri glue only *compile-prove* in CI's bundle build (src-tauri
+  never builds in PR CI), so treat rust-analyzer behaviour as manually verified.
+  The Outline stays a syntactic heuristic.
 - **No debugger (DAP)**. A **Testing panel** runs the project's `test` command
   and parses cargo/Jest/Vitest/pytest summaries (`orbit_core::testing`), but
   there is no per-test tree/discovery or coverage yet. The **Problems panel**

@@ -380,7 +380,9 @@ pub fn db_table_rows(path: String, table: String) -> Result<orbit_core::db::Quer
 /// Parse captured test-runner output into a pass/fail summary (`null` if no
 /// known format is recognised).
 #[tauri::command]
-pub fn parse_test_output(output: String) -> Result<Option<orbit_core::testing::TestSummary>, String> {
+pub fn parse_test_output(
+    output: String,
+) -> Result<Option<orbit_core::testing::TestSummary>, String> {
     Ok(orbit_core::testing::parse_summary(&output))
 }
 
@@ -388,6 +390,46 @@ pub fn parse_test_output(output: String) -> Result<Option<orbit_core::testing::T
 #[tauri::command]
 pub fn file_symbols(text: String, language: Option<String>) -> Vec<orbit_core::outline::Symbol> {
     orbit_core::outline::symbols(&text, language.as_deref())
+}
+
+/// Diagnostics for an open document from a language server.
+///
+/// Starts a server for `(root_uri, language)` on first use and keeps it alive in
+/// state; opens (or re-sends) the document, then returns whatever diagnostics
+/// have been published so far. Diagnostics arrive asynchronously, so the UI
+/// polls this. Returns an empty list (never an error) when no server is
+/// installed for the language.
+#[tauri::command]
+pub fn lsp_diagnostics(
+    state: State<'_, AppState>,
+    root_uri: String,
+    language: String,
+    uri: String,
+    text: String,
+) -> Result<Vec<orbit_core::lsp::Diagnostic>, String> {
+    use orbit_core::lsp::{server_for, LspDriver};
+
+    let Some((program, args)) = server_for(&language) else {
+        return Ok(Vec::new());
+    };
+
+    let key = format!("{root_uri}|{language}");
+    let mut servers = state
+        .lsp
+        .lock()
+        .map_err(|_| "state lock poisoned".to_string())?;
+    if !servers.contains_key(&key) {
+        match LspDriver::start(program, args, &root_uri) {
+            Ok(driver) => {
+                servers.insert(key.clone(), driver);
+            }
+            // Server not installed / failed to spawn — degrade quietly.
+            Err(_) => return Ok(Vec::new()),
+        }
+    }
+    let driver = servers.get_mut(&key).expect("just inserted");
+    let _ = driver.open(&uri, &language, &text);
+    Ok(driver.diagnostics(&uri))
 }
 
 /// Send an HTTP request (via `curl`) for the API explorer.
@@ -479,11 +521,7 @@ pub fn get_setting(state: State<'_, AppState>, key: String) -> Result<Option<Str
 
 /// Write a persisted UI setting.
 #[tauri::command]
-pub fn set_setting(
-    state: State<'_, AppState>,
-    key: String,
-    value: String,
-) -> Result<(), String> {
+pub fn set_setting(state: State<'_, AppState>, key: String, value: String) -> Result<(), String> {
     state.with_store(|store| store.set_setting(&key, &value).map_err(|e| e.to_string()))
 }
 
@@ -515,11 +553,8 @@ pub fn get_workspace(
     id: String,
     path: String,
 ) -> Result<Workspace, String> {
-    let mut workspace = state.with_store(|store| {
-        store
-            .workspace_or_default(&id)
-            .map_err(|e| e.to_string())
-    })?;
+    let mut workspace =
+        state.with_store(|store| store.workspace_or_default(&id).map_err(|e| e.to_string()))?;
 
     // First open: seed tasks from whatever the scanner detected.
     if workspace.tasks.is_empty() {
