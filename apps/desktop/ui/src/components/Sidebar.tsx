@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   BarChart3,
   Boxes,
+  Container,
   Settings as SettingsIcon,
   Plus,
   Circle,
@@ -40,6 +41,12 @@ const NAV: NavItem[] = [
     icon: Boxes,
     view: { kind: "ecosystem" },
     match: (v) => v.kind === "ecosystem",
+  },
+  {
+    label: "Containers",
+    icon: Container,
+    view: { kind: "docker" },
+    match: (v) => v.kind === "docker",
   },
   {
     label: "Settings",

@@ -81,8 +81,11 @@ Turning projects into true workspaces.
 
 ## v1.3 — Containers, data & APIs 📋
 
-- 📋 **Docker integration** — containers, images, networks, volumes, compose
+- 🚧 **Docker integration** — containers, images, networks, volumes, compose
   projects; start/stop/restart/rebuild/logs/exec; one-click compose startup.
+  First slice shipped: a Containers view listing containers + images with
+  start/stop/restart (backed by `orbit_core::docker`). Networks/volumes/compose/
+  logs/exec are next.
 - 📋 **Database explorer** — SQLite, PostgreSQL, MySQL/MariaDB, Redis. Browse
   tables, view records, run SQL, save queries, CSV import/export.
 - 📋 **API explorer** — REST, GraphQL, WebSockets; collections, variables, auth,

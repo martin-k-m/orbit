@@ -6,6 +6,7 @@ export type View =
   | { kind: "dashboard" }
   | { kind: "analytics" }
   | { kind: "ecosystem" }
+  | { kind: "docker" }
   | { kind: "settings" }
   | { kind: "project"; id: string; path: string };
 

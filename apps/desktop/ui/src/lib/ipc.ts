@@ -5,6 +5,8 @@ import type {
   CommandOutput,
   Commit,
   Dependency,
+  DockerContainer,
+  DockerImage,
   EnvReport,
   FileContents,
   FileNode,
@@ -745,6 +747,34 @@ export async function gitStashPop(path: string, reference: string): Promise<void
 /** Discard a stash entry without applying it. */
 export async function gitStashDrop(path: string, reference: string): Promise<void> {
   return invoke<void>("git_stash_drop", { path, reference });
+}
+
+// --- Docker -----------------------------------------------------------------
+
+/** Whether the Docker CLI + daemon are reachable. */
+export async function dockerAvailable(): Promise<boolean> {
+  if (!isTauri()) return false;
+  return invoke<boolean>("docker_available");
+}
+
+/** All containers (running and stopped). */
+export async function dockerContainers(): Promise<DockerContainer[]> {
+  if (!isTauri()) return [];
+  return invoke<DockerContainer[]>("docker_containers");
+}
+
+/** All local images. */
+export async function dockerImages(): Promise<DockerImage[]> {
+  if (!isTauri()) return [];
+  return invoke<DockerImage[]>("docker_images");
+}
+
+/** Start, stop or restart a container by id. */
+export async function dockerAction(
+  action: "start" | "stop" | "restart",
+  id: string,
+): Promise<void> {
+  return invoke<void>("docker_action", { action, id });
 }
 
 /**

@@ -307,6 +307,38 @@ pub fn git_stash_drop(path: String, reference: String) -> Result<(), String> {
     git::stash_drop(Path::new(&path), &reference).map_err(|e| e.to_string())
 }
 
+// --- Docker ---------------------------------------------------------------
+
+/// Whether the Docker CLI + daemon are reachable.
+#[tauri::command]
+pub fn docker_available() -> bool {
+    orbit_core::docker::available()
+}
+
+/// All containers (running and stopped).
+#[tauri::command]
+pub fn docker_containers() -> Vec<orbit_core::docker::Container> {
+    orbit_core::docker::containers()
+}
+
+/// All local images.
+#[tauri::command]
+pub fn docker_images() -> Vec<orbit_core::docker::Image> {
+    orbit_core::docker::images()
+}
+
+/// Start, stop or restart a container by id.
+#[tauri::command]
+pub fn docker_action(action: String, id: String) -> Result<(), String> {
+    let r = match action.as_str() {
+        "start" => orbit_core::docker::start(&id),
+        "stop" => orbit_core::docker::stop(&id),
+        "restart" => orbit_core::docker::restart(&id),
+        other => return Err(format!("unknown docker action `{other}`")),
+    };
+    r.map_err(|e| e.to_string())
+}
+
 /// Assess how risky a project's command is before running it, so the UI can
 /// show a confirmation dialog for anything destructive.
 #[tauri::command]

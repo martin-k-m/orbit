@@ -80,6 +80,24 @@ export interface StashEntry {
   message: string;
 }
 
+/** A Docker container (mirrors `orbit_core::docker::Container`). */
+export interface DockerContainer {
+  id: string;
+  name: string;
+  image: string;
+  state: string;
+  status: string;
+  ports: string;
+}
+
+/** A Docker image (mirrors `orbit_core::docker::Image`). */
+export interface DockerImage {
+  id: string;
+  repository: string;
+  tag: string;
+  size: string;
+}
+
 export interface HealthWarning {
   kind: string;
   message: string;

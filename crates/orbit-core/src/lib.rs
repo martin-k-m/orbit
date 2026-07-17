@@ -31,6 +31,7 @@
 pub mod analytics;
 pub mod deps;
 pub mod detect;
+pub mod docker;
 pub mod env;
 pub mod error;
 pub mod files;
@@ -129,6 +130,8 @@ mod tests {
         assert_serialize::<git::GitStatus>();
         assert_serialize::<git::StatusEntry>();
         assert_serialize::<git::StashEntry>();
+        assert_serialize::<docker::Container>();
+        assert_serialize::<docker::Image>();
         assert_serialize::<health::HealthReport>();
         assert_serialize::<health::Warning>();
         assert_serialize::<deps::Dependency>();

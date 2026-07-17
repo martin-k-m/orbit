@@ -8,6 +8,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Docker integration** — a new Containers view lists your Docker containers
+  (running + stopped) and images, with one-click start / stop / restart. Built
+  on a new `orbit_core::docker` module that shells out to the `docker` CLI and
+  degrades gracefully when Docker isn't installed or the daemon is down (the
+  JSON parsers are unit-tested). No compose/logs/exec yet.
 - **Quick-open — fuzzy file search in the command palette** — with a project
   open, `⌘/Ctrl+K` and typing now searches that project's files (backed by a new
   capped `orbit_core::files::list_files`, which skips ignored/hidden dirs).
