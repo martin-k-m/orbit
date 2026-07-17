@@ -6,8 +6,22 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.3.0] — 2026-07-17
+
+The IntelliJ-style workspace overhaul. Orbit's IDE grows a real
+tool-window layout — a permanent editor centre with a docked bottom
+tool-window strip — a live status bar, flatter professional chrome, and
+sheds the Ecosystem previews.
+
 ### Changed
 
+- **IntelliJ-style workspace.** A project now opens as a genuine IDE layout: a
+  top toolbar (project, language, live git branch/ahead-behind), the **editor as
+  the permanent centre** (file tree + tabs + breadcrumbs + code, filling the full
+  viewport height), and a collapsible **bottom tool-window strip** — Problems,
+  Git, Search, Testing, Terminal, Overview, Commands, Health, Dependencies — that
+  docks the selected tool below the editor and toggles shut, exactly like the
+  IntelliJ tool windows. The old in-project tab bar is gone.
 - **IntelliJ-style shell + status bar.** A slim IDE **status bar** now runs
   across the bottom — the current git branch, the active editor's caret
   position (Ln, Col), and the file's language / encoding / line ending. The

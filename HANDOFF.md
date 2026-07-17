@@ -4,7 +4,7 @@ A ground-truth snapshot for whoever (or whatever) picks up Orbit next. This is
 the honest state, including the things the marketing pages don't say. If it
 conflicts with a glossier doc, trust this file and fix the other one.
 
-Last updated at **v1.2.0** (the IDE release).
+Last updated at **v1.3.0** (the IntelliJ-style workspace overhaul).
 
 ---
 
@@ -40,7 +40,7 @@ orbit/
 `apps/desktop/src-tauri` is intentionally **excluded** from the workspace
 (`Cargo.toml` `exclude`) because it drags in the webview stack.
 
-## What actually exists (v1.2.0)
+## What actually exists (v1.3.0)
 
 Engine modules (`crates/orbit-core/src/`), all unit-tested:
 
@@ -64,27 +64,39 @@ Engine modules (`crates/orbit-core/src/`), all unit-tested:
 
 Desktop features that are **built and wired to the UI**:
 
-- Project dashboard, command palette (⌘/Ctrl+K), project detail views
-- Git status, health, dependency panels
+- **IntelliJ-style workspace layout** — a project opens as a real IDE: a top
+  toolbar (project, language, live git branch/ahead-behind), the **editor as the
+  permanent centre** (file tree + tabs + breadcrumbs + code, filling the full
+  viewport height), and a collapsible **bottom tool-window strip** that docks one
+  tool below the editor at a time: Problems, Git, Search, Testing, Terminal,
+  Overview, Commands, Health, Dependencies. There is no in-project tab bar; the
+  bottom strip toggles tools open/shut like IntelliJ tool windows.
+- **Projects launcher** (the old "Dashboard"): recent projects + quick actions.
+  Coding stats moved into **Analytics**; live per-project context (git branch,
+  caret Ln/Col, language/encoding/line-ending) lives in the bottom **status bar**.
+- Command palette (⌘/Ctrl+K), project detail data (git status, health, deps)
 - Command runner (safety-guarded), workspace tasks/notes
-- **Integrated terminal** — real PTY (`portable-pty`), xterm.js UI
+- **Integrated terminal** — real PTY (`portable-pty`), xterm.js UI (Terminal tool
+  window, multiple shell tabs + escape hatch to the system terminal)
 - **File explorer + CodeMirror 6 editor** with **multiple editor tabs**
-  (per-tab drafts/dirty state, reopen-focuses, close-picks-neighbour) (Explorer tab)
-- **Workspace search (find in files)** — a Search tab per project backed by
+  (per-tab drafts/dirty state, reopen-focuses, close-picks-neighbour) — the
+  permanent centre panel with breadcrumbs
+- **Workspace search (find in files)** — the Search tool window, backed by
   `orbit_core::search`; click a result to open the file at that line. This is
   project-scoped content search, **not** the cross-source universal palette yet.
-- **Source control (git power center)** — a Source Control tab: staged/unstaged
+- **Source control (git power center)** — the Git tool window: staged/unstaged
   groups, one-click stage/unstage, inline diff, commit, recent history, branch
   switch/create, and fetch/pull/push (pull is ff-only). Backed by
-  `orbit_core::git`. No stash/merge/rebase/cherry-pick/commit-graph yet.
-- Environment report; local analytics
-- System tray, native menu, Dark/Light/**System** theme (persisted)
+  `orbit_core::git`. No merge/rebase/cherry-pick/commit-graph yet.
+- Standalone views (in the left sidebar): Containers (Docker), Database (SQLite),
+  APIs (REST client), Analytics, Settings
+- System tray, native menu, Dark/Light/High-Contrast/**System** theme (persisted)
 - **Red brand identity** (red-600 → rose-500, matching the website) + a
   black-and-red **launch splashscreen** that fades into the app on boot
-- **Signed auto-update** (from v1.1.0)
+- **Signed auto-update** (from v1.1.0) + on-demand "Check for updates" in Settings
 
-Ecosystem integrations (Blink/Killer/Flux/Beacon) are **UI previews only** — no
-real engines behind them.
+The **Ecosystem previews** (Blink/Killer/Flux/Beacon) have been **removed** from
+the UI entirely — they were never backed by real engines.
 
 ## What does NOT exist (despite what big spec prompts asked for)
 
