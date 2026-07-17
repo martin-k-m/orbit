@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import {
   DocCallout,
   DocHeader,
@@ -71,12 +72,12 @@ export default function DocsIntroPage() {
 
         <DocCallout type="tip" title="New to Orbit?">
           Head to{" "}
-          <a
+          <Link
             href="/docs/getting-started"
             className="text-brand-violet underline underline-offset-4"
           >
             Getting started
-          </a>{" "}
+          </Link>{" "}
           to install the app and scan your first workspace in under two minutes.
         </DocCallout>
 
@@ -86,12 +87,12 @@ export default function DocsIntroPage() {
           engine), <InlineCode>orbit-desktop</InlineCode> (the Tauri app),{" "}
           <InlineCode>orbit-cli</InlineCode> (the terminal interface), and{" "}
           <InlineCode>orbit-web</InlineCode> (this site). See the{" "}
-          <a
+          <Link
             href="/docs/architecture"
             className="text-brand-violet underline underline-offset-4"
           >
             Architecture
-          </a>{" "}
+          </Link>{" "}
           page for the full picture.
         </DocP>
       </Prose>

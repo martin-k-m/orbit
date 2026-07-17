@@ -81,8 +81,8 @@ function HealthRing({ value }: { value: number }) {
         />
         <defs>
           <linearGradient id="ring-grad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#6366F1" />
-            <stop offset="1" stopColor="#8B5CF6" />
+            <stop offset="0" stopColor="#DC2626" />
+            <stop offset="1" stopColor="#F43F5E" />
           </linearGradient>
         </defs>
       </svg>

@@ -10,8 +10,8 @@ export function OrbitGlyph({ className }: { className?: string }) {
     >
       <defs>
         <linearGradient id="orbit-glyph-grad" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#6366F1" />
-          <stop offset="1" stopColor="#8B5CF6" />
+          <stop offset="0" stopColor="#DC2626" />
+          <stop offset="1" stopColor="#F43F5E" />
         </linearGradient>
       </defs>
       <circle cx="16" cy="16" r="4" fill="url(#orbit-glyph-grad)" />
@@ -24,7 +24,7 @@ export function OrbitGlyph({ className }: { className?: string }) {
         strokeWidth="1.6"
         transform="rotate(-28 16 16)"
       />
-      <circle cx="25.2" cy="10.6" r="1.9" fill="#8B5CF6" />
+      <circle cx="25.2" cy="10.6" r="1.9" fill="#F43F5E" />
     </svg>
   );
 }

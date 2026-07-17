@@ -30,14 +30,14 @@ body {
 }
 
 ::selection {
-  background-color: rgba(139, 92, 246, 0.35);
+  background-color: rgba(244, 63, 94, 0.35);
   color: #fff;
 }
 
 /* Focus visibility */
 :focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px #08080b, 0 0 0 4px #8b5cf6;
+  box-shadow: 0 0 0 2px #08080b, 0 0 0 4px #F43F5E;
   border-radius: 6px;
 }
 
@@ -88,9 +88,9 @@ body {
 
 .aurora {
   background:
-    radial-gradient(60% 50% at 50% 0%, rgba(99, 102, 241, 0.22) 0%, transparent 70%),
-    radial-gradient(40% 40% at 80% 20%, rgba(139, 92, 246, 0.18) 0%, transparent 70%),
-    radial-gradient(40% 40% at 15% 25%, rgba(56, 189, 248, 0.1) 0%, transparent 70%);
+    radial-gradient(60% 50% at 50% 0%, rgba(220, 38, 38, 0.22) 0%, transparent 70%),
+    radial-gradient(40% 40% at 80% 20%, rgba(244, 63, 94, 0.18) 0%, transparent 70%),
+    radial-gradient(40% 40% at 15% 25%, rgba(251, 113, 133, 0.1) 0%, transparent 70%);
 }
 
 .mask-fade-b {

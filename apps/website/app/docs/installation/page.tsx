@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import {
   DocCallout,
   DocCode,
@@ -27,12 +28,12 @@ export default function InstallationPage() {
       <Prose>
         <DocP>
           Grab the latest installer for your platform from the{" "}
-          <a
+          <Link
             href="/download"
             className="text-brand-violet underline underline-offset-4"
           >
             download page
-          </a>{" "}
+          </Link>{" "}
           or{" "}
           <a
             href="https://github.com/martin-k-m/orbit/releases/latest"
@@ -155,9 +156,9 @@ export default function InstallationPage() {
 
         <DocCallout type="tip">
           After installing, jump to{" "}
-          <a href="/docs/getting-started" className="text-brand-violet underline underline-offset-4">
+          <Link href="/docs/getting-started" className="text-brand-violet underline underline-offset-4">
             Getting started
-          </a>{" "}
+          </Link>{" "}
           to scan your first workspace.
         </DocCallout>
       </Prose>

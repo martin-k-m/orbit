@@ -17,9 +17,12 @@ const config: Config = {
           800: "#111119",
           700: "#16161F",
         },
+        // Brand palette. The historical token names are kept so every existing
+        // `brand-indigo` / `brand-violet` utility recolours at once; the values
+        // are Orbit's red scheme (red-600 → rose-500).
         brand: {
-          indigo: "#6366F1",
-          violet: "#8B5CF6",
+          indigo: "#DC2626",
+          violet: "#F43F5E",
         },
       },
       fontFamily: {

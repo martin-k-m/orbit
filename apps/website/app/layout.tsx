@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 const siteUrl = "https://martin-k-m.github.io/orbit";
+// Matches next.config.mjs basePath so the favicon resolves under the Pages subpath.
+const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -37,7 +39,7 @@ export const metadata: Metadata = {
       "A local-first developer command center. No server, no telemetry, everything on your machine.",
   },
   icons: {
-    icon: "/favicon.svg",
+    icon: `${basePath}/favicon.svg`,
   },
 };
 

@@ -62,8 +62,8 @@ export function EcosystemDiagram() {
             <line x1="50%" y1="50%" x2="10%" y2="50%" stroke="url(#eco-line)" strokeWidth="1" />
             <defs>
               <linearGradient id="eco-line" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stopColor="#6366F1" stopOpacity="0.5" />
-                <stop offset="1" stopColor="#8B5CF6" stopOpacity="0.1" />
+                <stop offset="0" stopColor="#DC2626" stopOpacity="0.5" />
+                <stop offset="1" stopColor="#F43F5E" stopOpacity="0.1" />
               </linearGradient>
             </defs>
           </svg>

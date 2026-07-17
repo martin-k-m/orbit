@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import {
   DocCallout,
   DocCode,
@@ -29,9 +30,9 @@ export default function GettingStartedPage() {
         <DocP>
           Download the latest build for your platform from GitHub Releases, or install
           the CLI. Full platform-specific steps live on the{" "}
-          <a href="/docs/installation" className="text-brand-violet underline underline-offset-4">
+          <Link href="/docs/installation" className="text-brand-violet underline underline-offset-4">
             Installation
-          </a>{" "}
+          </Link>{" "}
           page.
         </DocP>
         <DocCode
@@ -98,13 +99,13 @@ export default function GettingStartedPage() {
 
         <DocCallout type="tip" title="Next up">
           Learn the full command surface on the{" "}
-          <a href="/docs/cli" className="text-brand-violet underline underline-offset-4">
+          <Link href="/docs/cli" className="text-brand-violet underline underline-offset-4">
             CLI reference
-          </a>
+          </Link>
           , or understand how Orbit is built on the{" "}
-          <a href="/docs/architecture" className="text-brand-violet underline underline-offset-4">
+          <Link href="/docs/architecture" className="text-brand-violet underline underline-offset-4">
             Architecture
-          </a>{" "}
+          </Link>{" "}
           page.
         </DocCallout>
       </Prose>

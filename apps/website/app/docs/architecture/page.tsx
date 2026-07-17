@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import {
   DocCallout,
   DocHeader,
@@ -76,9 +77,9 @@ export default function ArchitecturePage() {
           The CLI wraps the same core and is designed for automation. Every command
           accepts <InlineCode>--json</InlineCode>, making Orbit easy to pipe into
           scripts, CI, or other tools. See the{" "}
-          <a href="/docs/cli" className="text-brand-violet underline underline-offset-4">
+          <Link href="/docs/cli" className="text-brand-violet underline underline-offset-4">
             CLI reference
-          </a>
+          </Link>
           .
         </DocP>
 
