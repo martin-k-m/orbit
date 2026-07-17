@@ -1,0 +1,36 @@
+name: Feature request
+description: Suggest an idea or improvement for Orbit.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the pain point. What are you trying to do?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What would you like Orbit to do?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Project scanning / detection
+        - Command running
+        - Git integration
+        - Health / analytics
+        - Dependency manager
+        - Ecosystem integration (Blink / Killer / Flux / Beacon)
+        - Design / UX
+        - CLI
+        - Other
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered

@@ -1,0 +1,660 @@
+import { invoke } from "@tauri-apps/api/core";
+import type {
+  ActivityReport,
+  Assessment,
+  CommandOutput,
+  Dependency,
+  GitInfo,
+  HealthReport,
+  ProjectDetail,
+  ProjectSummary,
+} from "./types";
+
+/** True when running inside the Tauri runtime (vs. a plain browser / CI). */
+export const isTauri = (): boolean =>
+  typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+
+// ---------------------------------------------------------------------------
+// Demo data — used when not running inside Tauri so the app renders in a plain
+// browser (local dev, CI screenshots) and degrades gracefully.
+// ---------------------------------------------------------------------------
+
+const HOUR = 3600 * 1000;
+const now = Date.now();
+
+const DEMO_SUMMARIES: ProjectSummary[] = [
+  {
+    id: "orbit",
+    name: "Orbit",
+    path: "/Users/dev/code/orbit",
+    primaryLanguage: "rust",
+    description: "Local-first developer command center",
+    hasProfile: true,
+    dependencyCount: 41,
+    ecosystemLink: null,
+    commandCount: 5,
+    gitBranch: "main",
+    gitClean: false,
+    changedFiles: 7,
+    lastOpened: now - 0.4 * HOUR,
+    pinned: true,
+  },
+  {
+    id: "blink",
+    name: "Blink",
+    path: "/Users/dev/code/blink",
+    primaryLanguage: "rust",
+    description: "Developer acceleration toolkit",
+    hasProfile: true,
+    dependencyCount: 28,
+    ecosystemLink: "blink",
+    commandCount: 6,
+    gitBranch: "feat/cache-warm",
+    gitClean: true,
+    changedFiles: 0,
+    lastOpened: now - 2 * HOUR,
+    pinned: true,
+  },
+  {
+    id: "beacon",
+    name: "Beacon",
+    path: "/Users/dev/code/beacon",
+    primaryLanguage: "type-script",
+    description: "Runtime monitoring dashboard",
+    hasProfile: false,
+    dependencyCount: 23,
+    ecosystemLink: "beacon",
+    commandCount: 4,
+    gitBranch: "main",
+    gitClean: true,
+    changedFiles: 0,
+    lastOpened: now - 26 * HOUR,
+    pinned: false,
+  },
+  {
+    id: "killer",
+    name: "Killer",
+    path: "/Users/dev/code/killer",
+    primaryLanguage: "rust",
+    description: "Security engine",
+    hasProfile: true,
+    dependencyCount: 34,
+    ecosystemLink: "killer",
+    commandCount: 5,
+    gitBranch: "main",
+    gitClean: false,
+    changedFiles: 3,
+    lastOpened: now - 3 * 24 * HOUR,
+    pinned: false,
+  },
+  {
+    id: "flux",
+    name: "Flux",
+    path: "/Users/dev/code/flux",
+    primaryLanguage: "go",
+    description: "Automation platform",
+    hasProfile: false,
+    dependencyCount: 19,
+    ecosystemLink: "flux",
+    commandCount: 4,
+    gitBranch: "release/1.4",
+    gitClean: true,
+    changedFiles: 0,
+    lastOpened: now - 6 * 24 * HOUR,
+    pinned: false,
+  },
+];
+
+const DEMO_DETAILS: Record<string, ProjectDetail> = {
+  "/Users/dev/code/orbit": {
+    project: {
+      id: "orbit",
+      name: "Orbit",
+      path: "/Users/dev/code/orbit",
+      primaryLanguage: "rust",
+      description: "Local-first developer command center",
+      hasProfile: true,
+      dependencyCount: 41,
+      ecosystemLink: null,
+      ecosystems: [
+        {
+          language: "rust",
+          framework: "Tauri",
+          manifest: "Cargo.toml",
+          commands: [
+            { name: "build", program: "cargo", args: ["build"], description: "Compile the workspace", source: "detected" },
+            { name: "test", program: "cargo", args: ["test"], description: "Run the test suite", source: "detected" },
+            { name: "dev", program: "cargo", args: ["tauri", "dev"], description: "Run desktop app in dev mode", source: "profile" },
+          ],
+        },
+      ],
+      commands: [
+        { name: "build", program: "cargo", args: ["build"], description: "Compile the workspace", source: "detected" },
+        { name: "test", program: "cargo", args: ["test"], description: "Run the test suite", source: "detected" },
+        { name: "lint", program: "cargo", args: ["clippy"], description: "Lint with clippy", source: "detected" },
+        { name: "dev", program: "cargo", args: ["tauri", "dev"], description: "Run desktop app in dev mode", source: "profile" },
+        { name: "fmt", program: "cargo", args: ["fmt"], description: "Format the codebase", source: "convention" },
+      ],
+    },
+    git: {
+      branch: "main",
+      isClean: false,
+      changedFiles: 7,
+      ahead: 2,
+      behind: 0,
+      lastCommit: {
+        hash: "9f2c1a4e8b7d3f60a1c2e5f7b9d0a3c6e8f1b2d4",
+        shortHash: "9f2c1a4",
+        summary: "feat(ui): glass command palette + page transitions",
+        author: "Martin Muskov",
+        timestamp: now - 0.6 * HOUR,
+      },
+    },
+    health: {
+      score: 92,
+      fileCount: 214,
+      totalLines: 28430,
+      todoCount: 12,
+      warnings: [
+        { kind: "large-file", message: "app.rs is 640 lines — consider splitting", path: "src/app.rs", penalty: 5 },
+        { kind: "todo", message: "12 TODO/FIXME markers across the codebase", path: null, penalty: 3 },
+      ],
+    },
+    dependencies: [
+      { name: "tauri", current: "2.1.1", dev: false, language: "rust" },
+      { name: "serde", current: "1.0.217", dev: false, language: "rust" },
+      { name: "tokio", current: "1.42.0", dev: false, language: "rust" },
+      { name: "sqlx", current: "0.8.2", dev: false, language: "rust" },
+      { name: "anyhow", current: "1.0.95", dev: false, language: "rust" },
+      { name: "tracing", current: "0.1.41", dev: false, language: "rust" },
+      { name: "insta", current: "1.42.0", dev: true, language: "rust" },
+    ],
+  },
+  "/Users/dev/code/blink": {
+    project: {
+      id: "blink",
+      name: "Blink",
+      path: "/Users/dev/code/blink",
+      primaryLanguage: "rust",
+      description: "Developer acceleration toolkit",
+      hasProfile: true,
+      dependencyCount: 28,
+      ecosystemLink: "blink",
+      ecosystems: [
+        {
+          language: "rust",
+          framework: null,
+          manifest: "Cargo.toml",
+          commands: [
+            { name: "build", program: "cargo", args: ["build", "--release"], description: "Release build", source: "detected" },
+            { name: "bench", program: "cargo", args: ["bench"], description: "Run benchmarks", source: "detected" },
+          ],
+        },
+      ],
+      commands: [
+        { name: "build", program: "cargo", args: ["build", "--release"], description: "Release build", source: "detected" },
+        { name: "test", program: "cargo", args: ["test"], description: "Run the test suite", source: "detected" },
+        { name: "bench", program: "cargo", args: ["bench"], description: "Run benchmarks", source: "detected" },
+        { name: "warm", program: "blink", args: ["warm"], description: "Warm the build cache", source: "profile" },
+        { name: "accelerate", program: "blink", args: ["accelerate"], description: "Accelerate incremental builds", source: "profile" },
+        { name: "fmt", program: "cargo", args: ["fmt"], description: "Format the codebase", source: "convention" },
+      ],
+    },
+    git: {
+      branch: "feat/cache-warm",
+      isClean: true,
+      changedFiles: 0,
+      ahead: 0,
+      behind: 1,
+      lastCommit: {
+        hash: "3a7b9c2d1e4f5061728394a5b6c7d8e9f0a1b2c3",
+        shortHash: "3a7b9c2",
+        summary: "perf: parallelize dependency graph resolution",
+        author: "Martin Muskov",
+        timestamp: now - 2.2 * HOUR,
+      },
+    },
+    health: {
+      score: 87,
+      fileCount: 156,
+      totalLines: 19875,
+      todoCount: 8,
+      warnings: [
+        { kind: "large-file", message: "parser.rs is 900 lines — consider splitting", path: "src/parser.rs", penalty: 8 },
+        { kind: "outdated-dependency", message: "5 dependencies have newer versions available", path: "Cargo.toml", penalty: 5 },
+      ],
+    },
+    dependencies: [
+      { name: "clap", current: "4.5.23", dev: false, language: "rust" },
+      { name: "rayon", current: "1.10.0", dev: false, language: "rust" },
+      { name: "dashmap", current: "6.1.0", dev: false, language: "rust" },
+      { name: "notify", current: "7.0.0", dev: false, language: "rust" },
+      { name: "criterion", current: "0.5.1", dev: true, language: "rust" },
+    ],
+  },
+  "/Users/dev/code/beacon": {
+    project: {
+      id: "beacon",
+      name: "Beacon",
+      path: "/Users/dev/code/beacon",
+      primaryLanguage: "type-script",
+      description: "Runtime monitoring dashboard",
+      hasProfile: false,
+      dependencyCount: 23,
+      ecosystemLink: "beacon",
+      ecosystems: [
+        {
+          language: "type-script",
+          framework: "Next.js",
+          manifest: "package.json",
+          commands: [
+            { name: "dev", program: "npm", args: ["run", "dev"], description: "Start the dev server", source: "detected" },
+            { name: "build", program: "npm", args: ["run", "build"], description: "Production build", source: "detected" },
+          ],
+        },
+      ],
+      commands: [
+        { name: "dev", program: "npm", args: ["run", "dev"], description: "Start the dev server", source: "detected" },
+        { name: "build", program: "npm", args: ["run", "build"], description: "Production build", source: "detected" },
+        { name: "test", program: "npm", args: ["test"], description: "Run tests", source: "detected" },
+        { name: "lint", program: "npm", args: ["run", "lint"], description: "Lint the project", source: "convention" },
+      ],
+    },
+    git: {
+      branch: "main",
+      isClean: true,
+      changedFiles: 0,
+      ahead: 0,
+      behind: 0,
+      lastCommit: {
+        hash: "5c8d1e2f3a4b5061728394a5b6c7d8e9f0a1b2c3",
+        shortHash: "5c8d1e2",
+        summary: "feat: add p95 latency panel to overview",
+        author: "Martin Muskov",
+        timestamp: now - 26 * HOUR,
+      },
+    },
+    health: {
+      score: 79,
+      fileCount: 189,
+      totalLines: 16240,
+      todoCount: 21,
+      warnings: [
+        { kind: "todo", message: "21 TODO/FIXME markers across the codebase", path: null, penalty: 6 },
+        { kind: "missing-tests", message: "3 route handlers have no test coverage", path: "app/api", penalty: 9 },
+        { kind: "outdated-dependency", message: "next is 2 minor versions behind", path: "package.json", penalty: 6 },
+      ],
+    },
+    dependencies: [
+      { name: "next", current: "15.1.3", dev: false, language: "type-script" },
+      { name: "react", current: "19.0.0", dev: false, language: "type-script" },
+      { name: "recharts", current: "2.15.0", dev: false, language: "type-script" },
+      { name: "zod", current: "3.24.1", dev: false, language: "type-script" },
+      { name: "tailwindcss", current: "3.4.17", dev: true, language: "type-script" },
+      { name: "vitest", current: "2.1.8", dev: true, language: "type-script" },
+    ],
+  },
+  "/Users/dev/code/killer": {
+    project: {
+      id: "killer",
+      name: "Killer",
+      path: "/Users/dev/code/killer",
+      primaryLanguage: "rust",
+      description: "Security engine",
+      hasProfile: true,
+      dependencyCount: 34,
+      ecosystemLink: "killer",
+      ecosystems: [
+        {
+          language: "rust",
+          framework: null,
+          manifest: "Cargo.toml",
+          commands: [
+            { name: "build", program: "cargo", args: ["build", "--release"], description: "Release build", source: "detected" },
+            { name: "scan", program: "killer", args: ["scan"], description: "Run a security scan", source: "profile" },
+          ],
+        },
+      ],
+      commands: [
+        { name: "build", program: "cargo", args: ["build", "--release"], description: "Release build", source: "detected" },
+        { name: "test", program: "cargo", args: ["test"], description: "Run the test suite", source: "detected" },
+        { name: "scan", program: "killer", args: ["scan"], description: "Run a security scan", source: "profile" },
+        { name: "audit", program: "cargo", args: ["audit"], description: "Audit dependencies", source: "detected" },
+        { name: "fmt", program: "cargo", args: ["fmt"], description: "Format the codebase", source: "convention" },
+      ],
+    },
+    git: {
+      branch: "main",
+      isClean: false,
+      changedFiles: 3,
+      ahead: 1,
+      behind: 0,
+      lastCommit: {
+        hash: "7e1f2a3b4c5d6071829304a5b6c7d8e9f0a1b2c3",
+        shortHash: "7e1f2a3",
+        summary: "fix: patch CVE in transitive tls dependency",
+        author: "Martin Muskov",
+        timestamp: now - 3 * 24 * HOUR,
+      },
+    },
+    health: {
+      score: 90,
+      fileCount: 172,
+      totalLines: 22110,
+      todoCount: 5,
+      warnings: [
+        { kind: "todo", message: "5 TODO/FIXME markers across the codebase", path: null, penalty: 2 },
+      ],
+    },
+    dependencies: [
+      { name: "ring", current: "0.17.8", dev: false, language: "rust" },
+      { name: "rustls", current: "0.23.20", dev: false, language: "rust" },
+      { name: "regex", current: "1.11.1", dev: false, language: "rust" },
+      { name: "serde_json", current: "1.0.134", dev: false, language: "rust" },
+      { name: "proptest", current: "1.6.0", dev: true, language: "rust" },
+    ],
+  },
+  "/Users/dev/code/flux": {
+    project: {
+      id: "flux",
+      name: "Flux",
+      path: "/Users/dev/code/flux",
+      primaryLanguage: "go",
+      description: "Automation platform",
+      hasProfile: false,
+      dependencyCount: 19,
+      ecosystemLink: "flux",
+      ecosystems: [
+        {
+          language: "go",
+          framework: null,
+          manifest: "go.mod",
+          commands: [
+            { name: "build", program: "go", args: ["build", "./..."], description: "Build all packages", source: "detected" },
+            { name: "test", program: "go", args: ["test", "./..."], description: "Run all tests", source: "detected" },
+          ],
+        },
+      ],
+      commands: [
+        { name: "build", program: "go", args: ["build", "./..."], description: "Build all packages", source: "detected" },
+        { name: "test", program: "go", args: ["test", "./..."], description: "Run all tests", source: "detected" },
+        { name: "run", program: "go", args: ["run", "."], description: "Run the application", source: "detected" },
+        { name: "vet", program: "go", args: ["vet", "./..."], description: "Vet the codebase", source: "convention" },
+      ],
+    },
+    git: {
+      branch: "release/1.4",
+      isClean: true,
+      changedFiles: 0,
+      ahead: 0,
+      behind: 0,
+      lastCommit: {
+        hash: "1b2c3d4e5f60718293a4b5c6d7e8f9a0b1c2d3e4",
+        shortHash: "1b2c3d4",
+        summary: "chore: cut 1.4.0 release candidate",
+        author: "Martin Muskov",
+        timestamp: now - 6 * 24 * HOUR,
+      },
+    },
+    health: {
+      score: 84,
+      fileCount: 143,
+      totalLines: 15320,
+      todoCount: 9,
+      warnings: [
+        { kind: "todo", message: "9 TODO/FIXME markers across the codebase", path: null, penalty: 4 },
+        { kind: "large-file", message: "scheduler.go is 720 lines — consider splitting", path: "internal/scheduler.go", penalty: 6 },
+      ],
+    },
+    dependencies: [
+      { name: "cobra", current: "1.8.1", dev: false, language: "go" },
+      { name: "viper", current: "1.19.0", dev: false, language: "go" },
+      { name: "zap", current: "1.27.0", dev: false, language: "go" },
+      { name: "testify", current: "1.10.0", dev: true, language: "go" },
+    ],
+  },
+};
+
+const DEMO_ACTIVITY: ActivityReport = {
+  totalSeconds: 25 * 3600,
+  projectsTouched: 5,
+  sessionCount: 34,
+  languages: [
+    { language: "rust", seconds: 14 * 3600 },
+    { language: "type-script", seconds: 8 * 3600 },
+    { language: "python", seconds: 3 * 3600 },
+  ],
+  medianBuildMs: 2000,
+};
+
+const demoSettings = new Map<string, string>([
+  ["theme", "dark"],
+  ["data-location", "~/Library/Application Support/dev.orbit.app"],
+]);
+
+// A mutable copy so demo mutations (pin/remove/add) feel real in the browser.
+let demoSummaries: ProjectSummary[] = DEMO_SUMMARIES.map((p) => ({ ...p }));
+
+function detailFor(path: string): ProjectDetail {
+  const detail = DEMO_DETAILS[path];
+  if (detail) return detail;
+  // Fabricate a minimal detail for unknown demo paths.
+  const summary = demoSummaries.find((p) => p.path === path);
+  const name = summary?.name ?? "Project";
+  return {
+    project: {
+      id: summary?.id ?? name.toLowerCase(),
+      name,
+      path,
+      primaryLanguage: summary?.primaryLanguage ?? "unknown",
+      description: summary?.description ?? null,
+      hasProfile: summary?.hasProfile ?? false,
+      dependencyCount: summary?.dependencyCount ?? 0,
+      ecosystemLink: summary?.ecosystemLink ?? null,
+      ecosystems: [],
+      commands: [],
+    },
+    git: null,
+    health: { score: 75, fileCount: 0, totalLines: 0, todoCount: 0, warnings: [] },
+    dependencies: [],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Typed IPC wrappers. Fall back to demo data outside Tauri.
+// ---------------------------------------------------------------------------
+
+export async function scanFolder(path: string): Promise<ProjectSummary[]> {
+  if (!isTauri()) return demoSummaries;
+  return invoke<ProjectSummary[]>("scan_folder", { path });
+}
+
+export async function listProjects(): Promise<ProjectSummary[]> {
+  if (!isTauri()) return demoSummaries;
+  return invoke<ProjectSummary[]>("list_projects");
+}
+
+export async function addProject(path: string): Promise<ProjectSummary[]> {
+  if (!isTauri()) {
+    const name = path.split(/[\\/]/).filter(Boolean).pop() ?? "New Project";
+    if (!demoSummaries.some((p) => p.path === path)) {
+      demoSummaries = [
+        ...demoSummaries,
+        {
+          id: name.toLowerCase().replace(/\s+/g, "-"),
+          name,
+          path,
+          primaryLanguage: "unknown",
+          description: null,
+          hasProfile: false,
+          dependencyCount: 0,
+          ecosystemLink: null,
+          commandCount: 0,
+          gitBranch: null,
+          gitClean: null,
+          changedFiles: null,
+          lastOpened: Date.now(),
+          pinned: false,
+        },
+      ];
+    }
+    return demoSummaries;
+  }
+  return invoke<ProjectSummary[]>("add_project", { path });
+}
+
+export async function removeProject(id: string): Promise<void> {
+  if (!isTauri()) {
+    demoSummaries = demoSummaries.filter((p) => p.id !== id);
+    return;
+  }
+  return invoke<void>("remove_project", { id });
+}
+
+export async function setPinned(id: string, pinned: boolean): Promise<void> {
+  if (!isTauri()) {
+    demoSummaries = demoSummaries.map((p) =>
+      p.id === id ? { ...p, pinned } : p,
+    );
+    return;
+  }
+  return invoke<void>("set_pinned", { id, pinned });
+}
+
+export async function openProject(
+  id: string,
+  path: string,
+): Promise<ProjectDetail> {
+  if (!isTauri()) {
+    demoSummaries = demoSummaries.map((p) =>
+      p.id === id ? { ...p, lastOpened: Date.now() } : p,
+    );
+    return detailFor(path);
+  }
+  return invoke<ProjectDetail>("open_project", { id, path });
+}
+
+export async function projectDetail(path: string): Promise<ProjectDetail> {
+  if (!isTauri()) return detailFor(path);
+  return invoke<ProjectDetail>("project_detail", { path });
+}
+
+export async function projectHealth(path: string): Promise<HealthReport> {
+  if (!isTauri()) return detailFor(path).health;
+  return invoke<HealthReport>("project_health", { path });
+}
+
+export async function projectDeps(path: string): Promise<Dependency[]> {
+  if (!isTauri()) return detailFor(path).dependencies;
+  return invoke<Dependency[]>("project_deps", { path });
+}
+
+export async function gitInfo(path: string): Promise<GitInfo | null> {
+  if (!isTauri()) return detailFor(path).git ?? null;
+  return invoke<GitInfo | null>("git_info", { path });
+}
+
+/**
+ * Assess how risky a project's command is before running it. Mirrors the
+ * engine's `orbit_core::safety` guard so the UI can show a confirmation dialog.
+ */
+export async function assessCommand(
+  path: string,
+  name: string,
+): Promise<Assessment> {
+  if (!isTauri()) {
+    const detail = detailFor(path);
+    const cmd = detail.project.commands.find((c) => c.name === name);
+    return assessDemo(cmd ? [cmd.program, ...cmd.args].join(" ") : name);
+  }
+  return invoke<Assessment>("assess_command", { path, name });
+}
+
+export async function runCommand(
+  path: string,
+  name: string,
+  confirmed?: boolean,
+): Promise<CommandOutput> {
+  if (!isTauri()) {
+    const detail = detailFor(path);
+    const cmd = detail.project.commands.find((c) => c.name === name);
+    const invocation = cmd ? [cmd.program, ...cmd.args].join(" ") : name;
+    const assessment = assessDemo(invocation);
+    if (assessment.risk === "dangerous" && confirmed !== true) {
+      throw new Error(`confirmation required: ${assessment.reasons.join("; ")}`);
+    }
+    return {
+      code: 0,
+      stdout: `$ ${invocation}\n\n[demo] Executed "${name}" in ${detail.project.name}.\nFinished in 2.0s — 0 errors, 0 warnings.\n`,
+      stderr: "",
+    };
+  }
+  return invoke<CommandOutput>("run_command", { path, name, confirmed });
+}
+
+/** A tiny client-side mirror of the engine's dangerous-command heuristic. */
+function assessDemo(line: string): Assessment {
+  const l = ` ${line.toLowerCase()} `;
+  const reasons: string[] = [];
+  if (/ rm .*-(rf|fr)/.test(l) || l.includes("remove-item") && l.includes("-recurse")) {
+    reasons.push("Recursive, forced file deletion");
+  }
+  if (l.includes("mkfs") || l.includes(" dd ") || l.includes("of=/dev/")) {
+    reasons.push("Low-level disk operation");
+  }
+  if ((l.includes("curl") || l.includes("wget")) && (l.includes("| sh") || l.includes("| bash"))) {
+    reasons.push("Downloads and executes a remote script");
+  }
+  return { risk: reasons.length ? "dangerous" : "safe", reasons };
+}
+
+export async function generateProfile(path: string): Promise<string> {
+  if (!isTauri()) {
+    const detail = detailFor(path);
+    return `# orbit.toml — generated for ${detail.project.name}\n[project]\nname = "${detail.project.name}"\nlanguage = "${detail.project.primaryLanguage}"\n`;
+  }
+  return invoke<string>("generate_profile", { path });
+}
+
+export async function activityReport(days?: number): Promise<ActivityReport> {
+  if (!isTauri()) return DEMO_ACTIVITY;
+  return invoke<ActivityReport>("activity_report", { days });
+}
+
+export async function getSetting(key: string): Promise<string | null> {
+  if (!isTauri()) return demoSettings.get(key) ?? null;
+  return invoke<string | null>("get_setting", { key });
+}
+
+export async function setSetting(key: string, value: string): Promise<void> {
+  if (!isTauri()) {
+    demoSettings.set(key, value);
+    return;
+  }
+  return invoke<void>("set_setting", { key, value });
+}
+
+export async function openTerminal(path: string): Promise<void> {
+  if (!isTauri()) {
+    // eslint-disable-next-line no-console
+    console.info(`[demo] open terminal at ${path}`);
+    return;
+  }
+  return invoke<void>("open_terminal", { path });
+}
+
+export async function appVersion(): Promise<string> {
+  if (!isTauri()) return "0.1.0-demo";
+  return invoke<string>("app_version");
+}
+
+/** Open the native folder picker; returns null if cancelled. */
+export async function pickFolder(): Promise<string | null> {
+  if (!isTauri()) {
+    return "/Users/dev/code/new-project";
+  }
+  const { open } = await import("@tauri-apps/plugin-dialog");
+  const result = await open({ directory: true, multiple: false });
+  if (result == null) return null;
+  return Array.isArray(result) ? (result[0] ?? null) : result;
+}

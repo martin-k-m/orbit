@@ -1,0 +1,47 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/orbit-core",
+    "crates/orbit-cli",
+]
+# The Tauri app (apps/desktop/src-tauri) is intentionally its own crate outside
+# this workspace: it drags in the platform webview stack, so keeping it separate
+# lets `cargo test` here stay fast and hermetic. CI builds the desktop app on
+# its own via the Tauri action.
+exclude = ["apps/desktop"]
+
+[workspace.package]
+version = "1.0.0"
+edition = "2021"
+rust-version = "1.77"
+license = "MIT"
+authors = ["Orbit Contributors"]
+homepage = "https://orbit.dev"
+repository = "https://github.com/martin-k-m/orbit"
+description = "A local-first developer command center."
+
+[workspace.dependencies]
+orbit-core = { path = "crates/orbit-core" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "1"
+anyhow = "1"
+walkdir = "2"
+time = { version = "0.3", features = ["serde", "formatting", "parsing", "macros"] }
+rusqlite = { version = "0.31", features = ["bundled"] }
+toml = "0.8"
+clap = { version = "4", features = ["derive"] }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_debug_implementations = "warn"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"

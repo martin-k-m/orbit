@@ -1,0 +1,54 @@
+name: Bug report
+description: Something in Orbit isn't working as expected.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to file a bug! Please fill in the details below.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug, and what you expected instead.
+      placeholder: When I scan ~/code, Orbit misses my Go project because…
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open Orbit
+        2. Add folder …
+        3. See error …
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Which surface?
+      options:
+        - Desktop app (orbit-desktop)
+        - CLI (orbit)
+        - Website (orbit-web)
+        - Engine (orbit-core)
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: macOS 14.5 / Windows 11 / Ubuntu 24.04
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Orbit version
+      placeholder: 0.1.0 (see the About panel or `orbit --version`)
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / output
+      description: Paste any relevant terminal output. `orbit <cmd> --json` output is helpful.
+      render: shell

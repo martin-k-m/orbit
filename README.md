@@ -1,0 +1,198 @@
+<div align="center">
+
+<img src="assets/banner.svg" alt="Orbit — your development workflow, unified" width="100%" />
+
+<br/>
+
+**A local-first developer command center for managing projects, tools, and workflows.**
+
+No server. No account. No telemetry. Everything runs on your machine.
+
+[![Test](https://github.com/martin-k-m/orbit/actions/workflows/test.yml/badge.svg)](https://github.com/martin-k-m/orbit/actions/workflows/test.yml)
+[![Build](https://github.com/martin-k-m/orbit/actions/workflows/build.yml/badge.svg)](https://github.com/martin-k-m/orbit/actions/workflows/build.yml)
+[![Release](https://github.com/martin-k-m/orbit/actions/workflows/release.yml/badge.svg)](https://github.com/martin-k-m/orbit/actions/workflows/release.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-6366F1.svg)](LICENSE)
+[![Built with Rust](https://img.shields.io/badge/built%20with-Rust-F74C00.svg?logo=rust&logoColor=white)](https://www.rust-lang.org)
+[![Powered by Tauri](https://img.shields.io/badge/powered%20by-Tauri%202-24C8DB.svg?logo=tauri&logoColor=white)](https://tauri.app)
+
+[Download](#-download) · [Features](#-features) · [Architecture](docs/architecture.md) · [Development](docs/development.md) · [Contributing](docs/contributing.md)
+
+</div>
+
+---
+
+## What is Orbit?
+
+Orbit is the desktop centerpiece of your development setup. It scans your code
+folders, understands your projects, and gives you one fast, beautiful place to
+run commands, check git status, watch project health, browse dependencies and
+review how you spend your time — all **locally**.
+
+Think of it as the calm control room for everything you build:
+
+- the **project switching** of Arc,
+- the **command palette** of Raycast,
+- the **polish** of Linear,
+- the **process control** of Docker Desktop —
+
+…designed specifically for developers, and never phoning home.
+
+> **Local-first by design.** Orbit has no backend. Your projects, settings and
+> analytics live in a single SQLite database on your machine and are never
+> uploaded anywhere.
+
+## ✨ Features
+
+| | |
+| --- | --- |
+| 🗂 **Project management** | Point Orbit at a folder and it detects every Rust, Node/TypeScript, Python, Go and Docker project inside — with the right commands, frameworks and dependencies. |
+| ⌘ **Command center** | A `Cmd/Ctrl + K` palette to jump to any project, run `dev`/`build`/`test`, open a terminal or scan a folder — without leaving the keyboard. |
+| ▶️ **Run anything** | One click runs a project's dev server, build or tests. Commands are inferred from manifests and can be pinned in a `.project-orbit` profile. |
+| 🌿 **Git at a glance** | Branch, cleanliness, ahead/behind and last commit for every project, read straight from your local repos. |
+| 🩺 **Project health** | A 0–100 score with concrete warnings — oversized files, stray TODOs, heavy artifacts, missing tests. |
+| 📦 **Dependency manager** | The declared dependencies of every ecosystem in a project, read offline from its manifests. |
+| 📊 **Developer analytics** | Local, private time tracking: hours per language, projects touched, build times. Never uploaded. |
+| 🛰 **Ecosystem integration** | First-class hooks for **Blink** (acceleration), **Killer** (security), **Flux** (automation) and **Beacon** (APIs). |
+| 🖥 **Native & premium** | Tauri 2 app for macOS, Windows and Linux with a tray, native menus, keyboard shortcuts and a dark, glass-panelled design. |
+| ⌨️ **A real CLI** | The same engine as a terminal companion: `orbit scan`, `orbit info`, `orbit health`, `orbit run`. |
+
+## 🧭 The ecosystem
+
+Orbit is the hub that ties a family of local developer tools together:
+
+```
+                       Orbit
+                         │
+      ┌─────────┬────────┼────────┬─────────┐
+      │         │        │        │         │
+    Blink     Flux     Killer   Beacon   (your project)
+    build   automate  security   API
+```
+
+Detect a sibling project and Orbit surfaces the right action — *Accelerate with
+Blink*, *Security scan with Killer*, *Automate with Flux*, *Monitor with
+Beacon*. Integrations that don't have an engine present are shown as clearly
+labelled previews.
+
+## 📦 Download
+
+Grab the latest installer from the [**Releases**](https://github.com/martin-k-m/orbit/releases/latest) page:
+
+| Platform | File |
+| --- | --- |
+| 🍎 **macOS** (Apple Silicon & Intel) | `.dmg` |
+| 🪟 **Windows** | `.msi` / `.exe` |
+| 🐧 **Linux** | `.AppImage` / `.deb` |
+
+Or build from source — see [docs/development.md](docs/development.md).
+
+## ⌨️ The CLI
+
+The engine ships as a standalone binary too:
+
+```console
+$ orbit scan ~/code
+✔ 5 projects under ~/code
+
+  Blink                   Rust    ◆ Blink
+  Beacon                  TypeScript
+  Flux                    Go      ◆ Flux
+  Killer                  Rust    ◆ Killer
+  Orbit                   Rust
+
+$ orbit info ./blink
+Blink
+ Rust   ~/code/blink
+Developer acceleration toolkit
+
+Git
+  branch   main  ✓ clean
+  latest   a1b2c3d Added compiler optimization
+
+Health  87/100  Good
+  12 files · 3,410 lines · 4 TODOs
+  ⚠ src/parser.rs — 900 lines
+```
+
+Install it with `cargo install --path crates/orbit-cli` (binary name: `orbit`).
+
+## 🏗 Architecture
+
+Orbit is one Rust engine with three thin surfaces:
+
+```
+orbit/
+├── apps/
+│   ├── desktop/         # Tauri 2 app — Rust backend (src-tauri) + React UI (ui)
+│   └── website/         # Next.js marketing site + documentation
+├── crates/
+│   ├── orbit-core/      # the engine: scan · detect · git · health · analytics · SQLite
+│   └── orbit-cli/       # terminal companion (binary `orbit`)
+├── packages/            # shared, reusable packages
+├── scripts/             # release & tooling helpers
+└── docs/                # architecture · development · contributing
+```
+
+All the interesting logic — what a project is, how healthy it is, which
+commands it exposes — lives in **`orbit-core`** and is unit-tested without a UI.
+The desktop app and CLI are shells over it, so behaviour is identical
+everywhere. Read the full write-up in [docs/architecture.md](docs/architecture.md).
+
+**Tech:** Rust · Tauri 2 · React + TypeScript · Tailwind CSS · SQLite · Next.js.
+
+## 🚀 Quick start (from source)
+
+```bash
+# Engine + CLI (one Cargo workspace)
+cargo test
+cargo run -p orbit-cli -- scan ~/code
+
+# Desktop app
+npm --prefix apps/desktop/ui install
+cargo tauri dev --config apps/desktop/src-tauri/tauri.conf.json
+
+# Website
+npm --prefix apps/website install && npm --prefix apps/website run dev
+```
+
+Full prerequisites and workflows are in [docs/development.md](docs/development.md).
+
+## 🔒 Privacy
+
+Orbit makes **no network requests** on its hot paths. Dependency inspection
+reads manifests on disk instead of calling a registry. Analytics are aggregated
+locally and never leave your machine. The desktop app ships a restrictive CSP
+and a minimal Tauri capability set, and `orbit-core` forbids `unsafe` code.
+
+## 🗺 Roadmap
+
+Orbit v1.0 is the foundation. Where it's headed:
+
+- **Live process control** — streaming logs and a process manager for long-
+  running dev servers, right in the app.
+- **Deeper dependency intelligence** — "update available" hints and vulnerability
+  flags, computed locally.
+- **Richer ecosystem plugins** — a stable plugin manifest so Blink, Killer, Flux
+  and Beacon (and third parties) can register actions.
+- **Embedded terminal** — a full terminal panel per project.
+- **Workspaces & tags** — group and filter large project collections.
+- **File watching** — auto-refresh git and health as files change.
+
+Have an idea? [Open a feature request](https://github.com/martin-k-m/orbit/issues/new/choose).
+
+## 🤝 Contributing
+
+Contributions are welcome! Start with [docs/contributing.md](docs/contributing.md)
+and the good-first-issue label. Before pushing:
+
+```bash
+cargo fmt --all
+cargo clippy --all-targets -- -D warnings
+cargo test
+```
+
+## 📄 License
+
+[MIT](LICENSE) © Orbit Contributors.
+
+<div align="center"><sub>Built for developers who want their tools to stay on their machine.</sub></div>
