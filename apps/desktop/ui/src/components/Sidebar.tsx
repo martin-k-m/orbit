@@ -4,6 +4,7 @@ import {
   BarChart3,
   Boxes,
   Container,
+  Database,
   Settings as SettingsIcon,
   Plus,
   Circle,
@@ -47,6 +48,12 @@ const NAV: NavItem[] = [
     icon: Container,
     view: { kind: "docker" },
     match: (v) => v.kind === "docker",
+  },
+  {
+    label: "Database",
+    icon: Database,
+    view: { kind: "database" },
+    match: (v) => v.kind === "database",
   },
   {
     label: "Settings",

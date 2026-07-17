@@ -98,6 +98,19 @@ export interface DockerImage {
   size: string;
 }
 
+/** A SQLite table/view (mirrors `orbit_core::db::Table`). */
+export interface DbTable {
+  name: string;
+  rowCount: number;
+}
+
+/** A query result (mirrors `orbit_core::db::QueryResult`). Cells are null-able. */
+export interface DbQueryResult {
+  columns: string[];
+  rows: (string | null)[][];
+  rowCount: number;
+}
+
 export interface HealthWarning {
   kind: string;
   message: string;

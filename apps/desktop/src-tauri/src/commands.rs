@@ -339,6 +339,26 @@ pub fn docker_action(action: String, id: String) -> Result<(), String> {
     r.map_err(|e| e.to_string())
 }
 
+// --- Database (SQLite) ----------------------------------------------------
+
+/// Tables and views in a SQLite database (opened read-only).
+#[tauri::command]
+pub fn db_tables(path: String) -> Result<Vec<orbit_core::db::Table>, String> {
+    orbit_core::db::tables(Path::new(&path)).map_err(|e| e.to_string())
+}
+
+/// Run a read query against a SQLite database (capped at 500 rows).
+#[tauri::command]
+pub fn db_query(path: String, sql: String) -> Result<orbit_core::db::QueryResult, String> {
+    orbit_core::db::query(Path::new(&path), &sql, 500).map_err(|e| e.to_string())
+}
+
+/// The first 200 rows of a table.
+#[tauri::command]
+pub fn db_table_rows(path: String, table: String) -> Result<orbit_core::db::QueryResult, String> {
+    orbit_core::db::table_rows(Path::new(&path), &table, 200).map_err(|e| e.to_string())
+}
+
 /// Assess how risky a project's command is before running it, so the UI can
 /// show a confirmation dialog for anything destructive.
 #[tauri::command]

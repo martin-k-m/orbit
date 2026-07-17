@@ -10,6 +10,7 @@ import { Dashboard } from "@/views/Dashboard";
 import { Analytics } from "@/views/Analytics";
 import { Ecosystem } from "@/views/Ecosystem";
 import { Docker } from "@/views/Docker";
+import { Database } from "@/views/Database";
 import { Settings } from "@/views/Settings";
 import { ProjectView } from "@/views/ProjectView";
 
@@ -47,6 +48,7 @@ export function AppShell() {
                 {view.kind === "analytics" && <Analytics />}
                 {view.kind === "ecosystem" && <Ecosystem />}
                 {view.kind === "docker" && <Docker />}
+                {view.kind === "database" && <Database />}
                 {view.kind === "settings" && <Settings />}
                 {view.kind === "project" && (
                   <ProjectView projectId={view.id} path={view.path} />

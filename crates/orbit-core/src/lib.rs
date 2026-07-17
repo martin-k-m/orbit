@@ -47,6 +47,8 @@ pub mod shell;
 pub mod workspace;
 
 #[cfg(feature = "persistence")]
+pub mod db;
+#[cfg(feature = "persistence")]
 pub mod store;
 
 pub use error::{Error, Result};
@@ -132,6 +134,11 @@ mod tests {
         assert_serialize::<git::StashEntry>();
         assert_serialize::<docker::Container>();
         assert_serialize::<docker::Image>();
+        #[cfg(feature = "persistence")]
+        {
+            assert_serialize::<db::Table>();
+            assert_serialize::<db::QueryResult>();
+        }
         assert_serialize::<health::HealthReport>();
         assert_serialize::<health::Warning>();
         assert_serialize::<deps::Dependency>();

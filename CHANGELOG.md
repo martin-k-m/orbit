@@ -8,6 +8,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Database explorer (SQLite)** — a new Database view opens a `.sqlite`/`.db`
+  file **read-only**, lists its tables/views with row counts, shows the first
+  rows of any table, and runs ad-hoc `SELECT` queries (`Ctrl/Cmd+Enter`), with a
+  null-aware results grid. Built on a new `orbit_core::db` module (feature-gated
+  behind `persistence`, unit-tested — including that writes are rejected).
+  Postgres/MySQL/Redis will follow behind the same shape.
 - **Docker integration** — a new Containers view lists your Docker containers
   (running + stopped) and images, with one-click start / stop / restart. Built
   on a new `orbit_core::docker` module that shells out to the `docker` CLI and

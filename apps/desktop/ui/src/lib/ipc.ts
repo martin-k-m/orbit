@@ -4,6 +4,8 @@ import type {
   Assessment,
   CommandOutput,
   Commit,
+  DbQueryResult,
+  DbTable,
   Dependency,
   DockerContainer,
   DockerImage,
@@ -775,6 +777,36 @@ export async function dockerAction(
   id: string,
 ): Promise<void> {
   return invoke<void>("docker_action", { action, id });
+}
+
+// --- Database (SQLite) ------------------------------------------------------
+
+/** Open the native file picker filtered to SQLite databases. */
+export async function pickDatabaseFile(): Promise<string | null> {
+  if (!isTauri()) return "/Users/dev/app.sqlite";
+  const { open } = await import("@tauri-apps/plugin-dialog");
+  const result = await open({
+    multiple: false,
+    filters: [{ name: "SQLite", extensions: ["sqlite", "sqlite3", "db", "db3"] }],
+  });
+  if (result == null) return null;
+  return Array.isArray(result) ? (result[0] ?? null) : result;
+}
+
+/** Tables and views in a SQLite database. */
+export async function dbTables(path: string): Promise<DbTable[]> {
+  if (!isTauri()) return [];
+  return invoke<DbTable[]>("db_tables", { path });
+}
+
+/** Run a read query against a SQLite database. */
+export async function dbQuery(path: string, sql: string): Promise<DbQueryResult> {
+  return invoke<DbQueryResult>("db_query", { path, sql });
+}
+
+/** The first rows of a table. */
+export async function dbTableRows(path: string, table: string): Promise<DbQueryResult> {
+  return invoke<DbQueryResult>("db_table_rows", { path, table });
 }
 
 /**

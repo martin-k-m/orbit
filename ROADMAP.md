@@ -86,8 +86,11 @@ Turning projects into true workspaces.
   First slice shipped: a Containers view listing containers + images with
   start/stop/restart (backed by `orbit_core::docker`). Networks/volumes/compose/
   logs/exec are next.
-- 📋 **Database explorer** — SQLite, PostgreSQL, MySQL/MariaDB, Redis. Browse
-  tables, view records, run SQL, save queries, CSV import/export.
+- 🚧 **Database explorer** — SQLite, PostgreSQL, MySQL/MariaDB, Redis. Browse
+  tables, view records, run SQL, save queries, CSV import/export. First slice
+  shipped: a read-only **SQLite** explorer (browse tables, view rows, run
+  `SELECT`), backed by `orbit_core::db`. Other engines + saved queries + export
+  are next.
 - 📋 **API explorer** — REST, GraphQL, WebSockets; collections, variables, auth,
   history, response viewer with JSON formatting and highlighting; auto-discovery
   of local APIs.

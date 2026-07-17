@@ -97,7 +97,10 @@ Be very clear about this — do not claim otherwise in any doc or the UI:
   is no compiler/linter/LSP diagnostic source behind it yet.
 - **Docker**: a Containers view (list containers/images, start/stop/restart via
   `orbit_core::docker` → `docker` CLI) shipped; no compose/logs/exec/networks/
-  volumes yet. **No database or API-client tooling.**
+  volumes yet.
+- **Database**: a read-only **SQLite** explorer (browse tables, view rows, run
+  `SELECT`) via `orbit_core::db` (feature `persistence`). No Postgres/MySQL/Redis
+  and no writes/export yet. **No API-client tooling.**
 - **No multi-window / dockable / split-pane IDE layout.** The editor has
   multiple tabs now, but there are no split editors, and still one terminal per
   project view.
