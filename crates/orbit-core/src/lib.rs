@@ -31,6 +31,7 @@
 pub mod analytics;
 pub mod deps;
 pub mod detect;
+pub mod env;
 pub mod error;
 pub mod git;
 pub mod health;
