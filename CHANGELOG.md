@@ -6,6 +6,22 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.3.1] — 2026-07-17
+
+Finishing touches on the IntelliJ-style tool-window system.
+
+### Added
+
+- **Resizable tool windows.** The bottom tool-window dock can now be
+  resized by dragging its top edge; the height is clamped to a usable
+  range and **remembered across restarts**.
+- **Collapsible file tree.** The editor's left Explorer collapses to a
+  thin rail (and back), for more room to read code.
+- **Remembered layout.** The docked tool window, dock height and file-tree
+  state now persist — the docked tool and tree survive switching between
+  projects, and the sizes/visibility survive relaunching — instead of
+  resetting every time you open a project.
+
 ## [1.3.0] — 2026-07-17
 
 The IntelliJ-style workspace overhaul. Orbit's IDE grows a real

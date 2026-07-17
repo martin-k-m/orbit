@@ -4,7 +4,7 @@ A ground-truth snapshot for whoever (or whatever) picks up Orbit next. This is
 the honest state, including the things the marketing pages don't say. If it
 conflicts with a glossier doc, trust this file and fix the other one.
 
-Last updated at **v1.3.0** (the IntelliJ-style workspace overhaul).
+Last updated at **v1.3.1** (IntelliJ tool-window polish: resizable dock, collapsible tree, remembered layout).
 
 ---
 
@@ -40,7 +40,7 @@ orbit/
 `apps/desktop/src-tauri` is intentionally **excluded** from the workspace
 (`Cargo.toml` `exclude`) because it drags in the webview stack.
 
-## What actually exists (v1.3.0)
+## What actually exists (v1.3.1)
 
 Engine modules (`crates/orbit-core/src/`), all unit-tested:
 
@@ -70,7 +70,10 @@ Desktop features that are **built and wired to the UI**:
   viewport height), and a collapsible **bottom tool-window strip** that docks one
   tool below the editor at a time: Problems, Git, Search, Testing, Terminal,
   Overview, Commands, Health, Dependencies. There is no in-project tab bar; the
-  bottom strip toggles tools open/shut like IntelliJ tool windows.
+  bottom strip toggles tools open/shut like IntelliJ tool windows. The dock is
+  **drag-resizable** (grab its top edge) and the left file tree **collapses** to
+  a rail; the docked tool, dock height and tree state live in `store/workspace.ts`
+  (height + tree persist across restarts via the settings table).
 - **Projects launcher** (the old "Dashboard"): recent projects + quick actions.
   Coding stats moved into **Analytics**; live per-project context (git branch,
   caret Ln/Col, language/encoding/line-ending) lives in the bottom **status bar**.
