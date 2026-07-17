@@ -52,10 +52,12 @@ Previews for the sibling tools **Blink** (acceleration), **Killer** (security),
 The same engine as a terminal binary: `orbit scan | info | health | deps | git |
 commands | run | init`, all with `--json`.
 
-### 🔄 Auto-update
+### 🔄 Auto-update (opt-in)
 
-The desktop app can check for, download and install updates from GitHub
-Releases, with signed update artifacts.
+The updater is wired into the app and checks GitHub Releases on launch, but
+v1.0.0 does not publish signed update artifacts — that needs an updater signing
+key (see docs/releasing.md). Update checks no-op safely until then; installers
+are the supported path.
 
 ## Downloads
 

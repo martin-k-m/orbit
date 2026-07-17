@@ -64,6 +64,10 @@ The engine. Pure library, no `unsafe` (`unsafe_code = "forbid"`).
 | `deps`        | List declared dependencies per ecosystem (offline).                    |
 | `health`      | Heuristic 0–100 project-health score with concrete warnings.           |
 | `analytics`   | Pure aggregation of local coding sessions and build times.             |
+| `safety`      | Assess a command for destructive intent before it runs.               |
+| `env`         | `.env` discovery/parsing, secret masking, duplicate/missing detection.|
+| `workspace`   | Per-project tasks, notes, bookmarks and terminal tabs.                 |
+| `shell`       | Which shells exist here, and which one the user actually wants.        |
 | `store`       | SQLite persistence (feature `persistence`): projects, settings, events.|
 
 The data model uses `#[serde(rename_all = "camelCase")]` so it crosses the
