@@ -28,12 +28,27 @@ describe("app store", () => {
     expect(state.selectedProjectId).toBe("abc");
   });
 
-  it("toggles the theme", () => {
+  it("cycles the theme dark -> light -> system -> dark", () => {
+    // The palette's "toggle theme" is the only way to reach every option, so
+    // the cycle must include "system" and wrap.
     expect(useAppStore.getState().theme).toBe("dark");
     useAppStore.getState().toggleTheme();
     expect(useAppStore.getState().theme).toBe("light");
     useAppStore.getState().toggleTheme();
+    expect(useAppStore.getState().theme).toBe("system");
+    useAppStore.getState().toggleTheme();
     expect(useAppStore.getState().theme).toBe("dark");
+  });
+
+  it("applies a resolved surface class, never 'system'", () => {
+    // "system" is a preference, not a surface — the DOM must always end up
+    // either .dark or .light or the theme tokens have no values.
+    useAppStore.getState().setTheme("system");
+    const root = document.documentElement;
+    expect(root.classList.contains("dark") || root.classList.contains("light")).toBe(
+      true,
+    );
+    expect(root.classList.contains("system")).toBe(false);
   });
 
   it("controls the command palette", () => {

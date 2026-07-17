@@ -25,16 +25,16 @@ jobs:
         include:
           - label: macOS (Apple Silicon)
             os: macos-latest
-            args: "--target aarch64-apple-darwin"
+            args: "--target aarch64-apple-darwin --config tauri.release.json"
           - label: macOS (Intel)
             os: macos-latest
-            args: "--target x86_64-apple-darwin"
+            args: "--target x86_64-apple-darwin --config tauri.release.json"
           - label: Linux (x64)
             os: ubuntu-latest
-            args: ""
+            args: "--config tauri.release.json"
           - label: Windows (x64)
             os: windows-latest
-            args: ""
+            args: "--config tauri.release.json"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -71,9 +71,8 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Updater artifacts (which require a signing key) are opt-in; see
-          # docs/releasing.md to enable signed auto-updates.
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           projectPath: apps/desktop/src-tauri
           tagName: ${{ env.RELEASE_TAG }}
@@ -81,7 +80,7 @@ jobs:
           releaseBody: "Building assets… release notes and checksums are attached when all platforms finish."
           releaseDraft: true
           prerelease: false
-          includeUpdaterJson: false
+          includeUpdaterJson: true
           args: ${{ matrix.args }}
 
   finalize:

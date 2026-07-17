@@ -10,6 +10,7 @@ Everything you need to use, build and ship Orbit.
 - [Configuration](./configuration.md) — `.project-orbit` profiles and app data.
 - [Workspaces](./workspace.md) — tasks, notes and bookmarks per project.
 - [Terminal](./terminal.md) — the built-in PTY shell, and which shell it opens.
+- [Updates](./updates.md) — how auto-update works, what it sends (nothing), signing.
 - [Environment variables](./environment.md) — `.env` files, masking, validation.
 - [CLI reference](./cli.md) — the `orbit` terminal companion.
 - [Plugins & integrations](./plugins.md) — Blink, Killer, Flux, Beacon.

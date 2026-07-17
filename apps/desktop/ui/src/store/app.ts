@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { setSetting } from "@/lib/ipc";
 import type { ProjectSummary } from "@/lib/types";
 
 export type View =
@@ -8,7 +9,7 @@ export type View =
   | { kind: "settings" }
   | { kind: "project"; id: string; path: string };
 
-export type Theme = "dark" | "light";
+export type Theme = "dark" | "light" | "system";
 
 export type ToastVariant = "default" | "success" | "error";
 
@@ -60,12 +61,19 @@ export const useAppStore = create<AppState>((set, get) => ({
   setTheme: (theme) => {
     applyTheme(theme);
     set({ theme });
+    // Persist, or the choice is forgotten on the next launch. App.tsx reads
+    // this back on boot.
+    void setSetting("theme", theme).catch(() => {
+      /* storage is best-effort; a failed write must not break the UI */
+    });
   },
 
   toggleTheme: () => {
-    const next: Theme = get().theme === "dark" ? "light" : "dark";
-    applyTheme(next);
-    set({ theme: next });
+    // Cycle dark → light → system, so the palette's "toggle theme" can reach
+    // every option without a submenu.
+    const order: Theme[] = ["dark", "light", "system"];
+    const next = order[(order.indexOf(get().theme) + 1) % order.length];
+    get().setTheme(next);
   },
 
   setPaletteOpen: (paletteOpen) => set({ paletteOpen }),
@@ -84,9 +92,41 @@ export const useAppStore = create<AppState>((set, get) => ({
     set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
 }));
 
+const DARK_QUERY = "(prefers-color-scheme: dark)";
+
+/** Whether the OS is currently asking for a dark UI. Defaults to dark. */
+function systemPrefersDark(): boolean {
+  if (typeof window === "undefined" || !window.matchMedia) return true;
+  return window.matchMedia(DARK_QUERY).matches;
+}
+
+/** Turn the user's preference into the surface we actually paint. */
+export function resolveTheme(theme: Theme): "dark" | "light" {
+  return theme === "system" ? (systemPrefersDark() ? "dark" : "light") : theme;
+}
+
 function applyTheme(theme: Theme): void {
   if (typeof document === "undefined") return;
+  const resolved = resolveTheme(theme);
   const root = document.documentElement;
-  root.classList.toggle("dark", theme === "dark");
-  root.classList.toggle("light", theme === "light");
+  root.classList.toggle("dark", resolved === "dark");
+  root.classList.toggle("light", resolved === "light");
+}
+
+/**
+ * Follow the OS theme while the user's preference is "system".
+ *
+ * Returns an unsubscribe function. Without this, picking "system" would only
+ * apply the OS theme at that moment and then go stale when the OS flipped.
+ */
+export function watchSystemTheme(): () => void {
+  if (typeof window === "undefined" || !window.matchMedia) return () => {};
+  const query = window.matchMedia(DARK_QUERY);
+  const onChange = () => {
+    if (useAppStore.getState().theme === "system") {
+      applyTheme("system");
+    }
+  };
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
 }

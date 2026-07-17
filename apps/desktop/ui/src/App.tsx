@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { AppShell } from "@/components/AppShell";
-import { useAppStore } from "@/store/app";
+import { useAppStore, watchSystemTheme } from "@/store/app";
 import { isTauri, listProjects, getSetting } from "@/lib/ipc";
 import type { Theme } from "@/store/app";
 
@@ -13,9 +13,13 @@ export default function App() {
   useEffect(() => {
     let cancelled = false;
 
+    // Follow the OS while the preference is "system"; stays live if the OS flips.
+    const unwatch = watchSystemTheme();
+
     (async () => {
       const stored = await getSetting("theme");
-      if (!cancelled && (stored === "dark" || stored === "light")) {
+      const valid: Theme[] = ["dark", "light", "system"];
+      if (!cancelled && valid.includes(stored as Theme)) {
         setTheme(stored as Theme);
       } else {
         setTheme("dark");
@@ -26,6 +30,7 @@ export default function App() {
 
     return () => {
       cancelled = true;
+      unwatch();
     };
   }, [setProjects, setTheme]);
 

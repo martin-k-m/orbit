@@ -24,6 +24,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   (macOS Apple Silicon + Intel, Windows MSI/EXE, Linux AppImage/deb), plus
   `/roadmap`, `/changelog`, `Configuration` and `Troubleshooting` pages.
 
+- **Signed auto-updates** — the updater signing key is generated, password-
+  protected and configured, so releases from now on publish signed update
+  artifacts and `latest.json`. v1.0.0 shipped without them.
+- **System theme** — Appearance now offers Dark / Light / System; "System"
+  follows the OS and updates live when it changes.
+
 ### Fixed
 
 - Desktop bundles failed to compile: `CommandOutput` was not `Serialize`, so
@@ -32,8 +38,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   than in a platform bundle job.
 - Tauri's before-commands run from the app root, so `npm --prefix ../ui`
   resolved to a nonexistent path and every platform build failed.
-- Release jobs could not decode the updater signing key; updater artifacts are
-  now opt-in so installers publish regardless.
+- Release jobs could not decode the updater signing key: the generated minisign
+  key was password-protected, so with no password supplied minisign fell back to
+  an interactive prompt that CI has no TTY for, surfacing as "Wrong password".
+  Regenerated with an explicit password and verified through Tauri's decode path.
+- The theme was never persisted: the app read a `theme` setting on boot that
+  nothing ever wrote, so it reset to dark on every launch.
+- Light mode inherited dark-tuned `--success`/`--warning`/`--danger`, which are
+  lightened for a near-black surface and washed out on white.
 
 ### Changed
 

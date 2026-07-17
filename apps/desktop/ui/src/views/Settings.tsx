@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import { Moon, Sun, FolderLock, ShieldCheck, HardDrive } from "lucide-react";
+import {
+  Moon,
+  Sun,
+  MonitorCog,
+  FolderLock,
+  ShieldCheck,
+  HardDrive,
+} from "lucide-react";
 import { useAppStore, type Theme } from "@/store/app";
 import { appVersion, getSetting } from "@/lib/ipc";
 import { OrbitGlyph } from "@/components/OrbitGlyph";
@@ -35,7 +42,7 @@ export function Settings() {
           <CardDescription>Choose how Orbit looks.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 gap-3 sm:max-w-md">
+          <div className="grid grid-cols-3 gap-3 sm:max-w-lg">
             <ThemeOption
               active={theme === "dark"}
               onClick={() => setTheme("dark" as Theme)}
@@ -48,7 +55,18 @@ export function Settings() {
               icon={Sun}
               label="Light"
             />
+            <ThemeOption
+              active={theme === "system"}
+              onClick={() => setTheme("system" as Theme)}
+              icon={MonitorCog}
+              label="System"
+            />
           </div>
+          <p className="mt-3 text-xs text-fg-subtle">
+            {theme === "system"
+              ? "Following your operating system, and updating live when it changes."
+              : "Your choice is remembered across restarts."}
+          </p>
         </CardContent>
       </Card>
 
