@@ -43,6 +43,13 @@
     --fg-subtle: 240 6% 55%;
     --accent: 243 75% 56%;
     --accent-2: 258 82% 60%;
+
+    /* Status colours must be re-tuned, not inherited: the dark values are
+       lightened for contrast against a near-black surface, and washed out on
+       white. These are darkened to stay legible on a light background. */
+    --success: 152 65% 32%;
+    --warning: 30 90% 40%;
+    --danger: 0 70% 46%;
   }
 
   * {
