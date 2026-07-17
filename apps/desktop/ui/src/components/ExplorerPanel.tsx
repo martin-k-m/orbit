@@ -193,7 +193,7 @@ export function ExplorerPanel({ root }: { root: string }) {
   }, [save, closeTab]);
 
   return (
-    <div className="flex h-[520px] overflow-hidden rounded-xl border border-white/[0.08] bg-black/20">
+    <div className="flex h-[520px] overflow-hidden rounded-lg border border-border bg-panel">
       <aside className="scrollbar-thin flex w-64 shrink-0 flex-col overflow-y-auto border-r border-white/[0.06]">
         <div className="flex items-center gap-1 border-b border-white/[0.06] px-2 py-1.5">
           <span className="mr-auto truncate pl-1 text-[11px] font-medium uppercase tracking-wider text-fg-subtle">

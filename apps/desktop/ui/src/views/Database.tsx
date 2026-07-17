@@ -99,7 +99,7 @@ export function Database() {
       </header>
 
       {!path ? (
-        <div className="rounded-xl border border-white/[0.08] bg-black/20 p-8 text-center">
+        <div className="rounded-lg border border-border bg-panel p-8 text-center">
           <DatabaseIcon className="mx-auto h-8 w-8 text-fg-subtle" />
           <p className="mt-3 text-sm text-fg-muted">
             {isTauri()
@@ -108,7 +108,7 @@ export function Database() {
           </p>
         </div>
       ) : (
-        <div className="flex h-[560px] overflow-hidden rounded-xl border border-white/[0.08] bg-black/20">
+        <div className="flex h-[560px] overflow-hidden rounded-lg border border-border bg-panel">
           {/* Tables list */}
           <aside className="scrollbar-thin w-56 shrink-0 overflow-y-auto border-r border-white/[0.06] py-2">
             <div className="px-3 pb-1 text-[11px] font-medium uppercase tracking-wider text-fg-subtle">

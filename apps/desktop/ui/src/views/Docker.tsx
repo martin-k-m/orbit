@@ -80,7 +80,7 @@ export function Docker() {
           <Loader2 className="h-5 w-5 animate-spin text-fg-subtle" />
         </Centered>
       ) : !available ? (
-        <div className="rounded-xl border border-white/[0.08] bg-black/20 p-8 text-center">
+        <div className="rounded-lg border border-border bg-panel p-8 text-center">
           <ContainerIcon className="mx-auto h-8 w-8 text-fg-subtle" />
           <p className="mt-3 text-sm text-fg-muted">
             {isTauri()
@@ -99,7 +99,7 @@ export function Docker() {
                 {containers.length}
               </span>
             </h2>
-            <div className="overflow-hidden rounded-xl border border-white/[0.08] bg-black/20">
+            <div className="overflow-hidden rounded-lg border border-border bg-panel">
               {containers.length === 0 ? (
                 <p className="px-4 py-6 text-center text-sm text-fg-subtle">No containers.</p>
               ) : (
@@ -163,7 +163,7 @@ export function Docker() {
                 {images.length}
               </span>
             </h2>
-            <div className="overflow-hidden rounded-xl border border-white/[0.08] bg-black/20">
+            <div className="overflow-hidden rounded-lg border border-border bg-panel">
               {images.length === 0 ? (
                 <p className="px-4 py-6 text-center text-sm text-fg-subtle">No images.</p>
               ) : (

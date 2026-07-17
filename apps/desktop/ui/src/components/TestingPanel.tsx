@@ -31,7 +31,7 @@ export function TestingPanel({ path, commands }: { path: string; commands: Comma
 
   if (!testCmd) {
     return (
-      <div className="rounded-xl border border-white/[0.08] bg-black/20 p-8 text-center">
+      <div className="rounded-lg border border-border bg-panel p-8 text-center">
         <FlaskConical className="mx-auto h-8 w-8 text-fg-subtle" />
         <p className="mt-3 text-sm text-fg-muted">No test command detected for this project.</p>
       </div>

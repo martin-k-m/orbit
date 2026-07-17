@@ -690,7 +690,7 @@ function codeColor(code: string): string {
 
 function Frame({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-[520px] overflow-hidden rounded-xl border border-white/[0.08] bg-black/20">
+    <div className="flex h-[520px] overflow-hidden rounded-lg border border-border bg-panel">
       {children}
     </div>
   );

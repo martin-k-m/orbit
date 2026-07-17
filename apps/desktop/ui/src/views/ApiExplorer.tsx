@@ -188,7 +188,7 @@ export function ApiExplorer() {
               )}
             </div>
           ) : (
-            <div className="flex h-40 items-center justify-center rounded-xl border border-white/[0.08] bg-black/20">
+            <div className="flex h-40 items-center justify-center rounded-lg border border-border bg-panel">
               <p className="text-sm text-fg-subtle">
                 {isTauri() ? "Send a request to see the response." : "API preview — open the desktop app."}
               </p>
