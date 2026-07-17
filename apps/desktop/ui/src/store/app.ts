@@ -20,6 +20,13 @@ export interface Toast {
   variant: ToastVariant;
 }
 
+/** A request to open a specific file in a project's editor (from quick-open). */
+export interface PendingFile {
+  projectId: string;
+  path: string;
+  line?: number;
+}
+
 interface AppState {
   projects: ProjectSummary[];
   selectedProjectId: string | null;
@@ -27,10 +34,14 @@ interface AppState {
   theme: Theme;
   paletteOpen: boolean;
   toasts: Toast[];
+  /** A file the project view should open once it is showing that project. */
+  pendingFile: PendingFile | null;
 
   setProjects: (projects: ProjectSummary[]) => void;
   navigate: (view: View) => void;
   openProject: (id: string, path: string) => void;
+  requestOpenFile: (file: PendingFile) => void;
+  clearPendingFile: () => void;
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
   setPaletteOpen: (open: boolean) => void;
@@ -46,6 +57,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   theme: "dark",
   paletteOpen: false,
   toasts: [],
+  pendingFile: null,
 
   setProjects: (projects) => set({ projects }),
 
@@ -57,6 +69,19 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   openProject: (id, path) =>
     set({ view: { kind: "project", id, path }, selectedProjectId: id }),
+
+  requestOpenFile: (file) => {
+    const proj = get().projects.find((p) => p.id === file.projectId);
+    set({
+      view: proj
+        ? { kind: "project", id: proj.id, path: proj.path }
+        : get().view,
+      selectedProjectId: file.projectId,
+      pendingFile: file,
+    });
+  },
+
+  clearPendingFile: () => set({ pendingFile: null }),
 
   setTheme: (theme) => {
     applyTheme(theme);

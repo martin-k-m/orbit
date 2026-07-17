@@ -8,6 +8,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Quick-open — fuzzy file search in the command palette** — with a project
+  open, `⌘/Ctrl+K` and typing now searches that project's files (backed by a new
+  capped `orbit_core::files::list_files`, which skips ignored/hidden dirs).
+  Picking a file opens it in an editor tab and reveals the Explorer — the first
+  cross-source step of the universal palette.
 - **Problems panel** — a new Problems tab gives a unified, navigable diagnostics
   view: it aggregates the diagnostics Orbit actually computes today — project
   **health** warnings and **environment** issues — sorted errors-first, each

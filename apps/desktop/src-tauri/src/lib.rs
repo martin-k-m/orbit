@@ -88,6 +88,7 @@ pub fn run() {
             commands::read_dir,
             commands::read_file,
             commands::write_file,
+            commands::list_files,
             commands::search_workspace,
         ])
         .run(tauri::generate_context!())

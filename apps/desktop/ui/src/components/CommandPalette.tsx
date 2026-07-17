@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Command } from "cmdk";
 import {
   LayoutDashboard,
@@ -10,11 +10,12 @@ import {
   ScanSearch,
   SunMoon,
   FolderGit2,
+  FileCode2,
   CornerDownLeft,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAppStore } from "@/store/app";
-import { addProject, openTerminal, pickFolder, scanFolder } from "@/lib/ipc";
+import { addProject, listFiles, openTerminal, pickFolder, scanFolder } from "@/lib/ipc";
 import { LANGUAGE_META } from "@/lib/types";
 
 export function CommandPalette() {
@@ -26,7 +27,11 @@ export function CommandPalette() {
   const projects = useAppStore((s) => s.projects);
   const setProjects = useAppStore((s) => s.setProjects);
   const selectedProjectId = useAppStore((s) => s.selectedProjectId);
+  const requestOpenFile = useAppStore((s) => s.requestOpenFile);
   const pushToast = useAppStore((s) => s.pushToast);
+
+  const [query, setQuery] = useState("");
+  const [files, setFiles] = useState<string[]>([]);
 
   // Global Cmd/Ctrl+K shortcut.
   useEffect(() => {
@@ -46,6 +51,28 @@ export function CommandPalette() {
   }
 
   const selectedProject = projects.find((p) => p.id === selectedProjectId);
+
+  // Load the current project's file list once the palette opens, for quick-open.
+  useEffect(() => {
+    if (!open || !selectedProject) {
+      setFiles([]);
+      return;
+    }
+    let cancelled = false;
+    listFiles(selectedProject.path).then((f) => {
+      if (!cancelled) setFiles(f);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, selectedProject?.id, selectedProject?.path]);
+
+  // Only surface files once the user types, capped, so the list stays snappy.
+  const fileMatches = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q || !selectedProject) return [];
+    return files.filter((f) => f.toLowerCase().includes(q)).slice(0, 40);
+  }, [query, files, selectedProject]);
 
   async function handleAdd() {
     const path = await pickFolder();
@@ -72,7 +99,10 @@ export function CommandPalette() {
       {open && (
         <Command.Dialog
           open={open}
-          onOpenChange={setOpen}
+          onOpenChange={(v) => {
+            setOpen(v);
+            if (!v) setQuery("");
+          }}
           label="Command palette"
           shouldFilter
           className="fixed inset-0 z-[70]"
@@ -95,7 +125,13 @@ export function CommandPalette() {
               <ScanSearch className="h-4 w-4 text-fg-subtle" />
               <Command.Input
                 autoFocus
-                placeholder="Type a command or search…"
+                value={query}
+                onValueChange={setQuery}
+                placeholder={
+                  selectedProject
+                    ? `Type a command, or search files in ${selectedProject.name}…`
+                    : "Type a command or search…"
+                }
                 className="h-12 w-full bg-transparent text-sm text-fg outline-none placeholder:text-fg-subtle"
               />
             </div>
@@ -160,6 +196,30 @@ export function CommandPalette() {
                   onSelect={() => run(toggleTheme)}
                 />
               </Command.Group>
+
+              {selectedProject && fileMatches.length > 0 && (
+                <Command.Group
+                  heading={`Files · ${selectedProject.name}`}
+                  className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[10px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-widest [&_[cmdk-group-heading]]:text-fg-subtle"
+                >
+                  {fileMatches.map((f) => (
+                    <PaletteItem
+                      key={f}
+                      icon={FileCode2}
+                      label={f}
+                      value={`file ${f}`}
+                      onSelect={() =>
+                        run(() =>
+                          requestOpenFile({
+                            projectId: selectedProject.id,
+                            path: `${selectedProject.path}/${f}`,
+                          }),
+                        )
+                      }
+                    />
+                  ))}
+                </Command.Group>
+              )}
 
               {projects.length > 0 && (
                 <Command.Group

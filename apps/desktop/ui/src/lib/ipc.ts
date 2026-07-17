@@ -874,6 +874,12 @@ export async function writeFile(path: string, contents: string): Promise<void> {
   return invoke<void>("write_file", { path, contents });
 }
 
+/** A flat, capped list of a project's files (relative paths) for quick-open. */
+export async function listFiles(path: string): Promise<string[]> {
+  if (!isTauri()) return [];
+  return invoke<string[]>("list_files", { path });
+}
+
 /**
  * Search a project for a literal string ("find in files"). Ignored, binary and
  * oversized files are skipped in the engine; results are capped.

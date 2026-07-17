@@ -199,6 +199,48 @@ pub fn list_dir(dir: &Path) -> crate::Result<Vec<FileNode>> {
     Ok(nodes)
 }
 
+/// A flat, capped list of a project's files as relative paths (forward slashes),
+/// for quick-open / file search. Skips ignored build/vendor directories and
+/// hidden directories; directories themselves are excluded. Sorted.
+pub fn list_files(root: &Path, cap: usize) -> Vec<String> {
+    use walkdir::WalkDir;
+    let mut out = Vec::new();
+    let mut walker = WalkDir::new(root).into_iter();
+    while let Some(entry) = walker.next() {
+        let Ok(entry) = entry else { continue };
+        let path = entry.path();
+        if entry.file_type().is_dir() {
+            if entry.depth() > 0 && skip_dir(path) {
+                walker.skip_current_dir();
+            }
+            continue;
+        }
+        if !entry.file_type().is_file() {
+            continue;
+        }
+        if let Ok(rel) = path.strip_prefix(root) {
+            let s = rel.to_string_lossy().replace('\\', "/");
+            if !s.is_empty() {
+                out.push(s);
+            }
+        }
+        if out.len() >= cap {
+            break;
+        }
+    }
+    out.sort();
+    out
+}
+
+/// Whether to skip descending into `dir` — an ignored build/vendor directory or
+/// a hidden one.
+fn skip_dir(dir: &Path) -> bool {
+    match dir.file_name().and_then(|n| n.to_str()) {
+        Some(name) => crate::scan::IGNORED_DIRS.contains(&name) || name.starts_with('.'),
+        None => false,
+    }
+}
+
 /// Read a file for the editor: decode it, and report encoding, line ending,
 /// language, and whether it was binary or truncated.
 pub fn read_text_file(path: &Path) -> crate::Result<FileContents> {
@@ -382,6 +424,37 @@ mod tests {
         assert_eq!(contents.encoding, Encoding::Utf8);
         assert!(contents.text.contains("println!"));
         assert!(!contents.truncated);
+    }
+
+    #[test]
+    fn list_files_skips_ignored_and_hidden_dirs() {
+        let tmp = tempfile::tempdir().unwrap();
+        fs::write(tmp.path().join("a.rs"), "").unwrap();
+        fs::create_dir_all(tmp.path().join("src")).unwrap();
+        fs::write(tmp.path().join("src/b.rs"), "").unwrap();
+        fs::create_dir_all(tmp.path().join("target")).unwrap();
+        fs::write(tmp.path().join("target/junk.rs"), "").unwrap();
+        fs::create_dir_all(tmp.path().join(".git")).unwrap();
+        fs::write(tmp.path().join(".git/config"), "").unwrap();
+
+        let files = list_files(tmp.path(), 100);
+        assert!(files.contains(&"a.rs".to_string()));
+        assert!(files.contains(&"src/b.rs".to_string()));
+        assert!(!files.iter().any(|f| f.contains("target")));
+        assert!(!files.iter().any(|f| f.contains(".git")));
+        // Sorted output.
+        let mut sorted = files.clone();
+        sorted.sort();
+        assert_eq!(files, sorted);
+    }
+
+    #[test]
+    fn list_files_respects_the_cap() {
+        let tmp = tempfile::tempdir().unwrap();
+        for i in 0..20 {
+            fs::write(tmp.path().join(format!("f{i}.txt")), "").unwrap();
+        }
+        assert_eq!(list_files(tmp.path(), 5).len(), 5);
     }
 
     #[test]

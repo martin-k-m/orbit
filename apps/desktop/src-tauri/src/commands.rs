@@ -481,6 +481,16 @@ pub fn read_file(path: String) -> Result<orbit_core::files::FileContents, String
     orbit_core::files::read_text_file(&file).map_err(|e| e.to_string())
 }
 
+/// A flat, capped list of a project's files (relative paths) for quick-open.
+#[tauri::command]
+pub fn list_files(path: String) -> Result<Vec<String>, String> {
+    let dir = PathBuf::from(&path);
+    if !dir.is_dir() {
+        return Err(format!("{path} is not a directory"));
+    }
+    Ok(orbit_core::files::list_files(&dir, 5000))
+}
+
 /// Write text back to a file (the editor's save).
 #[tauri::command]
 pub fn write_file(path: String, contents: String) -> Result<(), String> {

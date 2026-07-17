@@ -56,6 +56,8 @@ export function ProjectView({
   const [detail, setDetail] = useState<ProjectDetail | null>(null);
   const [tab, setTab] = useState("overview");
   const pushToast = useAppStore((s) => s.pushToast);
+  const pendingFile = useAppStore((s) => s.pendingFile);
+  const clearPendingFile = useAppStore((s) => s.clearPendingFile);
   const openInEditor = useEditorStore((s) => s.openTab);
 
   useEffect(() => {
@@ -67,6 +69,19 @@ export function ProjectView({
       cancelled = true;
     };
   }, [projectId, path]);
+
+  // Quick-open (from the command palette) drops a pending file into the store;
+  // when it targets this project, open it in the editor and reveal the Explorer.
+  useEffect(() => {
+    if (!pendingFile || pendingFile.projectId !== projectId) return;
+    const { path: filePath, line } = pendingFile;
+    clearPendingFile();
+    (async () => {
+      const contents = await readFile(filePath);
+      openInEditor(filePath, contents, line);
+      setTab("explorer");
+    })();
+  }, [pendingFile, projectId, clearPendingFile, openInEditor]);
 
   if (!detail) {
     return (
