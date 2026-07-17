@@ -67,7 +67,7 @@ export function ProjectView({
     );
   }
 
-  const { project, git, health, dependencies } = detail;
+  const { project, health, dependencies } = detail;
 
   async function handleTerminal() {
     await openTerminal(path);

@@ -65,10 +65,10 @@ export default function ProfilesPage() {
             ["", <InlineCode key="s">stack</InlineCode>, "Primary stack: rust, typescript, python, go, docker, …"],
             ["", <InlineCode key="de">description</InlineCode>, "Short summary shown in the dashboard."],
             ["", <InlineCode key="t">tags</InlineCode>, "Optional labels for grouping and search."],
-            [<InlineCode key="c">[commands]</InlineCode>, <InlineCode key="any">any = "…"</InlineCode>, "Named shell commands, runnable via orbit run <name>."],
+            [<InlineCode key="c">[commands]</InlineCode>, <InlineCode key="any">{'any = "…"'}</InlineCode>, "Named shell commands, runnable via orbit run <name>."],
             [<InlineCode key="h">[health]</InlineCode>, <InlineCode key="ch">checks</InlineCode>, "Command names to run for the health score."],
             ["", <InlineCode key="au">audit_dependencies</InlineCode>, "When true, include a dependency audit in health."],
-            [<InlineCode key="e">[env]</InlineCode>, <InlineCode key="kv">KEY = "…"</InlineCode>, "Environment variables applied when running commands."],
+            [<InlineCode key="e">[env]</InlineCode>, <InlineCode key="kv">{'KEY = "…"'}</InlineCode>, "Environment variables applied when running commands."],
           ]}
         />
 
