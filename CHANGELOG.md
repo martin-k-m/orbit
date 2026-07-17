@@ -8,6 +8,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Problems panel** — a new Problems tab gives a unified, navigable diagnostics
+  view: it aggregates the diagnostics Orbit actually computes today — project
+  **health** warnings and **environment** issues — sorted errors-first, each
+  clickable to open the file (env issues jump to the offending line). It's
+  deliberately scoped and labelled: these are Orbit's own diagnostics, not
+  `rustc`/`tsc`/lint output (that needs the not-yet-built LSP integration).
 - **Source control — the git power center** — a new Source Control tab turns git
   into a first-class panel: staged vs. unstaged/untracked groups with one-click
   stage/unstage (per file or all), an inline coloured diff viewer, a commit box

@@ -92,7 +92,9 @@ Be very clear about this — do not claim otherwise in any doc or the UI:
 
 - **No LSP / semantic code intelligence** — the editor is syntactic only. No
   go-to-definition, find-references, rename, hover types, real diagnostics.
-- **No debugger (DAP)**, no test-runner UI, no Problems panel.
+- **No debugger (DAP)**, no test-runner UI. The **Problems panel** exists but
+  aggregates only Orbit's own diagnostics (health warnings + env issues) — there
+  is no compiler/linter/LSP diagnostic source behind it yet.
 - **No Docker, database, or API-client tooling.**
 - **No multi-window / dockable / split-pane IDE layout.** The editor has
   multiple tabs now, but there are no split editors, and still one terminal per

@@ -36,6 +36,7 @@ import { TerminalPane } from "@/components/TerminalPane";
 import { ExplorerPanel } from "@/components/ExplorerPanel";
 import { SearchPanel } from "@/components/SearchPanel";
 import { SourceControlPanel } from "@/components/SourceControlPanel";
+import { ProblemsPanel } from "@/components/ProblemsPanel";
 import { useEditorStore } from "@/store/editor";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -91,8 +92,8 @@ export function ProjectView({
     });
   }
 
-  // Open a search hit in the editor at its line, then reveal the Explorer tab.
-  async function openSearchResult(filePath: string, line: number) {
+  // Open a file in the editor (optionally at a line), then reveal the Explorer tab.
+  async function openSearchResult(filePath: string, line?: number) {
     const contents = await readFile(filePath);
     openInEditor(filePath, contents, line);
     setTab("explorer");
@@ -153,6 +154,14 @@ export function ProjectView({
           <TabsTrigger value="source-control">
             <GitBranch className="h-3.5 w-3.5" /> Source Control
           </TabsTrigger>
+          <TabsTrigger value="problems">
+            Problems
+            {health.warnings.length > 0 && (
+              <span className="ml-1 rounded bg-warning/20 px-1 text-[10px] text-warning">
+                {health.warnings.length}
+              </span>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="terminal">Terminal</TabsTrigger>
         </TabsList>
 
@@ -176,6 +185,9 @@ export function ProjectView({
         </TabsContent>
         <TabsContent value="source-control">
           <SourceControlPanel root={path} />
+        </TabsContent>
+        <TabsContent value="problems">
+          <ProblemsPanel root={path} health={health} onOpen={openSearchResult} />
         </TabsContent>
         <TabsContent value="terminal">
           <TerminalTab path={path} onOpen={handleTerminal} />
