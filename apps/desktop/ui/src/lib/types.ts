@@ -126,6 +126,32 @@ export interface Workspace {
   updatedAt: number;
 }
 
+// --- Files: explorer + editor (mirrors `orbit_core::files`) ------------------
+
+/** One entry in a directory listing. */
+export interface FileNode {
+  name: string;
+  path: string;
+  isDir: boolean;
+  hidden: boolean;
+  size: number;
+  language?: string | null;
+}
+
+export type Encoding = "utf-8" | "utf-16-le" | "utf-16-be";
+export type LineEnding = "lf" | "crlf" | "none";
+
+/** A file loaded for the editor. */
+export interface FileContents {
+  text: string;
+  language?: string | null;
+  encoding: Encoding;
+  lineEnding: LineEnding;
+  binary: boolean;
+  truncated: boolean;
+  size: number;
+}
+
 // --- Terminal (mirrors `orbit_core::shell` + src-tauri/terminal.rs) ----------
 
 /** Which shell a session runs. */
