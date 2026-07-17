@@ -27,6 +27,11 @@ body {
   @apply bg-ink-950 font-sans text-slate-200 antialiased;
   font-feature-settings: "cv11", "ss01";
   text-rendering: optimizeLegibility;
+  /* Decorative glows are intentionally larger than the viewport; clip the
+     horizontal axis so they can never introduce a horizontal scrollbar.
+     `clip` (not `hidden`) avoids creating a scroll container, so the sticky
+     nav keeps working. */
+  overflow-x: clip;
 }
 
 ::selection {
