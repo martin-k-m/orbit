@@ -199,6 +199,95 @@ pub fn list_dir(dir: &Path) -> crate::Result<Vec<FileNode>> {
     Ok(nodes)
 }
 
+/// A flat, capped list of a project's files as relative paths (forward slashes),
+/// for quick-open / file search. Skips ignored build/vendor directories and
+/// hidden directories; directories themselves are excluded. Sorted.
+pub fn list_files(root: &Path, cap: usize) -> Vec<String> {
+    use walkdir::WalkDir;
+    let mut out = Vec::new();
+    let mut walker = WalkDir::new(root).into_iter();
+    while let Some(entry) = walker.next() {
+        let Ok(entry) = entry else { continue };
+        let path = entry.path();
+        if entry.file_type().is_dir() {
+            if entry.depth() > 0 && skip_dir(path) {
+                walker.skip_current_dir();
+            }
+            continue;
+        }
+        if !entry.file_type().is_file() {
+            continue;
+        }
+        if let Ok(rel) = path.strip_prefix(root) {
+            let s = rel.to_string_lossy().replace('\\', "/");
+            if !s.is_empty() {
+                out.push(s);
+            }
+        }
+        if out.len() >= cap {
+            break;
+        }
+    }
+    out.sort();
+    out
+}
+
+/// Whether to skip descending into `dir` — an ignored build/vendor directory or
+/// a hidden one.
+fn skip_dir(dir: &Path) -> bool {
+    match dir.file_name().and_then(|n| n.to_str()) {
+        Some(name) => crate::scan::IGNORED_DIRS.contains(&name) || name.starts_with('.'),
+        None => false,
+    }
+}
+
+/// Create an empty file. Errors if anything already exists at `path` (so an
+/// accidental "new file" never clobbers real content).
+pub fn create_file(path: &Path) -> crate::Result<()> {
+    if path.exists() {
+        return Err(already_exists(path));
+    }
+    std::fs::File::create(path)
+        .map(|_| ())
+        .map_err(|e| crate::Error::io(path, e))
+}
+
+/// Create a directory. Errors if anything already exists at `path`. The parent
+/// must exist (this is a single `mkdir`, not `mkdir -p`).
+pub fn create_dir(path: &Path) -> crate::Result<()> {
+    if path.exists() {
+        return Err(already_exists(path));
+    }
+    std::fs::create_dir(path).map_err(|e| crate::Error::io(path, e))
+}
+
+/// Rename/move `from` to `to`. Errors if `to` already exists, to avoid a silent
+/// overwrite.
+pub fn rename_path(from: &Path, to: &Path) -> crate::Result<()> {
+    if to.exists() {
+        return Err(already_exists(to));
+    }
+    std::fs::rename(from, to).map_err(|e| crate::Error::io(from, e))
+}
+
+/// Delete a file, or a directory and everything under it. Destructive — the UI
+/// confirms before calling this.
+pub fn delete_path(path: &Path) -> crate::Result<()> {
+    let meta = std::fs::symlink_metadata(path).map_err(|e| crate::Error::io(path, e))?;
+    if meta.is_dir() {
+        std::fs::remove_dir_all(path).map_err(|e| crate::Error::io(path, e))
+    } else {
+        std::fs::remove_file(path).map_err(|e| crate::Error::io(path, e))
+    }
+}
+
+fn already_exists(path: &Path) -> crate::Error {
+    crate::Error::io(
+        path,
+        std::io::Error::new(std::io::ErrorKind::AlreadyExists, "already exists"),
+    )
+}
+
 /// Read a file for the editor: decode it, and report encoding, line ending,
 /// language, and whether it was binary or truncated.
 pub fn read_text_file(path: &Path) -> crate::Result<FileContents> {
@@ -382,6 +471,72 @@ mod tests {
         assert_eq!(contents.encoding, Encoding::Utf8);
         assert!(contents.text.contains("println!"));
         assert!(!contents.truncated);
+    }
+
+    #[test]
+    fn list_files_skips_ignored_and_hidden_dirs() {
+        let tmp = tempfile::tempdir().unwrap();
+        fs::write(tmp.path().join("a.rs"), "").unwrap();
+        fs::create_dir_all(tmp.path().join("src")).unwrap();
+        fs::write(tmp.path().join("src/b.rs"), "").unwrap();
+        fs::create_dir_all(tmp.path().join("target")).unwrap();
+        fs::write(tmp.path().join("target/junk.rs"), "").unwrap();
+        fs::create_dir_all(tmp.path().join(".git")).unwrap();
+        fs::write(tmp.path().join(".git/config"), "").unwrap();
+
+        let files = list_files(tmp.path(), 100);
+        assert!(files.contains(&"a.rs".to_string()));
+        assert!(files.contains(&"src/b.rs".to_string()));
+        assert!(!files.iter().any(|f| f.contains("target")));
+        assert!(!files.iter().any(|f| f.contains(".git")));
+        // Sorted output.
+        let mut sorted = files.clone();
+        sorted.sort();
+        assert_eq!(files, sorted);
+    }
+
+    #[test]
+    fn list_files_respects_the_cap() {
+        let tmp = tempfile::tempdir().unwrap();
+        for i in 0..20 {
+            fs::write(tmp.path().join(format!("f{i}.txt")), "").unwrap();
+        }
+        assert_eq!(list_files(tmp.path(), 5).len(), 5);
+    }
+
+    #[test]
+    fn file_ops_create_rename_delete() {
+        let tmp = tempfile::tempdir().unwrap();
+        let root = tmp.path();
+
+        // Create a file, then refuse to clobber it.
+        let a = root.join("a.txt");
+        create_file(&a).unwrap();
+        assert!(a.is_file());
+        assert!(
+            create_file(&a).is_err(),
+            "must not overwrite an existing file"
+        );
+
+        // Create a directory, and refuse to clobber it too.
+        let dir = root.join("sub");
+        create_dir(&dir).unwrap();
+        assert!(dir.is_dir());
+        assert!(create_dir(&dir).is_err());
+
+        // Rename, but never onto an existing path.
+        let b = root.join("b.txt");
+        rename_path(&a, &b).unwrap();
+        assert!(!a.exists() && b.is_file());
+        fs::write(root.join("c.txt"), "x").unwrap();
+        assert!(rename_path(&b, &root.join("c.txt")).is_err());
+
+        // Delete a file and a (recursive) directory.
+        fs::write(dir.join("nested.txt"), "y").unwrap();
+        delete_path(&b).unwrap();
+        assert!(!b.exists());
+        delete_path(&dir).unwrap();
+        assert!(!dir.exists());
     }
 
     #[test]

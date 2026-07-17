@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   GitBranch,
@@ -14,6 +14,9 @@ import {
   FileCode2,
   ListTodo,
   Sparkles,
+  Search,
+  Plus,
+  X,
 } from "lucide-react";
 import type {
   Command,
@@ -28,10 +31,17 @@ import {
   runCommand,
   openTerminal,
   generateProfile,
+  readFile,
 } from "@/lib/ipc";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TerminalPane } from "@/components/TerminalPane";
 import { ExplorerPanel } from "@/components/ExplorerPanel";
+import { SearchPanel } from "@/components/SearchPanel";
+import { SourceControlPanel } from "@/components/SourceControlPanel";
+import { ProblemsPanel } from "@/components/ProblemsPanel";
+import { TestingPanel } from "@/components/TestingPanel";
+import { useEditorStore } from "@/store/editor";
+import { nextActiveAfterClose } from "@/lib/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -48,7 +58,11 @@ export function ProjectView({
   path: string;
 }) {
   const [detail, setDetail] = useState<ProjectDetail | null>(null);
+  const [tab, setTab] = useState("overview");
   const pushToast = useAppStore((s) => s.pushToast);
+  const pendingFile = useAppStore((s) => s.pendingFile);
+  const clearPendingFile = useAppStore((s) => s.clearPendingFile);
+  const openInEditor = useEditorStore((s) => s.openTab);
 
   useEffect(() => {
     let cancelled = false;
@@ -59,6 +73,19 @@ export function ProjectView({
       cancelled = true;
     };
   }, [projectId, path]);
+
+  // Quick-open (from the command palette) drops a pending file into the store;
+  // when it targets this project, open it in the editor and reveal the Explorer.
+  useEffect(() => {
+    if (!pendingFile || pendingFile.projectId !== projectId) return;
+    const { path: filePath, line } = pendingFile;
+    clearPendingFile();
+    (async () => {
+      const contents = await readFile(filePath);
+      openInEditor(filePath, contents, line);
+      setTab("explorer");
+    })();
+  }, [pendingFile, projectId, clearPendingFile, openInEditor]);
 
   if (!detail) {
     return (
@@ -82,6 +109,13 @@ export function ProjectView({
       title: "Profile generated",
       description: `orbit.toml written for ${project.name}`,
     });
+  }
+
+  // Open a file in the editor (optionally at a line), then reveal the Explorer tab.
+  async function openSearchResult(filePath: string, line?: number) {
+    const contents = await readFile(filePath);
+    openInEditor(filePath, contents, line);
+    setTab("explorer");
   }
 
   return (
@@ -121,7 +155,7 @@ export function ProjectView({
       </header>
 
       {/* Tabs */}
-      <Tabs defaultValue="overview">
+      <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="commands">Commands</TabsTrigger>
@@ -133,6 +167,21 @@ export function ProjectView({
             </span>
           </TabsTrigger>
           <TabsTrigger value="explorer">Explorer</TabsTrigger>
+          <TabsTrigger value="search">
+            <Search className="h-3.5 w-3.5" /> Search
+          </TabsTrigger>
+          <TabsTrigger value="source-control">
+            <GitBranch className="h-3.5 w-3.5" /> Source Control
+          </TabsTrigger>
+          <TabsTrigger value="problems">
+            Problems
+            {health.warnings.length > 0 && (
+              <span className="ml-1 rounded bg-warning/20 px-1 text-[10px] text-warning">
+                {health.warnings.length}
+              </span>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="testing">Testing</TabsTrigger>
           <TabsTrigger value="terminal">Terminal</TabsTrigger>
         </TabsList>
 
@@ -150,6 +199,18 @@ export function ProjectView({
         </TabsContent>
         <TabsContent value="explorer">
           <ExplorerPanel root={path} />
+        </TabsContent>
+        <TabsContent value="search">
+          <SearchPanel root={path} onOpen={openSearchResult} />
+        </TabsContent>
+        <TabsContent value="source-control">
+          <SourceControlPanel root={path} />
+        </TabsContent>
+        <TabsContent value="problems">
+          <ProblemsPanel root={path} health={health} onOpen={openSearchResult} />
+        </TabsContent>
+        <TabsContent value="testing">
+          <TestingPanel path={path} commands={project.commands} />
         </TabsContent>
         <TabsContent value="terminal">
           <TerminalTab path={path} onOpen={handleTerminal} />
@@ -592,19 +653,82 @@ function DepGroup({ title, deps }: { title: string; deps: Dependency[] }) {
  * anyone who'd rather use their own.
  */
 function TerminalTab({ path, onOpen }: { path: string; onOpen: () => void }) {
+  const counter = useRef(1);
+  const [tabs, setTabs] = useState<string[]>(["term-1"]);
+  const [active, setActive] = useState("term-1");
+
+  function addTab() {
+    const id = `term-${++counter.current}`;
+    setTabs((ts) => [...ts, id]);
+    setActive(id);
+  }
+
+  function closeTab(id: string) {
+    if (tabs.length <= 1) return; // always keep one shell
+    const next = nextActiveAfterClose(tabs, id, active);
+    if (next) setActive(next);
+    setTabs((ts) => ts.filter((t) => t !== id));
+  }
+
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <p className="text-xs text-fg-muted">
-          A real shell, running in{" "}
+          Real shells, running in{" "}
           <span className="font-mono text-fg-subtle">{path}</span>.
         </p>
         <Button variant="secondary" size="sm" onClick={onOpen}>
           <Terminal className="h-3.5 w-3.5" /> Open system terminal
         </Button>
       </div>
-      {/* Remount per project so each gets its own PTY session. */}
-      <TerminalPane key={path} path={path} className="h-[440px]" />
+
+      {/* Tab strip */}
+      <div className="flex items-center gap-1 border-b border-white/[0.06]">
+        {tabs.map((id, i) => (
+          <div
+            key={id}
+            onClick={() => setActive(id)}
+            className={cn(
+              "no-drag group flex cursor-pointer items-center gap-1.5 rounded-t-lg border-b-2 px-3 py-1.5 text-[13px] transition-colors",
+              id === active
+                ? "border-accent text-fg"
+                : "border-transparent text-fg-muted hover:text-fg",
+            )}
+          >
+            <Terminal className="h-3.5 w-3.5 shrink-0" />
+            <span>Terminal {i + 1}</span>
+            {tabs.length > 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  closeTab(id);
+                }}
+                aria-label={`Close Terminal ${i + 1}`}
+                className="no-drag ml-0.5 flex h-4 w-4 items-center justify-center rounded opacity-0 transition-opacity hover:bg-white/[0.08] group-hover:opacity-100"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            )}
+          </div>
+        ))}
+        <button
+          onClick={addTab}
+          aria-label="New terminal"
+          className="no-drag ml-1 flex h-7 w-7 items-center justify-center rounded-md text-fg-subtle transition-colors hover:bg-white/[0.06] hover:text-fg"
+        >
+          <Plus className="h-4 w-4" />
+        </button>
+      </div>
+
+      {/* Panes stay mounted so background shells keep running; hide inactive
+          ones. TerminalPane's ResizeObserver refits when it becomes visible. */}
+      <div className="relative">
+        {tabs.map((id) => (
+          <div key={id} className={id === active ? "block" : "hidden"}>
+            <TerminalPane path={path} className="h-[440px]" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

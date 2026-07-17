@@ -34,7 +34,7 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       boxShadow: {
-        glow: "0 0 0 1px rgb(99 102 241 / 0.25), 0 8px 40px -12px rgb(99 102 241 / 0.5)",
+        glow: "0 0 0 1px rgb(220 38 38 / 0.25), 0 8px 40px -12px rgb(220 38 38 / 0.55)",
         soft: "0 8px 30px -12px rgb(0 0 0 / 0.6)",
         lift: "0 20px 50px -20px rgb(0 0 0 / 0.7)",
       },
@@ -60,8 +60,23 @@ const config: Config = {
         "spin-slow": {
           to: { transform: "rotate(360deg)" },
         },
+        "spin-reverse": {
+          to: { transform: "rotate(-360deg)" },
+        },
         shimmer: {
           "100%": { transform: "translateX(100%)" },
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-6px)" },
+        },
+        breathe: {
+          "0%, 100%": { opacity: "0.4", transform: "scale(1)" },
+          "50%": { opacity: "0.9", transform: "scale(1.08)" },
+        },
+        indeterminate: {
+          "0%": { transform: "translateX(-140%)" },
+          "100%": { transform: "translateX(340%)" },
         },
       },
       animation: {
@@ -69,7 +84,11 @@ const config: Config = {
         "slide-up": "slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
         "scale-in": "scale-in 0.15s ease-out",
         "spin-slow": "spin-slow 8s linear infinite",
+        "spin-reverse": "spin-reverse 14s linear infinite",
         shimmer: "shimmer 1.5s infinite",
+        float: "float 4s ease-in-out infinite",
+        breathe: "breathe 3s ease-in-out infinite",
+        indeterminate: "indeterminate 1.4s ease-in-out infinite",
       },
     },
   },

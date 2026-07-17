@@ -1,13 +1,15 @@
 # Updates
 
 Orbit checks GitHub Releases for a newer version on launch. If it finds one, a
-banner appears; you choose when to install.
+banner appears; you choose when to install. You can also check any time from
+**Settings → Updates**.
 
 ## How it works
 
-1. On launch, Orbit fetches `latest.json` from the repository's latest release.
+1. On launch — or when you click **Check for updates** in Settings — Orbit
+   fetches `latest.json` from the repository's latest release.
 2. It compares that version with the running one.
-3. If newer, a banner offers **Install & restart**.
+3. If newer, a banner (and the Settings panel) offer **Install & restart**.
 4. Downloading verifies the update's signature against a public key compiled
    into the app. An update that isn't signed by the Orbit release key is
    rejected — a tampered or spoofed release cannot install itself.

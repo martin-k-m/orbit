@@ -4,7 +4,7 @@
 
 <br/>
 
-**A local-first developer command center for managing projects, tools, and workflows.**
+**A local-first, native developer IDE — editor, terminal, source control, and project tooling in one fast desktop app.**
 
 No server. No account. No telemetry. Everything runs on your machine.
 
@@ -25,10 +25,11 @@ No server. No account. No telemetry. Everything runs on your machine.
 
 ## What is Orbit?
 
-Orbit is the desktop centerpiece of your development setup. It scans your code
-folders, understands your projects, and gives you one fast, beautiful place to
-run commands, check git status, watch project health, browse dependencies and
-review how you spend your time — all **locally**.
+Orbit is the desktop centerpiece of your development setup — a native IDE that
+scans your code folders, understands your projects, and gives you one fast,
+beautiful place to **edit code, run a terminal, drive git, run tests, and manage
+containers, databases and APIs** — plus commands, project health, dependencies
+and local analytics. All **locally**.
 
 Think of it as the calm control room for everything you build:
 
@@ -50,7 +51,7 @@ Think of it as the calm control room for everything you build:
 | 🗂 **Project management** | Point Orbit at a folder and it detects every Rust, Node/TypeScript, Python, Go and Docker project inside — with the right commands, frameworks and dependencies. |
 | ⌘ **Command center** | A `Cmd/Ctrl + K` palette to jump to any project, run `dev`/`build`/`test`, open a terminal or scan a folder — without leaving the keyboard. |
 | ▶️ **Run anything** | One click runs a project's dev server, build or tests. Commands are inferred from manifests and can be pinned in a `.project-orbit` profile. |
-| 🌿 **Git at a glance** | Branch, cleanliness, ahead/behind and last commit for every project, read straight from your local repos. |
+| 🌿 **Git power center** | A first-class Source Control panel: stage/unstage, inline diffs, commit, history with per-commit patches, branches, fetch/pull/push, stash and tags — on the `git` binary you already have. |
 | 🩺 **Project health** | A 0–100 score with concrete warnings — oversized files, stray TODOs, heavy artifacts, missing tests. |
 | 📦 **Dependency manager** | The declared dependencies of every ecosystem in a project, read offline from its manifests. |
 | 📊 **Developer analytics** | Local, private time tracking: hours per language, projects touched, build times. Never uploaded. |
@@ -59,7 +60,10 @@ Think of it as the calm control room for everything you build:
 | 🛰 **Ecosystem previews** | Clearly-labelled previews for **Blink**, **Killer**, **Flux** and **Beacon** — the real engines land in v2.0 ([roadmap](ROADMAP.md)). |
 | 🖥 **Native & premium** | Tauri 2 app for macOS, Windows and Linux with a tray, native menus, keyboard shortcuts and a dark, glass-panelled design. |
 | 🖥 **Built-in terminal** | A real PTY-backed shell per project — colours, `top`/`vim`, Ctrl-C and reflow all work. Opens in your shell (`$SHELL`/`COMSPEC`), in the project directory. |
-| 📝 **File explorer & editor** | Browse the project tree and edit files in a CodeMirror editor — syntax highlighting, folding, multi-cursor, save, encoding/line-ending detection. |
+| 📝 **Code editor** | A tabbed CodeMirror editor — multi-file tabs, find/replace, go-to-line, a document outline, font/tab/wrap preferences, plus create/rename/delete in the file tree. |
+| 🔎 **Search & quick-open** | Fast find-in-files across a project, and `⌘/Ctrl+K` fuzzy quick-open to jump to any file. |
+| 🐳 **Docker · 🗄 Database · 🌐 APIs** | List and control Docker containers/images; browse a SQLite database and run `SELECT`s; send REST requests with a JSON-aware response viewer. |
+| 🧪 **Testing & problems** | Run a project's tests with a parsed pass/fail summary (cargo, Jest/Vitest, pytest), and a unified Problems panel with **live language-server diagnostics** (rust-analyzer, tsserver, pylsp, gopls) for your open files. |
 | ⌨️ **A real CLI** | The same engine as a terminal companion: `orbit scan`, `orbit info`, `orbit health`, `orbit run`. |
 
 ## 🧭 The ecosystem

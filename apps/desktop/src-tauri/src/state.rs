@@ -4,6 +4,7 @@
 //! SQLite database) and a registry of processes it has spawned. Both are held
 //! behind a `Mutex` because Tauri command handlers run on a thread pool.
 
+use orbit_core::lsp::LspDriver;
 use orbit_core::process::RunningProcess;
 use orbit_core::store::Store;
 use std::collections::HashMap;
@@ -16,6 +17,9 @@ pub struct AppState {
     pub store: Mutex<Option<Store>>,
     /// Long-running processes Orbit launched, keyed by an opaque id.
     pub processes: Mutex<HashMap<String, RunningProcess>>,
+    /// Live language servers, keyed by `"<rootUri>|<language>"`. Started lazily
+    /// the first time diagnostics are requested for a language in a project.
+    pub lsp: Mutex<HashMap<String, LspDriver>>,
 }
 
 impl AppState {
@@ -24,16 +28,17 @@ impl AppState {
         AppState {
             store: Mutex::new(None),
             processes: Mutex::new(HashMap::new()),
+            lsp: Mutex::new(HashMap::new()),
         }
     }
 
     /// Run a closure with the open store, or return an error string if the
     /// database is unavailable.
-    pub fn with_store<T>(
-        &self,
-        f: impl FnOnce(&Store) -> Result<T, String>,
-    ) -> Result<T, String> {
-        let guard = self.store.lock().map_err(|_| "state lock poisoned".to_string())?;
+    pub fn with_store<T>(&self, f: impl FnOnce(&Store) -> Result<T, String>) -> Result<T, String> {
+        let guard = self
+            .store
+            .lock()
+            .map_err(|_| "state lock poisoned".to_string())?;
         match guard.as_ref() {
             Some(store) => f(store),
             None => Err("local database is unavailable".to_string()),

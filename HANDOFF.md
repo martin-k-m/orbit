@@ -4,7 +4,7 @@ A ground-truth snapshot for whoever (or whatever) picks up Orbit next. This is
 the honest state, including the things the marketing pages don't say. If it
 conflicts with a glossier doc, trust this file and fix the other one.
 
-Last updated at **v1.1.0**.
+Last updated at **v1.2.0** (the IDE release).
 
 ---
 
@@ -40,7 +40,7 @@ orbit/
 `apps/desktop/src-tauri` is intentionally **excluded** from the workspace
 (`Cargo.toml` `exclude`) because it drags in the webview stack.
 
-## What actually exists (v1.1.0)
+## What actually exists (v1.2.0)
 
 Engine modules (`crates/orbit-core/src/`), all unit-tested:
 
@@ -59,6 +59,7 @@ Engine modules (`crates/orbit-core/src/`), all unit-tested:
 | `workspace` | Per-project tasks/notes/bookmarks/terminal tabs (JSON in SQLite) |
 | `shell` | Which shells exist + which the user prefers |
 | `files` | Lazy dir listing + file read (encoding/line-ending/language/binary) |
+| `search` | Find-in-files: literal content search, skips ignored/binary/large, capped |
 | `store` | SQLite persistence (feature `persistence`, schema v2) |
 
 Desktop features that are **built and wired to the UI**:
@@ -67,9 +68,19 @@ Desktop features that are **built and wired to the UI**:
 - Git status, health, dependency panels
 - Command runner (safety-guarded), workspace tasks/notes
 - **Integrated terminal** — real PTY (`portable-pty`), xterm.js UI
-- **File explorer + CodeMirror 6 editor** (Explorer tab)
+- **File explorer + CodeMirror 6 editor** with **multiple editor tabs**
+  (per-tab drafts/dirty state, reopen-focuses, close-picks-neighbour) (Explorer tab)
+- **Workspace search (find in files)** — a Search tab per project backed by
+  `orbit_core::search`; click a result to open the file at that line. This is
+  project-scoped content search, **not** the cross-source universal palette yet.
+- **Source control (git power center)** — a Source Control tab: staged/unstaged
+  groups, one-click stage/unstage, inline diff, commit, recent history, branch
+  switch/create, and fetch/pull/push (pull is ff-only). Backed by
+  `orbit_core::git`. No stash/merge/rebase/cherry-pick/commit-graph yet.
 - Environment report; local analytics
 - System tray, native menu, Dark/Light/**System** theme (persisted)
+- **Red brand identity** (red-600 → rose-500, matching the website) + a
+  black-and-red **launch splashscreen** that fades into the app on boot
 - **Signed auto-update** (from v1.1.0)
 
 Ecosystem integrations (Blink/Killer/Flux/Beacon) are **UI previews only** — no
@@ -79,14 +90,37 @@ real engines behind them.
 
 Be very clear about this — do not claim otherwise in any doc or the UI:
 
-- **No LSP / semantic code intelligence** — the editor is syntactic only. No
-  go-to-definition, find-references, rename, hover types, real diagnostics.
-- **No debugger (DAP)**, no test-runner UI, no Problems panel.
-- **No Docker, database, or API-client tooling.**
-- **No multi-window / dockable / split-pane IDE layout.** One editor file and
-  one terminal per project view; no editor tabs yet.
+- **LSP is now partially real.** `orbit_core::lsp` is a full client: Content-
+  Length framing + JSON-RPC + streaming decoder, a unit-tested `Session` state
+  machine (handshake/id-correlation/didOpen/definition/diagnostics), and an
+  `LspDriver` that spawns a real server and pumps stdio through the session on a
+  thread. The Tauri `lsp_diagnostics` command starts a server lazily (held in
+  `AppState.lsp`) and the **Problems panel shows live server diagnostics** for
+  open files. Caveats: it re-sends `didOpen` on each 3s poll (no `didChange`
+  yet); **go-to-definition/hover/rename are not wired to an editor gesture**; and
+  the driver + Tauri glue only *compile-prove* in CI's bundle build (src-tauri
+  never builds in PR CI), so treat rust-analyzer behaviour as manually verified.
+  The Outline stays a syntactic heuristic.
+- **No debugger (DAP)**. A **Testing panel** runs the project's `test` command
+  and parses cargo/Jest/Vitest/pytest summaries (`orbit_core::testing`), but
+  there is no per-test tree/discovery or coverage yet. The **Problems panel**
+  aggregates only Orbit's own diagnostics (health warnings + env issues) — no
+  compiler/linter/LSP diagnostic source behind it yet.
+- **Docker**: a Containers view (list containers/images, start/stop/restart via
+  `orbit_core::docker` → `docker` CLI) shipped; no compose/logs/exec/networks/
+  volumes yet.
+- **Database**: a read-only **SQLite** explorer (browse tables, view rows, run
+  `SELECT`) via `orbit_core::db` (feature `persistence`). No Postgres/MySQL/Redis
+  and no writes/export yet.
+- **API explorer**: a REST client (method/URL/headers/body, JSON-aware response)
+  via `orbit_core::http`, which shells out to **`curl`**. No collections/auth/
+  history/GraphQL/WebSockets yet.
+- **No multi-window / dockable / split-pane IDE layout.** The editor has
+  multiple tabs now, but there are no split editors, and still one terminal per
+  project view.
 - **No plugin SDK/runtime.**
-- Terminal has no tabs/splits/search/session-persistence yet.
+- Terminal now has **multiple tabs** (background shells stay alive); still no
+  splits/search/session-persistence.
 
 The [ROADMAP](ROADMAP.md) marks all of this honestly (✅ / 🚧 / 📋). Several
 prompt "phases" asked to *finish* or *verify* these as if they existed; they
@@ -155,6 +189,11 @@ Windows and Linux, plus `latest.json` and `SHA256SUMS.txt`, and creates a
   Merge one at a time with CI watching; don't bulk-merge onto a green release.
 - The `docs/` set covers only shipped features by design. If you build Docker/DB/
   API/LSP, add their docs *then*, not before.
+- **The OS launcher icon set is still the old indigo mark.** The new red brand
+  master lives at `apps/desktop/src-tauri/icons/app-icon.svg`, but the raster
+  set (`.ico`/`.icns`/PNGs) wasn't regenerated — the dev box has no SVG
+  rasteriser or Tauri CLI. Export the SVG to `app-icon.png` (1024²) and run
+  `scripts/gen-icons.sh`. The *in-app* logo, favicon and splash are already red.
 
 ## How to keep this honest
 

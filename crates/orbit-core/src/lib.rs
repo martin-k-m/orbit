@@ -31,19 +31,27 @@
 pub mod analytics;
 pub mod deps;
 pub mod detect;
+pub mod docker;
 pub mod env;
 pub mod error;
 pub mod files;
 pub mod git;
 pub mod health;
+pub mod http;
+pub mod lsp;
 pub mod model;
+pub mod outline;
 pub mod process;
 pub mod profile;
 pub mod safety;
 pub mod scan;
+pub mod search;
 pub mod shell;
+pub mod testing;
 pub mod workspace;
 
+#[cfg(feature = "persistence")]
+pub mod db;
 #[cfg(feature = "persistence")]
 pub mod store;
 
@@ -125,6 +133,22 @@ mod tests {
         assert_serialize::<ProjectDetail>();
         assert_serialize::<git::GitInfo>();
         assert_serialize::<git::Commit>();
+        assert_serialize::<git::GitStatus>();
+        assert_serialize::<git::StatusEntry>();
+        assert_serialize::<git::StashEntry>();
+        assert_serialize::<docker::Container>();
+        assert_serialize::<docker::Image>();
+        assert_serialize::<testing::TestSummary>();
+        assert_serialize::<http::HttpResponse>();
+        assert_serialize::<http::Header>();
+        assert_serialize::<outline::Symbol>();
+        assert_serialize::<lsp::Diagnostic>();
+        assert_serialize::<lsp::Location>();
+        #[cfg(feature = "persistence")]
+        {
+            assert_serialize::<db::Table>();
+            assert_serialize::<db::QueryResult>();
+        }
         assert_serialize::<health::HealthReport>();
         assert_serialize::<health::Warning>();
         assert_serialize::<deps::Dependency>();
@@ -151,6 +175,9 @@ mod tests {
         assert_serialize::<files::FileContents>();
         assert_serialize::<files::Encoding>();
         assert_serialize::<files::LineEnding>();
+        assert_serialize::<search::SearchResults>();
+        assert_serialize::<search::FileMatches>();
+        assert_serialize::<search::Match>();
 
         // Types the frontend also sends back must round-trip. `save_workspace`
         // takes a Workspace as a command *parameter*, so it must deserialize.

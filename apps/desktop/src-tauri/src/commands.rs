@@ -202,6 +202,247 @@ pub fn git_info(path: String) -> Result<Option<GitInfo>, String> {
     Ok(git::info(Path::new(&path)))
 }
 
+/// Grouped staged/unstaged status for the source-control panel (`null` if the
+/// project is not a git repository).
+#[tauri::command]
+pub fn git_status(path: String) -> Result<Option<git::GitStatus>, String> {
+    Ok(git::status(Path::new(&path)))
+}
+
+/// Stage one path, or every change when `path` is null/empty.
+#[tauri::command]
+pub fn git_stage(path: String, file: Option<String>) -> Result<(), String> {
+    let dir = Path::new(&path);
+    match file.as_deref().filter(|f| !f.is_empty()) {
+        Some(f) => git::stage(dir, f).map_err(|e| e.to_string()),
+        None => git::stage_all(dir).map_err(|e| e.to_string()),
+    }
+}
+
+/// Unstage one path, or everything when `path` is null/empty.
+#[tauri::command]
+pub fn git_unstage(path: String, file: Option<String>) -> Result<(), String> {
+    let dir = Path::new(&path);
+    match file.as_deref().filter(|f| !f.is_empty()) {
+        Some(f) => git::unstage(dir, f).map_err(|e| e.to_string()),
+        None => git::unstage_all(dir).map_err(|e| e.to_string()),
+    }
+}
+
+/// The unified diff for a file, staged or unstaged.
+#[tauri::command]
+pub fn git_diff(path: String, file: String, staged: bool) -> Result<String, String> {
+    git::diff(Path::new(&path), &file, staged).map_err(|e| e.to_string())
+}
+
+/// The full patch for a commit/ref.
+#[tauri::command]
+pub fn git_show(path: String, reference: String) -> Result<String, String> {
+    git::show(Path::new(&path), &reference).map_err(|e| e.to_string())
+}
+
+/// Commit the staged changes; returns the new commit.
+#[tauri::command]
+pub fn git_commit(path: String, message: String) -> Result<git::Commit, String> {
+    git::commit(Path::new(&path), &message).map_err(|e| e.to_string())
+}
+
+/// The most recent commits (newest first).
+#[tauri::command]
+pub fn git_log(path: String, limit: usize) -> Result<Vec<git::Commit>, String> {
+    Ok(git::recent_commits(Path::new(&path), limit))
+}
+
+/// Local branch names.
+#[tauri::command]
+pub fn git_branches(path: String) -> Result<Vec<String>, String> {
+    Ok(git::branches(Path::new(&path)))
+}
+
+/// Switch to an existing branch.
+#[tauri::command]
+pub fn git_switch_branch(path: String, name: String) -> Result<(), String> {
+    git::switch_branch(Path::new(&path), &name).map_err(|e| e.to_string())
+}
+
+/// Create a new branch off HEAD and switch to it.
+#[tauri::command]
+pub fn git_create_branch(path: String, name: String) -> Result<(), String> {
+    git::create_branch(Path::new(&path), &name).map_err(|e| e.to_string())
+}
+
+/// Tags, most recent first.
+#[tauri::command]
+pub fn git_tags(path: String) -> Result<Vec<String>, String> {
+    Ok(git::tags(Path::new(&path)))
+}
+
+/// Create a lightweight tag at HEAD.
+#[tauri::command]
+pub fn git_create_tag(path: String, name: String) -> Result<(), String> {
+    git::create_tag(Path::new(&path), &name).map_err(|e| e.to_string())
+}
+
+/// Fetch remote-tracking refs.
+#[tauri::command]
+pub fn git_fetch(path: String) -> Result<(), String> {
+    git::fetch(Path::new(&path)).map_err(|e| e.to_string())
+}
+
+/// Fast-forward pull from upstream.
+#[tauri::command]
+pub fn git_pull(path: String) -> Result<(), String> {
+    git::pull(Path::new(&path)).map_err(|e| e.to_string())
+}
+
+/// Push the current branch to its upstream.
+#[tauri::command]
+pub fn git_push(path: String) -> Result<(), String> {
+    git::push(Path::new(&path)).map_err(|e| e.to_string())
+}
+
+/// Stash working-tree + index changes (including untracked).
+#[tauri::command]
+pub fn git_stash_save(path: String, message: Option<String>) -> Result<(), String> {
+    git::stash_save(Path::new(&path), message.as_deref()).map_err(|e| e.to_string())
+}
+
+/// The stash stack, newest first.
+#[tauri::command]
+pub fn git_stash_list(path: String) -> Result<Vec<git::StashEntry>, String> {
+    Ok(git::stash_list(Path::new(&path)))
+}
+
+/// Apply and remove a stash entry.
+#[tauri::command]
+pub fn git_stash_pop(path: String, reference: String) -> Result<(), String> {
+    git::stash_pop(Path::new(&path), &reference).map_err(|e| e.to_string())
+}
+
+/// Discard a stash entry without applying it.
+#[tauri::command]
+pub fn git_stash_drop(path: String, reference: String) -> Result<(), String> {
+    git::stash_drop(Path::new(&path), &reference).map_err(|e| e.to_string())
+}
+
+// --- Docker ---------------------------------------------------------------
+
+/// Whether the Docker CLI + daemon are reachable.
+#[tauri::command]
+pub fn docker_available() -> bool {
+    orbit_core::docker::available()
+}
+
+/// All containers (running and stopped).
+#[tauri::command]
+pub fn docker_containers() -> Vec<orbit_core::docker::Container> {
+    orbit_core::docker::containers()
+}
+
+/// All local images.
+#[tauri::command]
+pub fn docker_images() -> Vec<orbit_core::docker::Image> {
+    orbit_core::docker::images()
+}
+
+/// Start, stop or restart a container by id.
+#[tauri::command]
+pub fn docker_action(action: String, id: String) -> Result<(), String> {
+    let r = match action.as_str() {
+        "start" => orbit_core::docker::start(&id),
+        "stop" => orbit_core::docker::stop(&id),
+        "restart" => orbit_core::docker::restart(&id),
+        other => return Err(format!("unknown docker action `{other}`")),
+    };
+    r.map_err(|e| e.to_string())
+}
+
+// --- Database (SQLite) ----------------------------------------------------
+
+/// Tables and views in a SQLite database (opened read-only).
+#[tauri::command]
+pub fn db_tables(path: String) -> Result<Vec<orbit_core::db::Table>, String> {
+    orbit_core::db::tables(Path::new(&path)).map_err(|e| e.to_string())
+}
+
+/// Run a read query against a SQLite database (capped at 500 rows).
+#[tauri::command]
+pub fn db_query(path: String, sql: String) -> Result<orbit_core::db::QueryResult, String> {
+    orbit_core::db::query(Path::new(&path), &sql, 500).map_err(|e| e.to_string())
+}
+
+/// The first 200 rows of a table.
+#[tauri::command]
+pub fn db_table_rows(path: String, table: String) -> Result<orbit_core::db::QueryResult, String> {
+    orbit_core::db::table_rows(Path::new(&path), &table, 200).map_err(|e| e.to_string())
+}
+
+/// Parse captured test-runner output into a pass/fail summary (`null` if no
+/// known format is recognised).
+#[tauri::command]
+pub fn parse_test_output(
+    output: String,
+) -> Result<Option<orbit_core::testing::TestSummary>, String> {
+    Ok(orbit_core::testing::parse_summary(&output))
+}
+
+/// A syntactic document outline (symbols) for the editor's Outline panel.
+#[tauri::command]
+pub fn file_symbols(text: String, language: Option<String>) -> Vec<orbit_core::outline::Symbol> {
+    orbit_core::outline::symbols(&text, language.as_deref())
+}
+
+/// Diagnostics for an open document from a language server.
+///
+/// Starts a server for `(root_uri, language)` on first use and keeps it alive in
+/// state; opens (or re-sends) the document, then returns whatever diagnostics
+/// have been published so far. Diagnostics arrive asynchronously, so the UI
+/// polls this. Returns an empty list (never an error) when no server is
+/// installed for the language.
+#[tauri::command]
+pub fn lsp_diagnostics(
+    state: State<'_, AppState>,
+    root_uri: String,
+    language: String,
+    uri: String,
+    text: String,
+) -> Result<Vec<orbit_core::lsp::Diagnostic>, String> {
+    use orbit_core::lsp::{server_for, LspDriver};
+
+    let Some((program, args)) = server_for(&language) else {
+        return Ok(Vec::new());
+    };
+
+    let key = format!("{root_uri}|{language}");
+    let mut servers = state
+        .lsp
+        .lock()
+        .map_err(|_| "state lock poisoned".to_string())?;
+    if !servers.contains_key(&key) {
+        match LspDriver::start(program, args, &root_uri) {
+            Ok(driver) => {
+                servers.insert(key.clone(), driver);
+            }
+            // Server not installed / failed to spawn — degrade quietly.
+            Err(_) => return Ok(Vec::new()),
+        }
+    }
+    let driver = servers.get_mut(&key).expect("just inserted");
+    let _ = driver.open(&uri, &language, &text);
+    Ok(driver.diagnostics(&uri))
+}
+
+/// Send an HTTP request (via `curl`) for the API explorer.
+#[tauri::command]
+pub fn http_request(
+    method: String,
+    url: String,
+    headers: Vec<(String, String)>,
+    body: Option<String>,
+) -> Result<orbit_core::http::HttpResponse, String> {
+    orbit_core::http::request(&method, &url, &headers, body.as_deref()).map_err(|e| e.to_string())
+}
+
 /// Assess how risky a project's command is before running it, so the UI can
 /// show a confirmation dialog for anything destructive.
 #[tauri::command]
@@ -280,11 +521,7 @@ pub fn get_setting(state: State<'_, AppState>, key: String) -> Result<Option<Str
 
 /// Write a persisted UI setting.
 #[tauri::command]
-pub fn set_setting(
-    state: State<'_, AppState>,
-    key: String,
-    value: String,
-) -> Result<(), String> {
+pub fn set_setting(state: State<'_, AppState>, key: String, value: String) -> Result<(), String> {
     state.with_store(|store| store.set_setting(&key, &value).map_err(|e| e.to_string()))
 }
 
@@ -316,11 +553,8 @@ pub fn get_workspace(
     id: String,
     path: String,
 ) -> Result<Workspace, String> {
-    let mut workspace = state.with_store(|store| {
-        store
-            .workspace_or_default(&id)
-            .map_err(|e| e.to_string())
-    })?;
+    let mut workspace =
+        state.with_store(|store| store.workspace_or_default(&id).map_err(|e| e.to_string()))?;
 
     // First open: seed tasks from whatever the scanner detected.
     if workspace.tasks.is_empty() {
@@ -400,6 +634,40 @@ pub fn read_file(path: String) -> Result<orbit_core::files::FileContents, String
     orbit_core::files::read_text_file(&file).map_err(|e| e.to_string())
 }
 
+/// A flat, capped list of a project's files (relative paths) for quick-open.
+#[tauri::command]
+pub fn list_files(path: String) -> Result<Vec<String>, String> {
+    let dir = PathBuf::from(&path);
+    if !dir.is_dir() {
+        return Err(format!("{path} is not a directory"));
+    }
+    Ok(orbit_core::files::list_files(&dir, 5000))
+}
+
+/// Create an empty file (fails if anything already exists at the path).
+#[tauri::command]
+pub fn create_file(path: String) -> Result<(), String> {
+    orbit_core::files::create_file(Path::new(&path)).map_err(|e| e.to_string())
+}
+
+/// Create a directory (fails if anything already exists at the path).
+#[tauri::command]
+pub fn create_dir(path: String) -> Result<(), String> {
+    orbit_core::files::create_dir(Path::new(&path)).map_err(|e| e.to_string())
+}
+
+/// Rename/move a path (fails if the destination already exists).
+#[tauri::command]
+pub fn rename_path(from: String, to: String) -> Result<(), String> {
+    orbit_core::files::rename_path(Path::new(&from), Path::new(&to)).map_err(|e| e.to_string())
+}
+
+/// Delete a file, or a directory and everything under it.
+#[tauri::command]
+pub fn delete_path(path: String) -> Result<(), String> {
+    orbit_core::files::delete_path(Path::new(&path)).map_err(|e| e.to_string())
+}
+
 /// Write text back to a file (the editor's save).
 #[tauri::command]
 pub fn write_file(path: String, contents: String) -> Result<(), String> {
@@ -411,6 +679,27 @@ pub fn write_file(path: String, contents: String) -> Result<(), String> {
         _ => return Err(format!("{path} has no existing parent directory")),
     }
     std::fs::write(&file, contents).map_err(|e| e.to_string())
+}
+
+/// Search a project for a literal string ("find in files"). Skips ignored,
+/// binary and oversized files; results are capped so a broad query stays cheap.
+#[tauri::command]
+pub fn search_workspace(
+    root: String,
+    query: String,
+    case_sensitive: bool,
+    whole_word: bool,
+) -> Result<orbit_core::search::SearchResults, String> {
+    let dir = PathBuf::from(&root);
+    if !dir.is_dir() {
+        return Err(format!("{root} is not a directory"));
+    }
+    let query = orbit_core::search::Query {
+        text: query,
+        case_sensitive,
+        whole_word,
+    };
+    orbit_core::search::search_workspace(&dir, &query).map_err(|e| e.to_string())
 }
 
 // --- Terminal -------------------------------------------------------------

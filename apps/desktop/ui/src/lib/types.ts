@@ -56,6 +56,103 @@ export interface GitInfo {
   lastCommit?: Commit | null;
 }
 
+/** One changed path (mirrors `orbit_core::git::StatusEntry`). */
+export interface GitStatusEntry {
+  path: string;
+  /** Git status letter: M, A, D, R, C, U, ? … */
+  code: string;
+  /** Human label, e.g. "Modified". */
+  label: string;
+}
+
+/** Grouped source-control status (mirrors `orbit_core::git::GitStatus`). */
+export interface GitStatus {
+  branch: string;
+  staged: GitStatusEntry[];
+  unstaged: GitStatusEntry[];
+  ahead: number;
+  behind: number;
+}
+
+/** One entry on the stash stack (mirrors `orbit_core::git::StashEntry`). */
+export interface StashEntry {
+  reference: string;
+  message: string;
+}
+
+/** A Docker container (mirrors `orbit_core::docker::Container`). */
+export interface DockerContainer {
+  id: string;
+  name: string;
+  image: string;
+  state: string;
+  status: string;
+  ports: string;
+}
+
+/** A Docker image (mirrors `orbit_core::docker::Image`). */
+export interface DockerImage {
+  id: string;
+  repository: string;
+  tag: string;
+  size: string;
+}
+
+/** A SQLite table/view (mirrors `orbit_core::db::Table`). */
+export interface DbTable {
+  name: string;
+  rowCount: number;
+}
+
+/** A query result (mirrors `orbit_core::db::QueryResult`). Cells are null-able. */
+export interface DbQueryResult {
+  columns: string[];
+  rows: (string | null)[][];
+  rowCount: number;
+}
+
+/** A parsed test run (mirrors `orbit_core::testing::TestSummary`). */
+export interface TestSummary {
+  passed: number;
+  failed: number;
+  total: number;
+  framework: string;
+}
+
+/** A document symbol for the Outline (mirrors `orbit_core::outline::Symbol`). */
+export interface Symbol {
+  name: string;
+  kind: string;
+  line: number;
+}
+
+/** A language-server diagnostic (mirrors `orbit_core::lsp::Diagnostic`). */
+export interface LspDiagnostic {
+  range: {
+    start: { line: number; character: number };
+    end: { line: number; character: number };
+  };
+  /** 1 error, 2 warning, 3 information, 4 hint. */
+  severity: number;
+  message: string;
+  source?: string | null;
+}
+
+/** One HTTP response header (mirrors `orbit_core::http::Header`). */
+export interface HttpHeader {
+  name: string;
+  value: string;
+}
+
+/** An HTTP response (mirrors `orbit_core::http::HttpResponse`). */
+export interface HttpResponse {
+  status: number;
+  statusText: string;
+  headers: HttpHeader[];
+  body: string;
+  elapsedMs: number;
+}
+
 export interface HealthWarning {
   kind: string;
   message: string;
@@ -150,6 +247,39 @@ export interface FileContents {
   binary: boolean;
   truncated: boolean;
   size: number;
+}
+
+// --- Search (mirrors `orbit_core::search`) ----------------------------------
+
+/** One matching line within a file. */
+export interface SearchMatch {
+  /** 1-based line number. */
+  line: number;
+  /** 1-based character column of the first match on the line. */
+  column: number;
+  /** The line's text, trimmed for display. */
+  text: string;
+  /** Byte offset of the match within `text` (equal to `matchEnd` if off-screen). */
+  matchStart: number;
+  /** Byte offset just past the match within `text`. */
+  matchEnd: number;
+}
+
+/** All matching lines within a single file. */
+export interface FileMatches {
+  path: string;
+  name: string;
+  language?: string | null;
+  matches: SearchMatch[];
+}
+
+/** The outcome of a workspace search. */
+export interface SearchResults {
+  fileCount: number;
+  matchCount: number;
+  /** A cap was hit — more matches exist than were returned. */
+  truncated: boolean;
+  files: FileMatches[];
 }
 
 // --- Terminal (mirrors `orbit_core::shell` + src-tauri/terminal.rs) ----------

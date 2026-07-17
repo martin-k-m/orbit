@@ -48,12 +48,16 @@ Turning projects into true workspaces.
   project restores the whole workspace.
 - 🚧 **File explorer + editor** — a lazy file tree and a CodeMirror 6 editor
   (syntax highlighting, folding, multi-cursor, save, encoding/line-ending
-  detection). Backed by `orbit_core::files`. Next: multiple tabs, and a language
-  server for go-to-definition and real diagnostics.
+  detection), now with **multiple editor tabs** (per-tab drafts and dirty state,
+  reopen-focuses, close-picks-neighbour, `Ctrl/Cmd+S`/`Ctrl/Cmd+W`) and
+  **in-editor find/replace/go-to-line**. Backed by `orbit_core::files`. Next:
+  split editors (needs a shared-document model so one file isn't two diverging
+  buffers), and a language server for go-to-definition and real diagnostics.
 - 🚧 **Integrated terminal** — a real PTY-backed shell per project has landed
   (ConPTY on Windows, openpty elsewhere): ANSI colour, scrollback, resize, and
-  shell detection (PowerShell, CMD, bash, zsh, fish). Still to come: multiple
-  tabs, split panes, search, and sessions that survive restarts.
+  shell detection (PowerShell, CMD, bash, zsh, fish), and **multiple tabs**
+  (background shells keep running). Still to come: split panes, search, and
+  sessions that survive restarts.
 - 📋 **Live log viewer** — per-process, colourised, searchable, filter to
   errors/warnings, copy/save/export, side-by-side logs, error surfacing.
 - 📋 **Task runner** — build/test/lint/format/bench/deploy + custom scripts,
@@ -61,9 +65,13 @@ Turning projects into true workspaces.
 
 ## v1.2 — Git power center & environments 📋
 
-- 📋 **Git power center** — staged/unstaged/untracked files, commit, stage,
+- 🚧 **Git power center** — staged/unstaged/untracked files, commit, stage,
   push/pull/fetch, branch create/switch/delete, merge, rebase, cherry-pick,
-  stashes, tags, contributors, and a commit-graph visualisation.
+  stashes, tags, contributors, and a commit-graph visualisation. First slice
+  shipped: a Source Control tab with staged/unstaged groups, one-click
+  stage/unstage, an inline diff viewer, commit, recent history, branch
+  switch/create, and fetch/pull/push (backed by `orbit_core::git`). Stashes,
+  merge/rebase/cherry-pick and the commit-graph are next.
 - 🚧 **Environment variable manager** — the engine is in
   (`orbit_core::env`: discovery across `.env`, `.env.local`, `.env.development`,
   `.env.production`, `.env.example`; dotenv parsing, secret detection + masking,
@@ -74,13 +82,21 @@ Turning projects into true workspaces.
 
 ## v1.3 — Containers, data & APIs 📋
 
-- 📋 **Docker integration** — containers, images, networks, volumes, compose
+- 🚧 **Docker integration** — containers, images, networks, volumes, compose
   projects; start/stop/restart/rebuild/logs/exec; one-click compose startup.
-- 📋 **Database explorer** — SQLite, PostgreSQL, MySQL/MariaDB, Redis. Browse
-  tables, view records, run SQL, save queries, CSV import/export.
-- 📋 **API explorer** — REST, GraphQL, WebSockets; collections, variables, auth,
+  First slice shipped: a Containers view listing containers + images with
+  start/stop/restart (backed by `orbit_core::docker`). Networks/volumes/compose/
+  logs/exec are next.
+- 🚧 **Database explorer** — SQLite, PostgreSQL, MySQL/MariaDB, Redis. Browse
+  tables, view records, run SQL, save queries, CSV import/export. First slice
+  shipped: a read-only **SQLite** explorer (browse tables, view rows, run
+  `SELECT`), backed by `orbit_core::db`. Other engines + saved queries + export
+  are next.
+- 🚧 **API explorer** — REST, GraphQL, WebSockets; collections, variables, auth,
   history, response viewer with JSON formatting and highlighting; auto-discovery
-  of local APIs.
+  of local APIs. First slice shipped: a REST client (method/URL/headers/body,
+  JSON-aware response viewer) backed by `orbit_core::http` (via `curl`).
+  Collections, auth, history and GraphQL/WebSockets are next.
 
 ## v1.4 — Insight & search 📋
 
@@ -90,9 +106,11 @@ Turning projects into true workspaces.
   active ports, with per-project port attribution.
 - 📋 **Explorer upgrades** — building on the v1.1 file tree: search, favourites,
   recent files, quick preview, reveal in OS explorer, drag & drop.
-- 📋 **Universal search** — one `⌘/Ctrl+K` across projects, commands, files,
+- 🚧 **Universal search** — one `⌘/Ctrl+K` across projects, commands, files,
   branches, commits, notes, env vars, terminal history, databases, API requests
-  and settings.
+  and settings. First slice shipped: **in-project find-in-files** (content
+  search with case/whole-word options, backed by `orbit_core::search`,
+  click-through to the editor). The cross-source palette is next.
 
 ## v2.0 — Platform 📋
 

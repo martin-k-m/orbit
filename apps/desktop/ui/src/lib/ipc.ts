@@ -3,15 +3,27 @@ import type {
   ActivityReport,
   Assessment,
   CommandOutput,
+  Commit,
+  DbQueryResult,
+  DbTable,
   Dependency,
+  DockerContainer,
+  DockerImage,
   EnvReport,
   FileContents,
   FileNode,
   GitInfo,
+  GitStatus,
   HealthReport,
+  HttpResponse,
+  LspDiagnostic,
   ProjectDetail,
   ProjectSummary,
+  SearchResults,
   Shell,
+  StashEntry,
+  Symbol,
+  TestSummary,
   TerminalExit,
   TerminalOutput,
   Workspace,
@@ -650,6 +662,226 @@ export async function gitInfo(path: string): Promise<GitInfo | null> {
   return invoke<GitInfo | null>("git_info", { path });
 }
 
+// --- Source control ---------------------------------------------------------
+
+/** Grouped staged/unstaged status, or null when the project is not a repo. */
+export async function gitStatus(path: string): Promise<GitStatus | null> {
+  if (!isTauri()) return null;
+  return invoke<GitStatus | null>("git_status", { path });
+}
+
+/** Stage one file, or every change when `file` is omitted. */
+export async function gitStage(path: string, file?: string): Promise<void> {
+  if (!isTauri()) return;
+  return invoke<void>("git_stage", { path, file: file ?? null });
+}
+
+/** Unstage one file, or everything when `file` is omitted. */
+export async function gitUnstage(path: string, file?: string): Promise<void> {
+  if (!isTauri()) return;
+  return invoke<void>("git_unstage", { path, file: file ?? null });
+}
+
+/** The unified diff for a file, staged (`--cached`) or working-tree. */
+export async function gitDiff(
+  path: string,
+  file: string,
+  staged: boolean,
+): Promise<string> {
+  if (!isTauri()) return "";
+  return invoke<string>("git_diff", { path, file, staged });
+}
+
+/** The full patch for a commit/ref. */
+export async function gitShow(path: string, reference: string): Promise<string> {
+  if (!isTauri()) return "";
+  return invoke<string>("git_show", { path, reference });
+}
+
+/** Commit the staged changes; resolves with the new commit. */
+export async function gitCommit(path: string, message: string): Promise<Commit> {
+  return invoke<Commit>("git_commit", { path, message });
+}
+
+/** The most recent commits, newest first. */
+export async function gitLog(path: string, limit = 20): Promise<Commit[]> {
+  if (!isTauri()) return [];
+  return invoke<Commit[]>("git_log", { path, limit });
+}
+
+/** Local branch names. */
+export async function gitBranches(path: string): Promise<string[]> {
+  if (!isTauri()) return [];
+  return invoke<string[]>("git_branches", { path });
+}
+
+/** Switch to an existing branch. */
+export async function gitSwitchBranch(path: string, name: string): Promise<void> {
+  return invoke<void>("git_switch_branch", { path, name });
+}
+
+/** Create a new branch off HEAD and switch to it. */
+export async function gitCreateBranch(path: string, name: string): Promise<void> {
+  return invoke<void>("git_create_branch", { path, name });
+}
+
+/** Tags, most recent first. */
+export async function gitTags(path: string): Promise<string[]> {
+  if (!isTauri()) return [];
+  return invoke<string[]>("git_tags", { path });
+}
+
+/** Create a lightweight tag at HEAD. */
+export async function gitCreateTag(path: string, name: string): Promise<void> {
+  return invoke<void>("git_create_tag", { path, name });
+}
+
+/** Fetch remote-tracking refs. */
+export async function gitFetch(path: string): Promise<void> {
+  return invoke<void>("git_fetch", { path });
+}
+
+/** Fast-forward pull from upstream. */
+export async function gitPull(path: string): Promise<void> {
+  return invoke<void>("git_pull", { path });
+}
+
+/** Push the current branch to its upstream. */
+export async function gitPush(path: string): Promise<void> {
+  return invoke<void>("git_push", { path });
+}
+
+/** Stash working-tree + index changes (including untracked). */
+export async function gitStashSave(path: string, message?: string): Promise<void> {
+  return invoke<void>("git_stash_save", { path, message: message ?? null });
+}
+
+/** The stash stack, newest first. */
+export async function gitStashList(path: string): Promise<StashEntry[]> {
+  if (!isTauri()) return [];
+  return invoke<StashEntry[]>("git_stash_list", { path });
+}
+
+/** Apply and remove a stash entry. */
+export async function gitStashPop(path: string, reference: string): Promise<void> {
+  return invoke<void>("git_stash_pop", { path, reference });
+}
+
+/** Discard a stash entry without applying it. */
+export async function gitStashDrop(path: string, reference: string): Promise<void> {
+  return invoke<void>("git_stash_drop", { path, reference });
+}
+
+// --- Docker -----------------------------------------------------------------
+
+/** Whether the Docker CLI + daemon are reachable. */
+export async function dockerAvailable(): Promise<boolean> {
+  if (!isTauri()) return false;
+  return invoke<boolean>("docker_available");
+}
+
+/** All containers (running and stopped). */
+export async function dockerContainers(): Promise<DockerContainer[]> {
+  if (!isTauri()) return [];
+  return invoke<DockerContainer[]>("docker_containers");
+}
+
+/** All local images. */
+export async function dockerImages(): Promise<DockerImage[]> {
+  if (!isTauri()) return [];
+  return invoke<DockerImage[]>("docker_images");
+}
+
+/** Start, stop or restart a container by id. */
+export async function dockerAction(
+  action: "start" | "stop" | "restart",
+  id: string,
+): Promise<void> {
+  return invoke<void>("docker_action", { action, id });
+}
+
+// --- Database (SQLite) ------------------------------------------------------
+
+/** Open the native file picker filtered to SQLite databases. */
+export async function pickDatabaseFile(): Promise<string | null> {
+  if (!isTauri()) return "/Users/dev/app.sqlite";
+  const { open } = await import("@tauri-apps/plugin-dialog");
+  const result = await open({
+    multiple: false,
+    filters: [{ name: "SQLite", extensions: ["sqlite", "sqlite3", "db", "db3"] }],
+  });
+  if (result == null) return null;
+  return Array.isArray(result) ? (result[0] ?? null) : result;
+}
+
+/** Tables and views in a SQLite database. */
+export async function dbTables(path: string): Promise<DbTable[]> {
+  if (!isTauri()) return [];
+  return invoke<DbTable[]>("db_tables", { path });
+}
+
+/** Run a read query against a SQLite database. */
+export async function dbQuery(path: string, sql: string): Promise<DbQueryResult> {
+  return invoke<DbQueryResult>("db_query", { path, sql });
+}
+
+/** The first rows of a table. */
+export async function dbTableRows(path: string, table: string): Promise<DbQueryResult> {
+  return invoke<DbQueryResult>("db_table_rows", { path, table });
+}
+
+// --- Testing ----------------------------------------------------------------
+
+/** Parse test-runner output into a pass/fail summary (null if unrecognised). */
+export async function parseTestOutput(output: string): Promise<TestSummary | null> {
+  if (!isTauri()) return null;
+  return invoke<TestSummary | null>("parse_test_output", { output });
+}
+
+/** A syntactic document outline (symbols) for a file's text. */
+export async function fileSymbols(text: string, language?: string | null): Promise<Symbol[]> {
+  if (!isTauri()) return [];
+  return invoke<Symbol[]>("file_symbols", { text, language: language ?? null });
+}
+
+/** Convert an absolute filesystem path to a `file://` URI (Windows-aware). */
+export function pathToUri(path: string): string {
+  const p = path.replace(/\\/g, "/");
+  return p.startsWith("/") ? `file://${p}` : `file:///${p}`;
+}
+
+/**
+ * Language-server diagnostics for an open document. Starts a server lazily on
+ * the backend and returns whatever it has published (poll for updates). Empty
+ * when no server is installed for the language.
+ */
+export async function lspDiagnostics(
+  rootUri: string,
+  language: string,
+  uri: string,
+  text: string,
+): Promise<LspDiagnostic[]> {
+  if (!isTauri()) return [];
+  return invoke<LspDiagnostic[]>("lsp_diagnostics", { rootUri, language, uri, text });
+}
+
+// --- HTTP (API explorer) ----------------------------------------------------
+
+/** Send an HTTP request (via `curl` in the backend). */
+export async function httpRequest(
+  method: string,
+  url: string,
+  headers: [string, string][],
+  body?: string,
+): Promise<HttpResponse> {
+  return invoke<HttpResponse>("http_request", {
+    method,
+    url,
+    headers,
+    body: body ?? null,
+  });
+}
+
 /**
  * Assess how risky a project's command is before running it. Mirrors the
  * engine's `orbit_core::safety` guard so the UI can show a confirmation dialog.
@@ -797,6 +1029,53 @@ export async function readFile(path: string): Promise<FileContents> {
 export async function writeFile(path: string, contents: string): Promise<void> {
   if (!isTauri()) return;
   return invoke<void>("write_file", { path, contents });
+}
+
+/** A flat, capped list of a project's files (relative paths) for quick-open. */
+export async function listFiles(path: string): Promise<string[]> {
+  if (!isTauri()) return [];
+  return invoke<string[]>("list_files", { path });
+}
+
+/** Create an empty file (fails if the path already exists). */
+export async function createFile(path: string): Promise<void> {
+  return invoke<void>("create_file", { path });
+}
+
+/** Create a directory (fails if the path already exists). */
+export async function createDir(path: string): Promise<void> {
+  return invoke<void>("create_dir", { path });
+}
+
+/** Rename/move a path (fails if the destination exists). */
+export async function renamePath(from: string, to: string): Promise<void> {
+  return invoke<void>("rename_path", { from, to });
+}
+
+/** Delete a file, or a directory and everything under it. */
+export async function deletePath(path: string): Promise<void> {
+  return invoke<void>("delete_path", { path });
+}
+
+/**
+ * Search a project for a literal string ("find in files"). Ignored, binary and
+ * oversized files are skipped in the engine; results are capped.
+ */
+export async function searchWorkspace(
+  root: string,
+  query: string,
+  caseSensitive: boolean,
+  wholeWord: boolean,
+): Promise<SearchResults> {
+  if (!isTauri()) {
+    return { fileCount: 0, matchCount: 0, truncated: false, files: [] };
+  }
+  return invoke<SearchResults>("search_workspace", {
+    root,
+    query,
+    caseSensitive,
+    wholeWord,
+  });
 }
 
 // --- Terminal ---------------------------------------------------------------
