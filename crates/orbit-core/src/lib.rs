@@ -33,6 +33,7 @@ pub mod deps;
 pub mod detect;
 pub mod env;
 pub mod error;
+pub mod files;
 pub mod git;
 pub mod health;
 pub mod model;
@@ -146,6 +147,10 @@ mod tests {
         assert_serialize::<env::Scope>();
         assert_serialize::<shell::Shell>();
         assert_serialize::<shell::ShellKind>();
+        assert_serialize::<files::FileNode>();
+        assert_serialize::<files::FileContents>();
+        assert_serialize::<files::Encoding>();
+        assert_serialize::<files::LineEnding>();
 
         // Types the frontend also sends back must round-trip. `save_workspace`
         // takes a Workspace as a command *parameter*, so it must deserialize.

@@ -31,6 +31,7 @@ import {
 } from "@/lib/ipc";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TerminalPane } from "@/components/TerminalPane";
+import { ExplorerPanel } from "@/components/ExplorerPanel";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -131,6 +132,7 @@ export function ProjectView({
               {dependencies.length}
             </span>
           </TabsTrigger>
+          <TabsTrigger value="explorer">Explorer</TabsTrigger>
           <TabsTrigger value="terminal">Terminal</TabsTrigger>
         </TabsList>
 
@@ -145,6 +147,9 @@ export function ProjectView({
         </TabsContent>
         <TabsContent value="dependencies">
           <DependenciesTab dependencies={dependencies} />
+        </TabsContent>
+        <TabsContent value="explorer">
+          <ExplorerPanel root={path} />
         </TabsContent>
         <TabsContent value="terminal">
           <TerminalTab path={path} onOpen={handleTerminal} />

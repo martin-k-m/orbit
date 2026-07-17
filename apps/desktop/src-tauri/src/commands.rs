@@ -376,6 +376,43 @@ pub async fn run_task(
     .map_err(|e| e.to_string())?
 }
 
+// --- Files (explorer + editor) --------------------------------------------
+
+/// List the immediate children of a directory, for the file explorer tree.
+/// Directories come first, then files, each sorted case-insensitively.
+#[tauri::command]
+pub fn read_dir(path: String) -> Result<Vec<orbit_core::files::FileNode>, String> {
+    let dir = PathBuf::from(&path);
+    if !dir.is_dir() {
+        return Err(format!("{path} is not a directory"));
+    }
+    orbit_core::files::list_dir(&dir).map_err(|e| e.to_string())
+}
+
+/// Read a file for the editor: decoded text plus encoding, line ending,
+/// language, and binary/truncated flags.
+#[tauri::command]
+pub fn read_file(path: String) -> Result<orbit_core::files::FileContents, String> {
+    let file = PathBuf::from(&path);
+    if !file.is_file() {
+        return Err(format!("{path} is not a file"));
+    }
+    orbit_core::files::read_text_file(&file).map_err(|e| e.to_string())
+}
+
+/// Write text back to a file (the editor's save).
+#[tauri::command]
+pub fn write_file(path: String, contents: String) -> Result<(), String> {
+    let file = PathBuf::from(&path);
+    // Refuse to create a file outside an existing directory — a save should
+    // overwrite or write next to siblings, never conjure a tree.
+    match file.parent() {
+        Some(parent) if parent.is_dir() => {}
+        _ => return Err(format!("{path} has no existing parent directory")),
+    }
+    std::fs::write(&file, contents).map_err(|e| e.to_string())
+}
+
 // --- Terminal -------------------------------------------------------------
 
 /// The shells installed on this machine, best first. The first entry is what

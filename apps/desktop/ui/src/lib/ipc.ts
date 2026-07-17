@@ -5,6 +5,8 @@ import type {
   CommandOutput,
   Dependency,
   EnvReport,
+  FileContents,
+  FileNode,
   GitInfo,
   HealthReport,
   ProjectDetail,
@@ -444,6 +446,45 @@ const DEMO_SHELLS: Shell[] = [
   { label: "sh", program: "/bin/sh", args: [], kind: "sh" },
 ];
 
+// A tiny fake project tree for the browser demo (no filesystem there).
+function demoDir(path: string): FileNode[] {
+  const isRoot = !path.includes("/src");
+  const dir = (name: string): FileNode => ({
+    name,
+    path: `${path}/${name}`,
+    isDir: true,
+    hidden: name.startsWith("."),
+    size: 0,
+    language: null,
+  });
+  const file = (name: string, language: string, size = 1024): FileNode => ({
+    name,
+    path: `${path}/${name}`,
+    isDir: false,
+    hidden: name.startsWith("."),
+    size,
+    language,
+  });
+  return isRoot
+    ? [dir("src"), file("Cargo.toml", "toml"), file("README.md", "markdown", 3400)]
+    : [file("main.rs", "rust", 820), file("lib.rs", "rust", 2400)];
+}
+
+function demoFile(path: string): FileContents {
+  const rust = path.endsWith(".rs");
+  return {
+    text: rust
+      ? 'fn main() {\n    // Orbit demo — open the desktop app to edit real files.\n    println!("hello from Orbit");\n}\n'
+      : "# Orbit\n\nThis is a demo file. Run the desktop app to open your project.\n",
+    language: rust ? "rust" : "markdown",
+    encoding: "utf-8",
+    lineEnding: "lf",
+    binary: false,
+    truncated: false,
+    size: 96,
+  };
+}
+
 // Workspaces the demo has handed out, so edits persist for the session.
 const demoWorkspaces = new Map<string, Workspace>();
 
@@ -736,6 +777,26 @@ export async function runTask(
     };
   }
   return invoke<CommandOutput>("run_task", { path, commandLine, confirmed });
+}
+
+// --- Files: explorer + editor -----------------------------------------------
+
+/** List a directory's immediate children (directories first, then files). */
+export async function readDir(path: string): Promise<FileNode[]> {
+  if (!isTauri()) return demoDir(path);
+  return invoke<FileNode[]>("read_dir", { path });
+}
+
+/** Read a file for the editor, with encoding/line-ending/language metadata. */
+export async function readFile(path: string): Promise<FileContents> {
+  if (!isTauri()) return demoFile(path);
+  return invoke<FileContents>("read_file", { path });
+}
+
+/** Save text back to a file. */
+export async function writeFile(path: string, contents: string): Promise<void> {
+  if (!isTauri()) return;
+  return invoke<void>("write_file", { path, contents });
 }
 
 // --- Terminal ---------------------------------------------------------------
