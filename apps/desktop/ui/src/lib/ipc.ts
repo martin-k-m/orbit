@@ -710,6 +710,21 @@ export async function gitCreateBranch(path: string, name: string): Promise<void>
   return invoke<void>("git_create_branch", { path, name });
 }
 
+/** Fetch remote-tracking refs. */
+export async function gitFetch(path: string): Promise<void> {
+  return invoke<void>("git_fetch", { path });
+}
+
+/** Fast-forward pull from upstream. */
+export async function gitPull(path: string): Promise<void> {
+  return invoke<void>("git_pull", { path });
+}
+
+/** Push the current branch to its upstream. */
+export async function gitPush(path: string): Promise<void> {
+  return invoke<void>("git_push", { path });
+}
+
 /**
  * Assess how risky a project's command is before running it. Mirrors the
  * engine's `orbit_core::safety` guard so the UI can show a confirmation dialog.

@@ -341,6 +341,25 @@ pub fn create_branch(dir: &Path, name: &str) -> crate::Result<()> {
     run_ok(dir, &["switch", "-c", name]).map(|_| ())
 }
 
+/// Update remote-tracking refs without touching the working tree (`git fetch`).
+pub fn fetch(dir: &Path) -> crate::Result<()> {
+    run_ok(dir, &["fetch", "--all", "--prune"]).map(|_| ())
+}
+
+/// Fast-forward the current branch from its upstream (`git pull --ff-only`).
+///
+/// `--ff-only` is deliberate: a one-click pull must never open a merge editor on
+/// a TTY-less webview or invent a merge commit. A diverged branch fails cleanly
+/// and the message tells the user to reconcile by hand.
+pub fn pull(dir: &Path) -> crate::Result<()> {
+    run_ok(dir, &["pull", "--ff-only"]).map(|_| ())
+}
+
+/// Push the current branch to its upstream (`git push`).
+pub fn push(dir: &Path) -> crate::Result<()> {
+    run_ok(dir, &["push"]).map(|_| ())
+}
+
 /// The most recent commits, newest first (empty if the repo has no history).
 pub fn recent_commits(dir: &Path, limit: usize) -> Vec<Commit> {
     let arg = format!("-{limit}");
@@ -468,6 +487,49 @@ mod tests {
         assert_eq!(status(d).unwrap().branch, start);
         // Switching to a non-existent branch is an error, not a panic.
         assert!(switch_branch(d, "does-not-exist").is_err());
+    }
+
+    #[test]
+    fn fetch_pull_push_against_a_bare_remote() {
+        // A bare repo acts as the "remote"; two clones talk through it — all on
+        // the local filesystem, so the test needs no network.
+        let remote = tempfile::tempdir().unwrap();
+        run_ok(remote.path(), &["init", "--bare", "-q"]).unwrap();
+        let remote_str = remote.path().to_str().unwrap();
+
+        let setup = |dir: &Path| {
+            run_ok(dir, &["config", "user.email", "t@example.com"]).unwrap();
+            run_ok(dir, &["config", "user.name", "Test"]).unwrap();
+            run_ok(dir, &["config", "commit.gpgsign", "false"]).unwrap();
+        };
+
+        // Clone A: first commit, set upstream.
+        let a = tempfile::tempdir().unwrap();
+        run_ok(a.path(), &["clone", "-q", remote_str, "."]).unwrap();
+        setup(a.path());
+        fs::write(a.path().join("f1.txt"), "1\n").unwrap();
+        stage(a.path(), "f1.txt").unwrap();
+        commit(a.path(), "first").unwrap();
+        run_ok(a.path(), &["push", "-u", "origin", "HEAD"]).unwrap();
+
+        // Clone B already has f1.
+        let b = tempfile::tempdir().unwrap();
+        run_ok(b.path(), &["clone", "-q", remote_str, "."]).unwrap();
+        setup(b.path());
+        assert!(b.path().join("f1.txt").exists());
+
+        // A pushes a second commit via our push(); B fetch()es then pull()s it.
+        fs::write(a.path().join("f2.txt"), "2\n").unwrap();
+        stage(a.path(), "f2.txt").unwrap();
+        commit(a.path(), "second").unwrap();
+        push(a.path()).unwrap();
+
+        fetch(b.path()).unwrap();
+        pull(b.path()).unwrap();
+        assert!(
+            b.path().join("f2.txt").exists(),
+            "pull should bring f2 across"
+        );
     }
 
     #[test]

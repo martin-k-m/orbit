@@ -7,8 +7,8 @@ import {
   Check,
   X,
   RefreshCw,
-  ArrowUp,
-  ArrowDown,
+  ArrowUpToLine,
+  ArrowDownToLine,
   Loader2,
 } from "lucide-react";
 import type { Commit, GitStatus, GitStatusEntry } from "@/lib/types";
@@ -22,6 +22,8 @@ import {
   gitBranches,
   gitSwitchBranch,
   gitCreateBranch,
+  gitPull,
+  gitPush,
   isTauri,
 } from "@/lib/ipc";
 import { useAppStore } from "@/store/app";
@@ -128,6 +130,19 @@ export function SourceControlPanel({ root }: { root: string }) {
     await mutate(() => gitCreateBranch(root, name));
   }
 
+  async function sync(fn: () => Promise<void>, label: string) {
+    setBusy(true);
+    try {
+      await fn();
+      await refresh();
+      pushToast({ variant: "success", title: label });
+    } catch (e) {
+      pushToast({ variant: "error", title: `${label} failed`, description: String(e) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   if (!loaded) {
     return (
       <Frame>
@@ -221,25 +236,33 @@ export function SourceControlPanel({ root }: { root: string }) {
               </button>
             </>
           )}
-          {status.ahead > 0 && (
-            <span className="inline-flex items-center gap-0.5 text-fg-subtle">
-              <ArrowUp className="h-3 w-3" />
-              {status.ahead}
-            </span>
-          )}
-          {status.behind > 0 && (
-            <span className="inline-flex items-center gap-0.5 text-fg-subtle">
-              <ArrowDown className="h-3 w-3" />
-              {status.behind}
-            </span>
-          )}
-          <button
-            onClick={() => void refresh()}
-            className="no-drag ml-auto rounded p-1 text-fg-subtle transition-colors hover:bg-white/[0.06] hover:text-fg"
-            title="Refresh"
-          >
-            <RefreshCw className={cn("h-3.5 w-3.5", busy && "animate-spin")} />
-          </button>
+          <div className="ml-auto flex items-center gap-0.5">
+            <button
+              onClick={() => void sync(() => gitPull(root), "Pulled")}
+              disabled={busy}
+              className="no-drag inline-flex items-center gap-1 rounded px-1.5 py-1 text-fg-subtle transition-colors hover:bg-white/[0.06] hover:text-fg disabled:opacity-50"
+              title="Pull (fast-forward)"
+            >
+              <ArrowDownToLine className="h-3.5 w-3.5" />
+              {status.behind > 0 && <span className="text-[10px]">{status.behind}</span>}
+            </button>
+            <button
+              onClick={() => void sync(() => gitPush(root), "Pushed")}
+              disabled={busy}
+              className="no-drag inline-flex items-center gap-1 rounded px-1.5 py-1 text-fg-subtle transition-colors hover:bg-white/[0.06] hover:text-fg disabled:opacity-50"
+              title="Push"
+            >
+              <ArrowUpToLine className="h-3.5 w-3.5" />
+              {status.ahead > 0 && <span className="text-[10px]">{status.ahead}</span>}
+            </button>
+            <button
+              onClick={() => void refresh()}
+              className="no-drag rounded p-1 text-fg-subtle transition-colors hover:bg-white/[0.06] hover:text-fg"
+              title="Refresh"
+            >
+              <RefreshCw className={cn("h-3.5 w-3.5", busy && "animate-spin")} />
+            </button>
+          </div>
         </div>
 
         {/* Commit box */}

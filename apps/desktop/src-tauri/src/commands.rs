@@ -265,6 +265,24 @@ pub fn git_create_branch(path: String, name: String) -> Result<(), String> {
     git::create_branch(Path::new(&path), &name).map_err(|e| e.to_string())
 }
 
+/// Fetch remote-tracking refs.
+#[tauri::command]
+pub fn git_fetch(path: String) -> Result<(), String> {
+    git::fetch(Path::new(&path)).map_err(|e| e.to_string())
+}
+
+/// Fast-forward pull from upstream.
+#[tauri::command]
+pub fn git_pull(path: String) -> Result<(), String> {
+    git::pull(Path::new(&path)).map_err(|e| e.to_string())
+}
+
+/// Push the current branch to its upstream.
+#[tauri::command]
+pub fn git_push(path: String) -> Result<(), String> {
+    git::push(Path::new(&path)).map_err(|e| e.to_string())
+}
+
 /// Assess how risky a project's command is before running it, so the UI can
 /// show a confirmation dialog for anything destructive.
 #[tauri::command]

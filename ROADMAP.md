@@ -68,8 +68,9 @@ Turning projects into true workspaces.
   push/pull/fetch, branch create/switch/delete, merge, rebase, cherry-pick,
   stashes, tags, contributors, and a commit-graph visualisation. First slice
   shipped: a Source Control tab with staged/unstaged groups, one-click
-  stage/unstage, an inline diff viewer, commit, and recent history (backed by
-  `orbit_core::git`). Push/pull, branches, stashes and the graph are next.
+  stage/unstage, an inline diff viewer, commit, recent history, branch
+  switch/create, and fetch/pull/push (backed by `orbit_core::git`). Stashes,
+  merge/rebase/cherry-pick and the commit-graph are next.
 - 🚧 **Environment variable manager** — the engine is in
   (`orbit_core::env`: discovery across `.env`, `.env.local`, `.env.development`,
   `.env.production`, `.env.example`; dotenv parsing, secret detection + masking,
