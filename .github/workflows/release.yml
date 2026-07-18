@@ -107,7 +107,7 @@ jobs:
       # tauri-action makes it attempt (and fail) a keychain import.
       - name: Build and publish
         if: "!(matrix.os == 'macos-latest' && env.MACOS_SIGN == 'true')"
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
@@ -126,7 +126,7 @@ jobs:
       # tauri-action then signs with the Developer ID and notarizes.
       - name: Build, sign, notarize and publish (macOS)
         if: matrix.os == 'macos-latest' && env.MACOS_SIGN == 'true'
-        uses: tauri-apps/tauri-action@v0
+        uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
