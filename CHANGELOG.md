@@ -6,6 +6,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.4.3] — 2026-07-17
+
+A look-and-feel pass: a cleaner IntelliJ-style top toolbar, retuned
+text colours, a properly branded Windows installer, and the first
+Integrations entry.
+
 ### Changed
 
 - **Cleaner IntelliJ-style top toolbar.** The project toolbar was rebuilt to sit

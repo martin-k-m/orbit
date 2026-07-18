@@ -1,30 +1,40 @@
-# Orbit v1.4.2 — Release Notes
+# Orbit v1.4.3 — Release Notes
 
-**An IDE-chrome polish pass.** Small, tasteful refinements that make Orbit feel
-tighter and more native — building on the v1.4.1 redesign.
+**A look-and-feel pass.** The chrome gets closer to a real IDE, the text reads
+cleaner, and — finally — the Windows installer looks like it belongs to Orbit.
 
 ## What's new
 
-### 📊 A richer status bar
+### 🧰 A cleaner, IntelliJ-style top toolbar
 
-The bottom status bar is now a proper VS Code-style bar:
+The project toolbar was rebuilt to sit closer to IntelliJ's: a branded project
+chip, a clickable **VCS widget** (branch, clean-or-changed, ahead/behind — it
+opens Source Control), a green **Run** entry, and dense icon actions separated by
+dividers.
 
-- The **git branch** and **AI** chips are clickable and open their tool windows.
-- It shows the current **indent width** alongside the caret position, encoding,
-  line ending and language.
-- Every segment has a hover state, so it reads as interactive, not decorative.
+### 🎨 Retuned text colours
 
-### ⌨️ Keyboard focus rings & hover feedback
+The dark-theme text hierarchy is cleaned up — brighter, more neutral
+primary/muted/subtle tones — so everything reads a touch crisper.
 
-Interactive controls now show a clean **focus ring** for keyboard users, and the
-activity bar and bottom tool-window strip gained consistent **hover feedback** —
-the small touches that make an app feel finished.
+### 📦 A properly branded Windows installer
 
-## Everything from v1.4.1, still here
+The Windows setup no longer looks like 2003. It now carries the **Orbit logo**
+(installer icon + a branded header and welcome/finish sidebar on a dark panel)
+and offers a **per-user / per-machine** choice. The installer artwork is
+generated from the brand SVG at build time, so it always matches.
 
-The icon-only activity bar, the context-aware title bar, the Plugins view, the
-correct red app icon, and the code-signing pipeline (which signs macOS + Windows
-once you add signing certificates — see
+### 🧩 Integrations in Plugins
+
+The Plugins view gained an **Integrations** section — the **AI provider** is the
+first entry, showing its live connection status and linking straight to its
+settings.
+
+## Everything from v1.4.2, still here
+
+The interactive VS Code-style status bar, the icon-only activity bar, the Plugins
+view, the correct red app icon, and the code-signing pipeline (which signs macOS
++ Windows once you add signing certificates — see
 [docs/SIGNING.md](https://github.com/martin-k-m/orbit/blob/main/docs/SIGNING.md)).
 
 ## Still to come
