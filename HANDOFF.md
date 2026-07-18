@@ -4,7 +4,7 @@ A ground-truth snapshot for whoever (or whatever) picks up Orbit next. This is
 the honest state, including the things the marketing pages don't say. If it
 conflicts with a glossier doc, trust this file and fix the other one.
 
-Last updated at **v1.3.1** (IntelliJ tool-window polish: resizable dock, collapsible tree, remembered layout).
+Last updated at **v1.4.0** (AI assistant, commit graph, Terminal 3.0, split editors).
 
 ---
 
@@ -40,7 +40,7 @@ orbit/
 `apps/desktop/src-tauri` is intentionally **excluded** from the workspace
 (`Cargo.toml` `exclude`) because it drags in the webview stack.
 
-## What actually exists (v1.3.1)
+## What actually exists (v1.4.0)
 
 Engine modules (`crates/orbit-core/src/`), all unit-tested:
 

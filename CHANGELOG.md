@@ -6,6 +6,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.4.0] — 2026-07-17
+
+Toward an AI-native IDE. Orbit gains a **local-first AI assistant**, a **commit
+graph**, **Terminal 3.0** (search, splits, shell profiles) and **split
+editors** — and sheds the last of the Blink/Killer/Flux/Beacon plumbing.
+
 ### Added
 
 - **Split editors.** The editor can now **split side by side** — open a second
