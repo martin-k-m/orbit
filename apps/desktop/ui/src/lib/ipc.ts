@@ -51,7 +51,6 @@ const DEMO_SUMMARIES: ProjectSummary[] = [
     description: "Local-first developer command center",
     hasProfile: true,
     dependencyCount: 41,
-    ecosystemLink: null,
     commandCount: 5,
     gitBranch: "main",
     gitClean: false,
@@ -67,7 +66,6 @@ const DEMO_SUMMARIES: ProjectSummary[] = [
     description: "Developer acceleration toolkit",
     hasProfile: true,
     dependencyCount: 28,
-    ecosystemLink: "blink",
     commandCount: 6,
     gitBranch: "feat/cache-warm",
     gitClean: true,
@@ -83,7 +81,6 @@ const DEMO_SUMMARIES: ProjectSummary[] = [
     description: "Runtime monitoring dashboard",
     hasProfile: false,
     dependencyCount: 23,
-    ecosystemLink: "beacon",
     commandCount: 4,
     gitBranch: "main",
     gitClean: true,
@@ -99,7 +96,6 @@ const DEMO_SUMMARIES: ProjectSummary[] = [
     description: "Security engine",
     hasProfile: true,
     dependencyCount: 34,
-    ecosystemLink: "killer",
     commandCount: 5,
     gitBranch: "main",
     gitClean: false,
@@ -115,7 +111,6 @@ const DEMO_SUMMARIES: ProjectSummary[] = [
     description: "Automation platform",
     hasProfile: false,
     dependencyCount: 19,
-    ecosystemLink: "flux",
     commandCount: 4,
     gitBranch: "release/1.4",
     gitClean: true,
@@ -135,7 +130,6 @@ const DEMO_DETAILS: Record<string, ProjectDetail> = {
       description: "Local-first developer command center",
       hasProfile: true,
       dependencyCount: 41,
-      ecosystemLink: null,
       ecosystems: [
         {
           language: "rust",
@@ -199,7 +193,6 @@ const DEMO_DETAILS: Record<string, ProjectDetail> = {
       description: "Developer acceleration toolkit",
       hasProfile: true,
       dependencyCount: 28,
-      ecosystemLink: "blink",
       ecosystems: [
         {
           language: "rust",
@@ -261,7 +254,6 @@ const DEMO_DETAILS: Record<string, ProjectDetail> = {
       description: "Runtime monitoring dashboard",
       hasProfile: false,
       dependencyCount: 23,
-      ecosystemLink: "beacon",
       ecosystems: [
         {
           language: "type-script",
@@ -323,7 +315,6 @@ const DEMO_DETAILS: Record<string, ProjectDetail> = {
       description: "Security engine",
       hasProfile: true,
       dependencyCount: 34,
-      ecosystemLink: "killer",
       ecosystems: [
         {
           language: "rust",
@@ -383,7 +374,6 @@ const DEMO_DETAILS: Record<string, ProjectDetail> = {
       description: "Automation platform",
       hasProfile: false,
       dependencyCount: 19,
-      ecosystemLink: "flux",
       ecosystems: [
         {
           language: "go",
@@ -559,7 +549,6 @@ function detailFor(path: string): ProjectDetail {
       description: summary?.description ?? null,
       hasProfile: summary?.hasProfile ?? false,
       dependencyCount: summary?.dependencyCount ?? 0,
-      ecosystemLink: summary?.ecosystemLink ?? null,
       ecosystems: [],
       commands: [],
     },
@@ -597,7 +586,6 @@ export async function addProject(path: string): Promise<ProjectSummary[]> {
           description: null,
           hasProfile: false,
           dependencyCount: 0,
-          ecosystemLink: null,
           commandCount: 0,
           gitBranch: null,
           gitClean: null,

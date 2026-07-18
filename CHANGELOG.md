@@ -22,6 +22,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   module (OpenAI-compatible request/response over `curl`, like the API explorer),
   so a model on `localhost` and a cloud endpoint share one code path.
 
+### Removed
+
+- **Blink/Killer/Flux/Beacon plumbing.** The last of the old ecosystem
+  sibling-detection is gone — the `EcosystemLink` model field, its detection, and
+  the unused UI metadata — so the codebase no longer carries integrations that
+  never had a real engine behind them.
+
 ## [1.3.1] — 2026-07-17
 
 Finishing touches on the IntelliJ-style tool-window system.

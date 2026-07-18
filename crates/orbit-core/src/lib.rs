@@ -57,7 +57,7 @@ pub mod db;
 pub mod store;
 
 pub use error::{Error, Result};
-pub use model::{Command, CommandSource, Ecosystem, EcosystemLink, Language, Project};
+pub use model::{Command, CommandSource, Ecosystem, Language, Project};
 pub use safety::{assess, Assessment, Risk};
 
 /// The current engine version, sourced from `Cargo.toml`.
@@ -160,7 +160,6 @@ mod tests {
         assert_serialize::<analytics::Session>();
         assert_serialize::<analytics::BuildRecord>();
         assert_serialize::<Language>();
-        assert_serialize::<EcosystemLink>();
         assert_serialize::<workspace::Workspace>();
         assert_serialize::<workspace::Task>();
         assert_serialize::<workspace::TerminalTab>();
@@ -276,16 +275,6 @@ mod tests {
         assert!(report.score < 100);
         assert!(report.warnings.iter().any(|w| w.kind == "large-file"));
         assert_eq!(report.todo_count, 1);
-    }
-
-    #[test]
-    fn ecosystem_link_recognises_siblings() {
-        let root = tempfile::tempdir().unwrap();
-        let blink = root.path().join("blink");
-        fs::create_dir_all(&blink).unwrap();
-        write(&blink, "Cargo.toml", "[package]\nname=\"blink\"\n");
-        let project = scan::analyze(&blink).unwrap().unwrap();
-        assert_eq!(project.ecosystem_link, Some(EcosystemLink::Blink));
     }
 
     #[test]

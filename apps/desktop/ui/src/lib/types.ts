@@ -7,8 +7,6 @@ export type Language =
   | "docker"
   | "unknown";
 
-export type EcosystemLink = "blink" | "killer" | "flux" | "beacon";
-
 export type CommandSource = "detected" | "profile" | "convention";
 
 export interface Command {
@@ -36,7 +34,6 @@ export interface Project {
   description?: string | null;
   hasProfile: boolean;
   dependencyCount: number;
-  ecosystemLink?: EcosystemLink | null;
 }
 
 export interface Commit {
@@ -397,7 +394,6 @@ export interface ProjectSummary {
   description?: string | null;
   hasProfile: boolean;
   dependencyCount: number;
-  ecosystemLink?: EcosystemLink | null;
   commandCount: number;
   gitBranch?: string | null;
   gitClean?: boolean | null;
@@ -416,16 +412,3 @@ export const LANGUAGE_META: Record<Language, { label: string; color: string }> =
   unknown: { label: "Unknown", color: "#8B8B8B" },
 };
 
-export const ECOSYSTEM_META: Record<
-  EcosystemLink,
-  { label: string; tagline: string; accent: string }
-> = {
-  blink: {
-    label: "Blink",
-    tagline: "Developer acceleration toolkit",
-    accent: "#6366F1",
-  },
-  killer: { label: "Killer", tagline: "Security engine", accent: "#EF4444" },
-  flux: { label: "Flux", tagline: "Automation platform", accent: "#22D3EE" },
-  beacon: { label: "Beacon", tagline: "Runtime monitoring", accent: "#F59E0B" },
-};
