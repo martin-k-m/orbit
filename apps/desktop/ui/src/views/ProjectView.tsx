@@ -763,7 +763,7 @@ function TerminalTab({ path, onOpen }: { path: string; onOpen: () => void }) {
     <div className="flex h-full flex-col overflow-hidden rounded-lg border border-border bg-panel">
       {/* Tab strip */}
       <div className="flex items-center gap-1 border-b border-border px-1">
-        {tabs.map((t, i) => (
+        {tabs.map((t) => (
           <div
             key={t.id}
             onClick={() => setActive(t.id)}
