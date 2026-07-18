@@ -1,12 +1,17 @@
-import { GitBranch, Circle } from "lucide-react";
+import { GitBranch, Bot, Check } from "lucide-react";
 import { useAppStore } from "@/store/app";
 import { useEditorStore, activeTab } from "@/store/editor";
+import { useWorkspaceStore } from "@/store/workspace";
+import { useSettingsStore } from "@/store/settings";
+import { useAiStore } from "@/store/ai";
 import type { Encoding, LineEnding } from "@/lib/types";
+import { cn } from "@/lib/cn";
 
 /**
- * A slim IDE status bar across the bottom of the window. Left: the current
- * project's git branch and the active editor's caret position. Right: the active
- * file's language / encoding / line ending, and a local-first indicator.
+ * A VS Code-style status bar across the bottom of the window. Segments are
+ * interactive where it helps: the branch and AI chips open their tool windows.
+ * Left: git branch + working-tree state. Right: caret position, indent, the
+ * active file's encoding / EOL / language, an AI indicator, and a privacy chip.
  */
 export function StatusBar() {
   const view = useAppStore((s) => s.view);
@@ -15,40 +20,89 @@ export function StatusBar() {
   const project = projects.find((p) => p.id === selectedId);
   const cursor = useEditorStore((s) => s.cursor);
   const active = useEditorStore(activeTab);
+  const setBottomTool = useWorkspaceStore((s) => s.setBottomTool);
+  const tabSize = useSettingsStore((s) => s.tabSize);
+  const aiOn = useAiStore((s) => s.enabled);
   const inProject = view.kind === "project";
 
   return (
-    <footer className="relative z-30 flex h-6 shrink-0 items-center gap-3 border-t border-border bg-elevated px-3 text-[11px] text-fg-subtle">
+    <footer className="relative z-30 flex h-[22px] shrink-0 items-stretch border-t border-border bg-elevated text-[11px] text-fg-subtle">
       {inProject && project?.gitBranch && (
-        <span className="inline-flex items-center gap-1.5">
+        <Chip onClick={() => setBottomTool("source-control")} title="Source control">
           <GitBranch className="h-3 w-3" />
           {project.gitBranch}
-          {project.gitClean === false && (
-            <Circle className="h-1.5 w-1.5 fill-warning text-warning" />
+          {project.gitClean === false ? (
+            <span className="text-warning">
+              {project.changedFiles ? `✱ ${project.changedFiles}` : "✱"}
+            </span>
+          ) : (
+            <Check className="h-3 w-3 text-success" />
           )}
-        </span>
+        </Chip>
       )}
 
       {inProject && active && !active.contents.binary && (
-        <span className="tabular-nums">
+        <Static className="tabular-nums">
           Ln {cursor.line}, Col {cursor.col}
-        </span>
+        </Static>
       )}
 
-      <div className="ml-auto flex items-center gap-3">
+      <div className="ml-auto flex items-stretch">
         {inProject && active && !active.contents.binary && (
           <>
-            <span>{active.contents.language ?? "text"}</span>
-            <span>{encodingLabel(active.contents.encoding)}</span>
-            <span>{lineEndingLabel(active.contents.lineEnding)}</span>
+            <Static>Spaces: {tabSize}</Static>
+            <Static>{encodingLabel(active.contents.encoding)}</Static>
+            <Static>{lineEndingLabel(active.contents.lineEnding)}</Static>
+            <Static className="capitalize">{active.contents.language ?? "text"}</Static>
           </>
         )}
-        <span className="inline-flex items-center gap-1.5">
+        {inProject && aiOn && (
+          <Chip onClick={() => setBottomTool("ai")} title="AI assistant">
+            <Bot className="h-3 w-3 text-accent" /> AI
+          </Chip>
+        )}
+        <Static>
           <span className="h-1.5 w-1.5 rounded-full bg-success shadow-[0_0_6px_hsl(var(--success))]" />
-          Local · No account
-        </span>
+          Local
+        </Static>
       </div>
     </footer>
+  );
+}
+
+/** A clickable status segment with a hover state. */
+function Chip({
+  children,
+  onClick,
+  title,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  title: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      className="no-drag inline-flex items-center gap-1.5 px-2 transition-colors hover:bg-white/[0.08] hover:text-fg"
+    >
+      {children}
+    </button>
+  );
+}
+
+/** A non-interactive status segment. */
+function Static({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <span className={cn("inline-flex items-center gap-1.5 px-2", className)}>
+      {children}
+    </span>
   );
 }
 

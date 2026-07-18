@@ -94,6 +94,20 @@
   ::selection {
     background: hsl(var(--accent) / 0.35);
   }
+
+  /* Keyboard focus rings on interactive controls — visible only for keyboard
+     users, so mouse clicks stay clean. Editors (CodeMirror/xterm) manage their
+     own focus, so they're deliberately excluded. */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 2px solid hsl(var(--accent) / 0.7);
+    outline-offset: 1px;
+    border-radius: 3px;
+  }
 }
 
 /* ------------------------------------------------------------------ */

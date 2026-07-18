@@ -260,7 +260,9 @@ export function ProjectView({
               onClick={() => toggleTool(t.id)}
               className={cn(
                 "no-drag flex shrink-0 items-center gap-1.5 rounded px-2 py-1 text-[11px] transition-colors",
-                on ? "bg-accent/15 text-accent" : "text-fg-subtle hover:text-fg",
+                on
+                  ? "bg-accent/15 text-accent"
+                  : "text-fg-subtle hover:bg-white/[0.05] hover:text-fg",
               )}
             >
               <Icon className="h-3 w-3" />

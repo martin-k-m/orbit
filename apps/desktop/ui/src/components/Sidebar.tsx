@@ -119,7 +119,7 @@ function Rail({
         aria-current={active ? "page" : undefined}
         className={cn(
           "no-drag relative flex h-11 w-full items-center justify-center transition-colors",
-          active ? "text-fg" : "text-fg-subtle hover:text-fg",
+          active ? "text-fg" : "text-fg-subtle hover:bg-white/[0.04] hover:text-fg",
         )}
       >
         {/* VS Code-style active bar on the rail's left edge. */}
