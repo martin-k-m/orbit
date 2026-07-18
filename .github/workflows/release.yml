@@ -19,6 +19,11 @@ env:
 jobs:
   publish:
     name: ${{ matrix.label }}
+    # Windows code-signing cert (optional): set these repo secrets to sign the
+    # Windows installers. Absent → the build runs unsigned exactly as before.
+    env:
+      WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+      WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
     strategy:
       fail-fast: false
       matrix:
@@ -67,12 +72,48 @@ jobs:
         run: npm install
         working-directory: apps/desktop/ui
 
+      # Rebuild the platform icon set (.ico/.icns/PNGs) from the brand SVG so the
+      # installers and app carry the current red Orbit logo, not a stale raster.
+      - name: Regenerate app icons from the brand SVG
+        run: npm run gen-icons
+        working-directory: apps/desktop/ui
+
+      # Import the Windows code-signing certificate (if provided) and point the
+      # bundler at it, so the .msi / .exe are signed and don't trip SmartScreen.
+      - name: Prepare Windows code signing
+        if: matrix.os == 'windows-latest' && env.WINDOWS_CERTIFICATE != ''
+        shell: pwsh
+        run: |
+          $pfx = Join-Path $env:RUNNER_TEMP 'orbit-signing.pfx'
+          [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE))
+          $securePwd = ConvertTo-SecureString $env:WINDOWS_CERTIFICATE_PASSWORD -AsPlainText -Force
+          $cert = Import-PfxCertificate -FilePath $pfx -CertStoreLocation Cert:\CurrentUser\My -Password $securePwd
+          $confPath = 'apps/desktop/src-tauri/tauri.release.json'
+          $conf = Get-Content $confPath -Raw | ConvertFrom-Json
+          $win = [PSCustomObject]@{
+            certificateThumbprint = $cert.Thumbprint
+            digestAlgorithm       = 'sha256'
+            timestampUrl          = 'http://timestamp.digicert.com'
+          }
+          $conf.bundle | Add-Member -NotePropertyName windows -NotePropertyValue $win -Force
+          $conf | ConvertTo-Json -Depth 10 | Set-Content $confPath
+          Write-Host "Windows signing configured (thumbprint $($cert.Thumbprint))."
+
       - name: Build, sign and publish
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          # macOS signing + notarization (optional): set these repo secrets and
+          # the macOS builds are signed with your Developer ID and notarized, so
+          # Gatekeeper stops flagging them. Absent → unsigned, as before.
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         with:
           projectPath: apps/desktop/src-tauri
           tagName: ${{ env.RELEASE_TAG }}

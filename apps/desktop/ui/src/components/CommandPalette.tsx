@@ -6,6 +6,7 @@ import {
   Container,
   Database,
   Globe,
+  Puzzle,
   Settings as SettingsIcon,
   FolderPlus,
   TerminalSquare,
@@ -171,6 +172,11 @@ export function CommandPalette() {
                   icon={Globe}
                   label="Go to APIs"
                   onSelect={() => run(() => navigate({ kind: "apis" }))}
+                />
+                <PaletteItem
+                  icon={Puzzle}
+                  label="Go to Plugins"
+                  onSelect={() => run(() => navigate({ kind: "plugins" }))}
                 />
                 <PaletteItem
                   icon={SettingsIcon}

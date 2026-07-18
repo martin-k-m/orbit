@@ -13,6 +13,7 @@ import { Analytics } from "@/views/Analytics";
 import { Docker } from "@/views/Docker";
 import { Database } from "@/views/Database";
 import { ApiExplorer } from "@/views/ApiExplorer";
+import { Plugins } from "@/views/Plugins";
 import { Settings } from "@/views/Settings";
 import { ProjectView } from "@/views/ProjectView";
 
@@ -54,6 +55,7 @@ export function AppShell() {
                 {view.kind === "docker" && <Docker />}
                 {view.kind === "database" && <Database />}
                 {view.kind === "apis" && <ApiExplorer />}
+                {view.kind === "plugins" && <Plugins />}
                 {view.kind === "settings" && <Settings />}
                 {view.kind === "project" && (
                   <ProjectView projectId={view.id} path={view.path} />
