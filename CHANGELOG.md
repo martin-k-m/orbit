@@ -8,6 +8,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Terminal 3.0.** The integrated terminal grows real IDE ergonomics: an
+  **in-terminal find bar** (Ctrl/Cmd+F, next/previous, backed by the xterm search
+  addon), a **side-by-side split** so you can watch a build in one pane and work
+  in another, and **shell profiles** — the `＋` has a menu of the shells Orbit
+  found, and each tab is labelled with the shell it launched. (Cross-restart
+  session persistence is still to come.)
 - **Commit graph in Source Control.** The history now draws a real
   **commit-graph rail** — a lane per branch with a node in each commit's lane —
   so you can read branch and merge structure at a glance. Backed by a new

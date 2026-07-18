@@ -18,6 +18,8 @@ import {
   FlaskConical,
   Gauge,
   Bot,
+  Columns2,
+  ChevronDown,
 } from "lucide-react";
 import type {
   Command,
@@ -25,6 +27,7 @@ import type {
   Dependency,
   HealthReport,
   ProjectDetail,
+  Shell,
 } from "@/lib/types";
 import { LANGUAGE_META } from "@/lib/types";
 import {
@@ -33,6 +36,7 @@ import {
   openTerminal,
   generateProfile,
   readFile,
+  terminalShells,
 } from "@/lib/ipc";
 import { TerminalPane } from "@/components/TerminalPane";
 import { ExplorerPanel } from "@/components/ExplorerPanel";
@@ -701,52 +705,84 @@ function DepGroup({ title, deps }: { title: string; deps: Dependency[] }) {
   );
 }
 
+interface TermTab {
+  id: string;
+  label: string;
+  /** The shell profile this terminal launched with (default when undefined). */
+  shell?: Shell;
+  /** When true, the tab is split into two side-by-side shells. */
+  split: boolean;
+}
+
 /**
- * The project's embedded shell, plus an escape hatch to the system terminal for
- * anyone who'd rather use their own.
+ * The project's embedded shells: multiple tabs, per-tab shell profiles, a
+ * side-by-side split, in-terminal search (per pane), plus an escape hatch to
+ * the system terminal for anyone who'd rather use their own.
  */
 function TerminalTab({ path, onOpen }: { path: string; onOpen: () => void }) {
   const counter = useRef(1);
-  const [tabs, setTabs] = useState<string[]>(["term-1"]);
+  const [tabs, setTabs] = useState<TermTab[]>([
+    { id: "term-1", label: "Terminal 1", split: false },
+  ]);
   const [active, setActive] = useState("term-1");
+  const [shells, setShells] = useState<Shell[]>([]);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  function addTab() {
-    const id = `term-${++counter.current}`;
-    setTabs((ts) => [...ts, id]);
+  useEffect(() => {
+    terminalShells()
+      .then(setShells)
+      .catch(() => {});
+  }, []);
+
+  function addTab(shell?: Shell) {
+    const n = ++counter.current;
+    const id = `term-${n}`;
+    setTabs((ts) => [
+      ...ts,
+      { id, label: shell ? shell.label : `Terminal ${n}`, shell, split: false },
+    ]);
     setActive(id);
+    setMenuOpen(false);
   }
 
   function closeTab(id: string) {
     if (tabs.length <= 1) return; // always keep one shell
-    const next = nextActiveAfterClose(tabs, id, active);
+    const ids = tabs.map((t) => t.id);
+    const next = nextActiveAfterClose(ids, id, active);
     if (next) setActive(next);
-    setTabs((ts) => ts.filter((t) => t !== id));
+    setTabs((ts) => ts.filter((t) => t.id !== id));
   }
+
+  function toggleSplit() {
+    setTabs((ts) => ts.map((t) => (t.id === active ? { ...t, split: !t.split } : t)));
+  }
+
+  const activeTab = tabs.find((t) => t.id === active);
 
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-lg border border-border bg-panel">
       {/* Tab strip */}
       <div className="flex items-center gap-1 border-b border-border px-1">
-        {tabs.map((id, i) => (
+        {tabs.map((t) => (
           <div
-            key={id}
-            onClick={() => setActive(id)}
+            key={t.id}
+            onClick={() => setActive(t.id)}
             className={cn(
               "no-drag group flex cursor-pointer items-center gap-1.5 rounded-t-lg border-b-2 px-3 py-1.5 text-[13px] transition-colors",
-              id === active
+              t.id === active
                 ? "border-accent text-fg"
                 : "border-transparent text-fg-muted hover:text-fg",
             )}
           >
             <Terminal className="h-3.5 w-3.5 shrink-0" />
-            <span>Terminal {i + 1}</span>
+            <span>{t.label}</span>
             {tabs.length > 1 && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  closeTab(id);
+                  closeTab(t.id);
                 }}
-                aria-label={`Close Terminal ${i + 1}`}
+                aria-label={`Close ${t.label}`}
                 className="no-drag ml-0.5 flex h-4 w-4 items-center justify-center rounded opacity-0 transition-opacity hover:bg-white/[0.08] group-hover:opacity-100"
               >
                 <X className="h-3 w-3" />
@@ -754,27 +790,81 @@ function TerminalTab({ path, onOpen }: { path: string; onOpen: () => void }) {
             )}
           </div>
         ))}
+
+        {/* New terminal, with a profile menu for the installed shells. */}
+        <div className="relative ml-1 flex items-center">
+          <button
+            onClick={() => addTab()}
+            aria-label="New terminal"
+            className="no-drag flex h-7 w-7 items-center justify-center rounded-l-md text-fg-subtle transition-colors hover:bg-white/[0.06] hover:text-fg"
+          >
+            <Plus className="h-4 w-4" />
+          </button>
+          {shells.length > 0 && (
+            <button
+              onClick={() => setMenuOpen((v) => !v)}
+              aria-label="Choose a shell"
+              className="no-drag flex h-7 w-5 items-center justify-center rounded-r-md text-fg-subtle transition-colors hover:bg-white/[0.06] hover:text-fg"
+            >
+              <ChevronDown className="h-3 w-3" />
+            </button>
+          )}
+          {menuOpen && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+              <div className="absolute left-0 top-8 z-20 min-w-40 overflow-hidden rounded-lg border border-border bg-elevated py-1 shadow-xl">
+                {shells.map((s) => (
+                  <button
+                    key={s.program}
+                    onClick={() => addTab(s)}
+                    className="no-drag flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] text-fg-muted transition-colors hover:bg-white/[0.05] hover:text-fg"
+                  >
+                    <Terminal className="h-3.5 w-3.5 shrink-0 text-fg-subtle" />
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
         <button
-          onClick={addTab}
-          aria-label="New terminal"
-          className="no-drag ml-1 flex h-7 w-7 items-center justify-center rounded-md text-fg-subtle transition-colors hover:bg-white/[0.06] hover:text-fg"
+          onClick={toggleSplit}
+          title="Split terminal"
+          aria-label="Split terminal"
+          className={cn(
+            "no-drag ml-auto flex h-7 w-7 items-center justify-center rounded-md transition-colors hover:bg-white/[0.06] hover:text-fg",
+            activeTab?.split ? "text-accent" : "text-fg-subtle",
+          )}
         >
-          <Plus className="h-4 w-4" />
+          <Columns2 className="h-4 w-4" />
         </button>
-        <Button variant="ghost" size="sm" className="ml-auto" onClick={onOpen}>
+        <Button variant="ghost" size="sm" onClick={onOpen}>
           <Terminal className="h-3.5 w-3.5" /> System terminal
         </Button>
       </div>
 
       {/* Panes stay mounted so background shells keep running; hide inactive
-          ones. TerminalPane's ResizeObserver refits when it becomes visible. */}
+          ones. TerminalPane's ResizeObserver refits when it becomes visible.
+          The primary pane keeps a stable key across split toggles so it never
+          restarts; the split adds a second, independent shell. */}
       <div className="relative min-h-0 flex-1">
-        {tabs.map((id) => (
+        {tabs.map((t) => (
           <div
-            key={id}
-            className={cn("absolute inset-0", id === active ? "block" : "hidden")}
+            key={t.id}
+            className={cn(
+              "absolute inset-0 flex gap-1",
+              t.id === active ? "flex" : "hidden",
+            )}
           >
-            <TerminalPane path={path} className="h-full" />
+            <TerminalPane path={path} shell={t.shell?.program} className="h-full flex-1" />
+            {t.split && (
+              <TerminalPane
+                path={path}
+                shell={t.shell?.program}
+                className="h-full flex-1"
+              />
+            )}
           </div>
         ))}
       </div>
