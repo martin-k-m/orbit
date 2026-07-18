@@ -10,7 +10,10 @@ import {
   Braces,
   Search,
   ExternalLink,
+  Settings as SettingsIcon,
 } from "lucide-react";
+import { useAppStore } from "@/store/app";
+import { useAiStore } from "@/store/ai";
 
 interface Capability {
   name: string;
@@ -31,6 +34,17 @@ const BUILTINS: Capability[] = [
 ];
 
 export function Plugins() {
+  const navigate = useAppStore((s) => s.navigate);
+  const aiEnabled = useAiStore((s) => s.enabled);
+  const aiModel = useAiStore((s) => s.model);
+  const aiBaseUrl = useAiStore((s) => s.baseUrl);
+  let aiHost = aiBaseUrl;
+  try {
+    aiHost = new URL(aiBaseUrl).host;
+  } catch {
+    /* keep the raw string */
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <header className="flex items-center gap-3">
@@ -82,6 +96,44 @@ export function Plugins() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section>
+        <div className="mb-2 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-fg-subtle">
+          Integrations
+        </div>
+        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+          <div className="flex items-start gap-3 rounded-xl border border-border bg-panel p-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent">
+              <Bot className="h-4 w-4" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-fg">AI provider</span>
+                {aiEnabled ? (
+                  <span className="rounded bg-success/15 px-1.5 py-0.5 text-[10px] font-medium text-success">
+                    Connected
+                  </span>
+                ) : (
+                  <span className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px] font-medium text-fg-subtle">
+                    Not configured
+                  </span>
+                )}
+              </div>
+              <p className="mt-0.5 truncate text-xs text-fg-subtle">
+                {aiEnabled
+                  ? `${aiModel} · ${aiHost}`
+                  : "Connect a local or hosted OpenAI-compatible model."}
+              </p>
+              <button
+                onClick={() => navigate({ kind: "settings" })}
+                className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-white/[0.1] px-2 py-1 text-xs text-fg-muted transition-colors hover:bg-white/[0.05] hover:text-fg"
+              >
+                <SettingsIcon className="h-3.5 w-3.5" /> Configure
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -52,6 +52,12 @@
     "windows": {
       "webviewInstallMode": {
         "type": "downloadBootstrapper"
+      },
+      "nsis": {
+        "installMode": "both",
+        "installerIcon": "icons/icon.ico",
+        "headerImage": "icons/installerHeader.bmp",
+        "sidebarImage": "icons/installerSidebar.bmp"
       }
     },
     "macOS": {

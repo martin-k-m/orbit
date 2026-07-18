@@ -145,44 +145,63 @@ export function ProjectView({
 
   return (
     <div className="flex h-full flex-col">
-      {/* Main toolbar */}
-      <div className="flex items-center gap-2.5 border-b border-border bg-elevated px-3 py-1.5">
-        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-panel text-xs font-semibold text-fg">
-          {project.name.slice(0, 1)}
+      {/* Main toolbar — IntelliJ-style: project · VCS widget · run/actions */}
+      <div className="flex h-9 items-center gap-1.5 border-b border-border bg-elevated px-2">
+        <span className="flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-md bg-accent text-[11px] font-bold text-white">
+          {project.name.slice(0, 1).toUpperCase()}
         </span>
-        <span className="truncate text-sm font-semibold text-fg">{project.name}</span>
+        <span className="truncate text-[13px] font-medium text-fg">{project.name}</span>
         <LanguageChip language={project.primaryLanguage} />
+
         {git && (
-          <span className="hidden items-center gap-1.5 text-xs text-fg-subtle sm:flex">
-            <GitBranch className="h-3.5 w-3.5" />
-            {git.branch}
-            {git.isClean ? (
-              <CircleCheck className="h-3 w-3 text-success" />
-            ) : (
-              <span className="text-warning">{git.changedFiles} changed</span>
-            )}
-            {git.ahead > 0 && (
-              <span className="inline-flex items-center">
-                <ArrowUp className="h-3 w-3" />
-                {git.ahead}
-              </span>
-            )}
-            {git.behind > 0 && (
-              <span className="inline-flex items-center">
-                <ArrowDown className="h-3 w-3" />
-                {git.behind}
-              </span>
-            )}
-          </span>
+          <>
+            <ToolbarSep />
+            <button
+              onClick={() => setBottomTool("source-control")}
+              title="Source control"
+              className="no-drag hidden items-center gap-1.5 rounded-md px-2 py-1 text-xs text-fg-muted transition-colors hover:bg-white/[0.06] hover:text-fg sm:flex"
+            >
+              <GitBranch className="h-3.5 w-3.5" />
+              <span className="max-w-[140px] truncate">{git.branch}</span>
+              {git.isClean ? (
+                <CircleCheck className="h-3 w-3 text-success" />
+              ) : (
+                <span className="text-warning">{git.changedFiles}★</span>
+              )}
+              {git.ahead > 0 && (
+                <span className="inline-flex items-center text-fg-subtle">
+                  <ArrowUp className="h-3 w-3" />
+                  {git.ahead}
+                </span>
+              )}
+              {git.behind > 0 && (
+                <span className="inline-flex items-center text-fg-subtle">
+                  <ArrowDown className="h-3 w-3" />
+                  {git.behind}
+                </span>
+              )}
+            </button>
+          </>
         )}
-        <div className="ml-auto flex items-center gap-1.5">
-          <Button variant="secondary" size="sm" onClick={handleProfile}>
-            <Sparkles className="h-3.5 w-3.5" />
-            {project.hasProfile ? "Regenerate profile" : "Generate profile"}
-          </Button>
-          <Button variant="secondary" size="sm" onClick={() => setBottomTool("terminal")}>
-            <Terminal className="h-3.5 w-3.5" /> Terminal
-          </Button>
+
+        <div className="ml-auto flex items-center gap-0.5">
+          <button
+            onClick={() => setBottomTool("commands")}
+            title="Run a command"
+            className="no-drag flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-fg-muted transition-colors hover:bg-white/[0.06] hover:text-fg"
+          >
+            <Play className="h-3.5 w-3.5 text-success" /> Run
+          </button>
+          <ToolbarSep />
+          <ToolbarBtn onClick={() => setBottomTool("terminal")} title="Terminal">
+            <Terminal className="h-4 w-4" />
+          </ToolbarBtn>
+          <ToolbarBtn
+            onClick={handleProfile}
+            title={project.hasProfile ? "Regenerate profile" : "Generate profile"}
+          >
+            <Sparkles className="h-4 w-4" />
+          </ToolbarBtn>
         </div>
       </div>
 
@@ -276,6 +295,33 @@ export function ProjectView({
       </div>
     </div>
   );
+}
+
+/** A square icon button for the project toolbar. */
+function ToolbarBtn({
+  children,
+  onClick,
+  title,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  title: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      aria-label={title}
+      className="no-drag flex h-7 w-7 items-center justify-center rounded-md text-fg-muted transition-colors hover:bg-white/[0.06] hover:text-fg"
+    >
+      {children}
+    </button>
+  );
+}
+
+/** A thin vertical divider between toolbar groups. */
+function ToolbarSep() {
+  return <span className="mx-1 h-4 w-px shrink-0 bg-border" />;
 }
 
 /**
