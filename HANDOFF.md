@@ -85,8 +85,10 @@ Desktop features that are **built and wired to the UI**:
   **side-by-side split**, **shell profiles** via `terminal_shells`, + escape
   hatch to the system terminal). No cross-restart session persistence yet.
 - **File explorer + CodeMirror 6 editor** with **multiple editor tabs**
-  (per-tab drafts/dirty state, reopen-focuses, close-picks-neighbour) — the
-  permanent centre panel with breadcrumbs
+  (per-tab drafts/dirty state, reopen-focuses, close-picks-neighbour) and a
+  **side-by-side split** — the permanent centre panel with breadcrumbs. Both
+  split panes render tabs from the one `useEditorStore` document set, so a file
+  open in both edits a single shared draft (`splitPath` in the store).
 - **Workspace search (find in files)** — the Search tool window, backed by
   `orbit_core::search`; click a result to open the file at that line. This is
   project-scoped content search, **not** the cross-source universal palette yet.
@@ -141,9 +143,9 @@ Be very clear about this — do not claim otherwise in any doc or the UI:
 - **API explorer**: a REST client (method/URL/headers/body, JSON-aware response)
   via `orbit_core::http`, which shells out to **`curl`**. No collections/auth/
   history/GraphQL/WebSockets yet.
-- **No multi-window / dockable / split-pane IDE layout.** The editor has
-  multiple tabs now, but there are no split editors, and still one terminal per
-  project view.
+- **No multi-window / detachable panels.** The editor has multiple tabs and a
+  **side-by-side split** now, and the terminal splits too, but panels can't be
+  torn off into separate OS windows or moved across monitors.
 - **No plugin SDK/runtime.**
 - Terminal now has **multiple tabs, a side-by-side split, search and shell
   profiles** (background shells stay alive); still no cross-restart

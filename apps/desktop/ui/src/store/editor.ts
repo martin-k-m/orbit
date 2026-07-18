@@ -30,9 +30,17 @@ let revealSeq = 0;
 interface EditorState {
   tabs: EditorTab[];
   activePath: string | null;
+  /**
+   * The file shown in the second (right) editor pane when the view is split,
+   * or `null` when there's a single editor. Both panes render tabs from the
+   * same `tabs` array, so a file open in both edits one shared draft.
+   */
+  splitPath: string | null;
   /** The active editor's caret position (1-based), for the status bar. */
   cursor: { line: number; col: number };
   setCursor: (line: number, col: number) => void;
+  /** Open the given path (or the active one) in the right pane; null closes it. */
+  setSplitPath: (path: string | null) => void;
 
   /**
    * Open a file, or focus it if it's already open. Reopening never discards
@@ -81,9 +89,12 @@ function neighbourPath(tabs: EditorTab[], closedIndex: number): string | null {
 export const useEditorStore = create<EditorState>((set, get) => ({
   tabs: [],
   activePath: null,
+  splitPath: null,
   cursor: { line: 1, col: 1 },
 
   setCursor: (line, col) => set({ cursor: { line, col } }),
+
+  setSplitPath: (path) => set({ splitPath: path }),
 
   openTab: (path, contents, revealLine) => {
     const reveal =
@@ -130,10 +141,12 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       return {
         tabs: s.tabs.filter((t) => t.path !== path),
         activePath: nextActive,
+        // Collapse the split if its file just closed.
+        splitPath: s.splitPath === path ? null : s.splitPath,
       };
     }),
 
-  closeAll: () => set({ tabs: [], activePath: null }),
+  closeAll: () => set({ tabs: [], activePath: null, splitPath: null }),
 
   updateDraft: (path, draft) =>
     set((s) => ({
