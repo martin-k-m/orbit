@@ -6,6 +6,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **Polished IDE chrome.** The **status bar** is now a proper VS Code-style bar:
+  the git branch and AI chips are clickable (they open their tool windows), it
+  shows the indent width, and every segment has a hover state. Interactive
+  surfaces across the app gained **keyboard focus rings** and consistent hover
+  feedback (the activity bar and the bottom tool-window strip), for a tighter,
+  more native feel.
+
 ## [1.4.1] — 2026-07-17
 
 A proper-IDE design pass: a slim icon-only activity bar, toned-down
