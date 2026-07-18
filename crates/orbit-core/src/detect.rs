@@ -363,19 +363,6 @@ fn detect_docker(dir: &Path) -> Ecosystem {
     }
 }
 
-/// Recognise a sibling ecosystem product from its directory name / manifest.
-pub fn ecosystem_link(dir: &Path) -> Option<crate::model::EcosystemLink> {
-    use crate::model::EcosystemLink;
-    let name = dir.file_name()?.to_string_lossy().to_lowercase();
-    match name.as_str() {
-        "blink" => Some(EcosystemLink::Blink),
-        "killer" => Some(EcosystemLink::Killer),
-        "flux" => Some(EcosystemLink::Flux),
-        "beacon" => Some(EcosystemLink::Beacon),
-        _ => None,
-    }
-}
-
 fn cmd(name: &str, program: &str, args: &[&str], source: CommandSource, desc: &str) -> Command {
     Command {
         name: name.into(),

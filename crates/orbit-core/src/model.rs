@@ -152,9 +152,6 @@ pub struct Project {
     /// The number of direct dependencies detected (best effort).
     #[serde(default)]
     pub dependency_count: usize,
-    /// A known ecosystem sibling (Blink/Killer/Flux/Beacon) if recognised.
-    #[serde(default)]
-    pub ecosystem_link: Option<EcosystemLink>,
 }
 
 impl Project {
@@ -171,31 +168,5 @@ impl Project {
             hash = hash.wrapping_mul(0x0000_0100_0000_01b3);
         }
         format!("{hash:016x}")
-    }
-}
-
-/// A sibling product in the Orbit ecosystem that a project belongs to.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "kebab-case")]
-pub enum EcosystemLink {
-    /// Blink — developer acceleration toolkit.
-    Blink,
-    /// Killer — security platform.
-    Killer,
-    /// Flux — automation platform.
-    Flux,
-    /// Beacon — developer API / web platform.
-    Beacon,
-}
-
-impl EcosystemLink {
-    /// Human label for the sibling product.
-    pub fn label(self) -> &'static str {
-        match self {
-            EcosystemLink::Blink => "Blink",
-            EcosystemLink::Killer => "Killer",
-            EcosystemLink::Flux => "Flux",
-            EcosystemLink::Beacon => "Beacon",
-        }
     }
 }

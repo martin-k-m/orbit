@@ -336,7 +336,6 @@ mod tests {
             description: None,
             has_profile: false,
             dependency_count: 0,
-            ecosystem_link: None,
         };
 
         let mut ws = Workspace::new("abc");

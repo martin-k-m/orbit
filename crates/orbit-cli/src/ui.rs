@@ -43,9 +43,6 @@ fn red(text: &str) -> String {
 fn cyan(text: &str) -> String {
     paint("36", text)
 }
-fn magenta(text: &str) -> String {
-    paint("35", text)
-}
 
 /// The `✔` success badge.
 pub fn ok_badge() -> String {
@@ -63,11 +60,7 @@ pub fn error_badge() -> String {
 /// One compact line describing a project, used by `orbit scan`.
 pub fn project_line(project: &Project) {
     let lang = language_chip(project.primary_language.label());
-    let link = project
-        .ecosystem_link
-        .map(|l| format!("  {}", magenta(&format!("◆ {}", l.label()))))
-        .unwrap_or_default();
-    println!("  {}  {}{}", bold(&pad(&project.name, 22)), lang, link);
+    println!("  {}  {}", bold(&pad(&project.name, 22)), lang);
     println!(
         "  {}  {}",
         " ".repeat(22),

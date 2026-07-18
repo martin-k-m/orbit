@@ -148,7 +148,6 @@ pub fn analyze(dir: &Path) -> Result<Option<Project>> {
         description: profile.and_then(|p| p.description),
         has_profile: profile_exists(&dir),
         dependency_count,
-        ecosystem_link: detect::ecosystem_link(&dir),
         path: dir,
     }))
 }

@@ -12,7 +12,7 @@ use orbit_core::deps::Dependency;
 use orbit_core::env::EnvReport;
 use orbit_core::git::GitInfo;
 use orbit_core::health::HealthReport;
-use orbit_core::model::{EcosystemLink, Language, Project};
+use orbit_core::model::{Language, Project};
 use orbit_core::process::CommandOutput;
 use orbit_core::store::StoredProject;
 use orbit_core::workspace::Workspace;
@@ -33,7 +33,6 @@ pub struct ProjectSummary {
     description: Option<String>,
     has_profile: bool,
     dependency_count: usize,
-    ecosystem_link: Option<EcosystemLink>,
     command_count: usize,
     git_branch: Option<String>,
     git_clean: Option<bool>,
@@ -52,7 +51,6 @@ impl ProjectSummary {
             description: project.description,
             has_profile: project.has_profile,
             dependency_count: project.dependency_count,
-            ecosystem_link: project.ecosystem_link,
             command_count: project.commands.len(),
             git_branch: git.as_ref().map(|g| g.branch.clone()),
             git_clean: git.as_ref().map(|g| g.is_clean),
