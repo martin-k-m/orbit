@@ -6,6 +6,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.4.2] — 2026-07-17
+
+An IDE-chrome polish pass — a richer, interactive status bar plus
+keyboard focus rings and hover feedback across the app.
+
 ### Changed
 
 - **Polished IDE chrome.** The **status bar** is now a proper VS Code-style bar:

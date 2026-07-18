@@ -4,7 +4,7 @@ A ground-truth snapshot for whoever (or whatever) picks up Orbit next. This is
 the honest state, including the things the marketing pages don't say. If it
 conflicts with a glossier doc, trust this file and fix the other one.
 
-Last updated at **v1.4.1** (proper-IDE redesign: icon activity bar, plugins view, fixed app icon, signing pipeline).
+Last updated at **v1.4.2** (proper-IDE redesign + chrome polish: icon activity bar, richer status bar, plugins, fixed icon, gated signing).
 
 ---
 
@@ -40,7 +40,7 @@ orbit/
 `apps/desktop/src-tauri` is intentionally **excluded** from the workspace
 (`Cargo.toml` `exclude`) because it drags in the webview stack.
 
-## What actually exists (v1.4.1)
+## What actually exists (v1.4.2)
 
 Engine modules (`crates/orbit-core/src/`), all unit-tested:
 
