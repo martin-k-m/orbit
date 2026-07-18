@@ -8,6 +8,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
+- **Split editors.** The editor can now **split side by side** — open a second
+  file next to the first, or the same file twice to work in two places at once.
+  Because both panes render from one shared document model, editing a file open
+  in both panes updates both live and there's a single unsaved state to save.
 - **Terminal 3.0.** The integrated terminal grows real IDE ergonomics: an
   **in-terminal find bar** (Ctrl/Cmd+F, next/previous, backed by the xterm search
   addon), a **side-by-side split** so you can watch a build in one pane and work

@@ -17,6 +17,7 @@ import {
   ListTree,
   PanelLeftClose,
   PanelLeftOpen,
+  Columns2,
 } from "lucide-react";
 import type { FileNode, Symbol as DocSymbol } from "@/lib/types";
 import {
@@ -69,10 +70,18 @@ export function ExplorerPanel({ root }: { root: string }) {
   const markSaved = useEditorStore((s) => s.markSaved);
   const revealLine = useEditorStore((s) => s.revealLine);
   const setCursor = useEditorStore((s) => s.setCursor);
+  const splitPath = useEditorStore((s) => s.splitPath);
+  const setSplitPath = useEditorStore((s) => s.setSplitPath);
   const active = useEditorStore(activeTab);
+  const splitTab = tabs.find((t) => t.path === splitPath) ?? null;
   const treeCollapsed = useWorkspaceStore((s) => s.treeCollapsed);
   const toggleTree = useWorkspaceStore((s) => s.toggleTree);
   const [showOutline, setShowOutline] = useState(false);
+
+  // If the split's file is no longer open, collapse back to a single editor.
+  useEffect(() => {
+    if (splitPath && !tabs.some((t) => t.path === splitPath)) setSplitPath(null);
+  }, [splitPath, tabs, setSplitPath]);
 
   const [loadingPath, setLoadingPath] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -279,6 +288,17 @@ export function ExplorerPanel({ root }: { root: string }) {
                 </div>
                 <div className="ml-auto flex items-center gap-2 text-fg-subtle">
                   <button
+                    onClick={() => setSplitPath(splitPath ? null : active.path)}
+                    title={splitPath ? "Close split editor" : "Split editor right"}
+                    aria-label={splitPath ? "Close split editor" : "Split editor right"}
+                    className={cn(
+                      "no-drag ml-1 inline-flex items-center rounded-md px-1.5 py-1 transition-colors",
+                      splitPath ? "bg-accent/15 text-accent" : "text-fg-subtle hover:text-fg",
+                    )}
+                  >
+                    <Columns2 className="h-3.5 w-3.5" />
+                  </button>
+                  <button
                     onClick={() => setShowOutline((v) => !v)}
                     title="Toggle outline"
                     className={cn(
@@ -309,29 +329,41 @@ export function ExplorerPanel({ root }: { root: string }) {
               </div>
             )}
 
-            <div className="min-h-0 flex-1">
-              {loadingPath && !active ? (
-                <Centered>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                </Centered>
-              ) : active?.contents.binary ? (
-                <Centered>
-                  <div className="flex flex-col items-center gap-2 text-fg-subtle">
-                    <FileWarning className="h-5 w-5" />
-                    <span className="text-xs">Binary file — not shown</span>
+            <div className="flex min-h-0 flex-1">
+              <div className="min-w-0 flex-1">
+                {loadingPath && !active ? (
+                  <Centered>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  </Centered>
+                ) : (
+                  <EditorBody
+                    tab={active}
+                    onChange={updateDraft}
+                    onCursor={setCursor}
+                  />
+                )}
+              </div>
+              {splitTab && (
+                <div className="flex min-w-0 flex-1 flex-col border-l border-white/[0.06]">
+                  <div className="flex items-center gap-2 border-b border-white/[0.06] px-3 py-1 text-[11px] text-fg-subtle">
+                    <span className="truncate font-mono">{splitTab.name}</span>
+                    <button
+                      onClick={() => setSplitPath(null)}
+                      aria-label="Close split editor"
+                      className="no-drag ml-auto rounded p-0.5 hover:bg-white/[0.06] hover:text-fg"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
                   </div>
-                </Centered>
-              ) : active ? (
-                <CodeEditor
-                  path={active.path}
-                  value={active.draft}
-                  language={active.contents.language}
-                  readOnly={active.contents.truncated}
-                  reveal={active.reveal}
-                  onChange={(v) => updateDraft(active.path, v)}
-                  onCursor={(line, col) => setCursor(line, col)}
-                />
-              ) : null}
+                  <div className="min-h-0 flex-1">
+                    <EditorBody
+                      tab={splitTab}
+                      onChange={updateDraft}
+                      onCursor={setCursor}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
             {active?.contents.truncated && (
               <div className="border-t border-white/[0.06] px-3 py-1.5 text-[11px] text-warning">
@@ -359,6 +391,40 @@ export function ExplorerPanel({ root }: { root: string }) {
         />
       )}
     </div>
+  );
+}
+
+/** Renders one editor pane's content: a binary notice, or the CodeEditor. */
+function EditorBody({
+  tab,
+  onChange,
+  onCursor,
+}: {
+  tab: EditorTab | null;
+  onChange: (path: string, value: string) => void;
+  onCursor: (line: number, col: number) => void;
+}) {
+  if (!tab) return null;
+  if (tab.contents.binary) {
+    return (
+      <Centered>
+        <div className="flex flex-col items-center gap-2 text-fg-subtle">
+          <FileWarning className="h-5 w-5" />
+          <span className="text-xs">Binary file — not shown</span>
+        </div>
+      </Centered>
+    );
+  }
+  return (
+    <CodeEditor
+      path={tab.path}
+      value={tab.draft}
+      language={tab.contents.language}
+      readOnly={tab.contents.truncated}
+      reveal={tab.reveal}
+      onChange={(v) => onChange(tab.path, v)}
+      onCursor={onCursor}
+    />
   );
 }
 
