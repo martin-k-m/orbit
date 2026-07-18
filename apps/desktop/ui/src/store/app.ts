@@ -8,6 +8,7 @@ export type View =
   | { kind: "docker" }
   | { kind: "database" }
   | { kind: "apis" }
+  | { kind: "plugins" }
   | { kind: "settings" }
   | { kind: "project"; id: string; path: string };
 

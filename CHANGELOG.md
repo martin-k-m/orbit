@@ -6,6 +6,29 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **A proper-IDE redesign.** The chrome was reworked to sit closer to VS Code /
+  IntelliJ: the left navigation is now a slim **icon-only activity bar** (with
+  tooltips and a VS Code-style active rail) instead of a wide labelled panel, the
+  title bar drops the marketing banner for the **current context** (project or
+  view), and the in-app branding is toned right down — no more "Command Center"
+  header or spinning logo.
+- **App icon fixed.** The installers and app now carry the current **red Orbit
+  logo** — CI regenerates the full icon set (`.ico`/`.icns`/PNGs) from the brand
+  SVG at build time instead of shipping a stale raster.
+
+### Added
+
+- **Plugins view.** A new **Plugins** destination presents Orbit's built-in
+  capabilities as extensions and previews the coming community marketplace
+  (honestly marked as roadmap).
+- **Code-signing pipeline.** The release workflow now signs + notarizes macOS and
+  signs Windows automatically **when signing certificates are provided as repo
+  secrets** (see [docs/SIGNING.md](docs/SIGNING.md)), which removes the OS
+  "unidentified developer" / SmartScreen warnings. Without the certs, builds ship
+  unsigned exactly as before.
+
 ## [1.4.0] — 2026-07-17
 
 Toward an AI-native IDE. Orbit gains a **local-first AI assistant**, a **commit
