@@ -6,6 +6,25 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- **Cleaner IntelliJ-style top toolbar.** The project toolbar was rebuilt to sit
+  closer to IntelliJ's: a branded project chip, a clickable **VCS widget** (branch
+  / clean-or-changed / ahead-behind that opens Source Control), a green **Run**
+  entry, and dense icon actions separated by dividers.
+- **Retuned text colours.** The dark-theme text hierarchy was cleaned up —
+  brighter, more neutral primary/muted/subtle tones — for a crisper read.
+- **A properly branded Windows installer.** The NSIS setup now carries the Orbit
+  logo (installer icon + a branded header and welcome/finish sidebar on a dark
+  panel) and offers a per-user / per-machine choice, instead of the default grey
+  wizard. The installer artwork is generated from the brand SVG in CI.
+
+### Added
+
+- **Integrations in Plugins.** The Plugins view gained an **Integrations** section
+  — the AI provider is the first, showing its connection status and linking
+  straight to its settings.
+
 ## [1.4.2] — 2026-07-17
 
 An IDE-chrome polish pass — a richer, interactive status bar plus
