@@ -7,28 +7,27 @@
 //     branded header + welcome/finish images NSIS uses, so the Windows setup
 //     carries the Orbit logo on a dark panel instead of the default 2003 grey.
 
-import { execFileSync } from "node:child_process";
+import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+const uiDir = path.resolve(here, "..");
 const iconsDir = path.resolve(here, "../../src-tauri/icons");
 const svg = path.join(iconsDir, "app-icon.svg");
 
 // Near-black panel behind the logo, matching the app surface.
 const PANEL = { r: 10, g: 8, b: 12 };
 
-// 1) The platform icon set, straight from the SVG.
-const tauriBin = path.resolve(
-  here,
-  "..",
-  "node_modules",
-  ".bin",
-  process.platform === "win32" ? "tauri.cmd" : "tauri",
-);
-execFileSync(tauriBin, ["icon", svg, "--output", iconsDir], { stdio: "inherit" });
+// 1) The platform icon set, straight from the SVG. Go through the shell (npx)
+//    so the local Tauri CLI resolves the same way on every OS — Node can't
+//    spawn the Windows `.cmd` shim directly.
+execSync(`npx tauri icon "${svg}" --output "${iconsDir}"`, {
+  stdio: "inherit",
+  cwd: uiDir,
+});
 
 // 2) NSIS installer artwork.
 await renderBmp(150, 57, "center", path.join(iconsDir, "installerHeader.bmp"));
