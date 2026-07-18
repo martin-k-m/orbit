@@ -24,6 +24,9 @@ jobs:
     env:
       WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
       WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+      # 'true' only when an Apple cert secret exists — gates the signed macOS
+      # build path. Passing empty APPLE_* to tauri-action breaks the build.
+      MACOS_SIGN: ${{ secrets.APPLE_CERTIFICATE != '' }}
     strategy:
       fail-fast: false
       matrix:
@@ -99,15 +102,35 @@ jobs:
           $conf | ConvertTo-Json -Depth 10 | Set-Content $confPath
           Write-Host "Windows signing configured (thumbprint $($cert.Thumbprint))."
 
-      - name: Build, sign and publish
+      # Default path: Windows (signed above if a cert exists), Linux, and
+      # unsigned macOS. No APPLE_* env here — passing empty values to
+      # tauri-action makes it attempt (and fail) a keychain import.
+      - name: Build and publish
+        if: "!(matrix.os == 'macos-latest' && env.MACOS_SIGN == 'true')"
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-          # macOS signing + notarization (optional): set these repo secrets and
-          # the macOS builds are signed with your Developer ID and notarized, so
-          # Gatekeeper stops flagging them. Absent → unsigned, as before.
+        with:
+          projectPath: apps/desktop/src-tauri
+          tagName: ${{ env.RELEASE_TAG }}
+          releaseName: "Orbit ${{ env.RELEASE_TAG }}"
+          releaseBody: "Building assets… release notes and checksums are attached when all platforms finish."
+          releaseDraft: true
+          prerelease: false
+          includeUpdaterJson: true
+          args: ${{ matrix.args }}
+
+      # Signed macOS path: only when an Apple Developer ID cert secret is set.
+      # tauri-action then signs with the Developer ID and notarizes.
+      - name: Build, sign, notarize and publish (macOS)
+        if: matrix.os == 'macos-latest' && env.MACOS_SIGN == 'true'
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
