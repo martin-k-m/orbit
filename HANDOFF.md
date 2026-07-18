@@ -4,7 +4,7 @@ A ground-truth snapshot for whoever (or whatever) picks up Orbit next. This is
 the honest state, including the things the marketing pages don't say. If it
 conflicts with a glossier doc, trust this file and fix the other one.
 
-Last updated at **v1.4.0** (AI assistant, commit graph, Terminal 3.0, split editors).
+Last updated at **v1.4.1** (proper-IDE redesign: icon activity bar, plugins view, fixed app icon, signing pipeline).
 
 ---
 
@@ -40,7 +40,7 @@ orbit/
 `apps/desktop/src-tauri` is intentionally **excluded** from the workspace
 (`Cargo.toml` `exclude`) because it drags in the webview stack.
 
-## What actually exists (v1.4.0)
+## What actually exists (v1.4.1)
 
 Engine modules (`crates/orbit-core/src/`), all unit-tested:
 
@@ -104,8 +104,11 @@ Desktop features that are **built and wired to the UI**:
   `orbit_core::ai` (request/response pure + unit-tested, `curl` for the call —
   compile-proven in CI's bundle only, like `http`/`lsp`). **Non-streaming, single
   conversation, no codebase indexing / multi-agent / plugin SDK yet.**
-- Standalone views (in the left sidebar): Containers (Docker), Database (SQLite),
-  APIs (REST client), Analytics, Settings
+- **Left sidebar is a VS Code-style icon-only activity bar** (`Sidebar.tsx`,
+  ~48px, tooltips + active rail). Destinations: Projects, Analytics, Containers
+  (Docker), Database (SQLite), APIs (REST client), **Plugins** (`views/Plugins.tsx`
+  — presents built-ins as extensions + an honest roadmap note; no real plugin SDK
+  yet), Settings. The title bar shows the current context, not branding.
 - System tray, native menu, Dark/Light/High-Contrast/**System** theme (persisted)
 - **Red brand identity** (red-600 → rose-500, matching the website) + a
   black-and-red **launch splashscreen** that fades into the app on boot

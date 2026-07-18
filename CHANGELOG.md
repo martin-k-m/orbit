@@ -6,6 +6,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.4.1] — 2026-07-17
+
+A proper-IDE design pass: a slim icon-only activity bar, toned-down
+chrome, a Plugins view, the correct red app icon on the installers, and
+an optional code-signing pipeline for warning-free installs.
+
 ### Changed
 
 - **A proper-IDE redesign.** The chrome was reworked to sit closer to VS Code /

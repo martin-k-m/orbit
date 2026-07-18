@@ -1,60 +1,57 @@
-# Orbit v1.4.0 — Release Notes
+# Orbit v1.4.1 — Release Notes
 
-**Toward an AI-native IDE.** Orbit gains a local-first AI assistant, a commit
-graph, a much stronger terminal, and split editors — while staying exactly what
-it's always been: local-first, no account, no telemetry, fast, and
-cross-platform.
+**A proper-IDE design pass.** Orbit's chrome moves closer to VS Code / IntelliJ,
+the installers finally carry the right logo, and the release pipeline is ready to
+ship warning-free, signed builds.
 
 ## Highlights
 
-### 🤖 A local-first AI assistant
+### 🎛 A slim, icon-only activity bar
 
-A new **AI** tool window brings a project-aware chat right into the workspace,
-backed by **any OpenAI-compatible endpoint** you choose in Settings → AI:
+The left navigation is now a **VS Code-style activity bar** — icons only, a
+fraction of its old width, with tooltips and an accent rail on the active item.
+More room for your code, less chrome.
 
-- A **local runtime** (Ollama, LM Studio, a llama.cpp server) or a hosted
-  provider — one code path serves both.
-- **Off by default.** The endpoint, model and key are stored only on your
-  device, and Orbit contacts nothing until you enable it and send a message.
-- Built on a new, unit-tested `orbit_core::ai` module.
+### 🧭 Context in the title bar, not branding
 
-### 🌱 Commit graph
+The title bar drops the marketing banner and shows **what you're looking at** —
+the current project or view — the way a real IDE does. The old "Command Center"
+header and spinning logo are gone; you know what app you're in.
 
-The Source Control history now draws a real **commit-graph rail** — a lane per
-branch with a node in each commit's lane — so you can read branch and merge
-structure at a glance. The lane layout is a pure, unit-tested function.
+### 🧩 Plugins
 
-### 🖥 Terminal 3.0
+A new **Plugins** destination presents Orbit's built-in capabilities as
+extensions and previews the community marketplace that's on the roadmap (marked
+honestly as coming, not pretend-installed).
 
-The integrated terminal grows real IDE ergonomics:
+### 🎨 The right icon
 
-- **In-terminal find** (Ctrl/Cmd+F, next/previous).
-- A **side-by-side split** — watch a build in one pane, work in another.
-- **Shell profiles** — the `＋` has a menu of the shells Orbit found, and each
-  tab is labelled with the shell it launched.
+The installers and the app now carry the current **red Orbit logo** — CI
+regenerates the full icon set (`.ico` / `.icns` / PNGs) from the brand SVG at
+build time, so no more stale purple raster.
 
-### ⬌ Split editors
+### 🔏 Signed, warning-free installs (when certs are provided)
 
-The editor **splits side by side** — open a second file next to the first, or
-the same file twice. Both panes share one document model, so a file open in both
-edits a single draft with one unsaved state.
+The release workflow now **signs and notarizes macOS** and **signs Windows**
+automatically — which removes the "unidentified developer" / SmartScreen prompts
+— **as soon as signing certificates are added as repository secrets**. See
+[docs/SIGNING.md](https://github.com/martin-k-m/orbit/blob/main/docs/SIGNING.md)
+for exactly what to add.
 
-### 🧹 Ecosystem plumbing removed
+> **Note:** OS-level code signing requires paid certificates that only the
+> project owner can obtain (an Apple Developer ID for macOS; an OV/EV
+> code-signing certificate for Windows). Until those are added, these builds ship
+> **unsigned** and your OS will still warn on first launch — that's a property of
+> any unsigned binary, not of Orbit. The pipeline is wired to sign automatically
+> the moment the certificates exist.
 
-The last of the Blink/Killer/Flux/Beacon sibling-detection is gone from the app
-and the website — Orbit no longer carries integrations that never had a real
-engine behind them.
+## Everything from v1.4.0, still here
 
-## Under the hood
-
-New unit-tested engine work (`orbit_core::ai`, the git commit-graph lane
-layout), the xterm search addon for terminal find, and a small editor-store
-change that gives split editors a shared document model for free. The engine
-test suite stays green and the desktop bundle builds on macOS (Intel + Apple
-Silicon), Windows and Linux.
+The local-first AI assistant, the commit graph, Terminal 3.0 (search / splits /
+profiles), split editors, and the full IDE beneath them.
 
 ## Still to come
 
 Cross-restart terminal sessions, the LSP go-to-definition/hover gestures, a
-debugger, and a plugin SDK — tracked honestly in the
+debugger, and a real plugin SDK — tracked in the
 [roadmap](https://github.com/martin-k-m/orbit/blob/main/ROADMAP.md).
