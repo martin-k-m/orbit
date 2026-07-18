@@ -80,7 +80,7 @@ jobs:
         run: cargo tauri build --target ${{ matrix.target }}
 
       - name: Upload installers
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: orbit-${{ matrix.target }}
           path: |
