@@ -18,8 +18,8 @@ orbit init            # or the "Generate profile" action in the app
 ```toml
 # .project-orbit
 [project]
-name = "Blink"
-description = "Developer acceleration toolkit"
+name = "API Server"
+description = "The backend service"
 
 [commands]
 dev   = "cargo run"

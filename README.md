@@ -51,15 +51,16 @@ Think of it as the calm control room for everything you build:
 | 🗂 **Project management** | Point Orbit at a folder and it detects every Rust, Node/TypeScript, Python, Go and Docker project inside — with the right commands, frameworks and dependencies. |
 | ⌘ **Command center** | A `Cmd/Ctrl + K` palette to jump to any project, run `dev`/`build`/`test`, open a terminal or scan a folder — without leaving the keyboard. |
 | ▶️ **Run anything** | One click runs a project's dev server, build or tests. Commands are inferred from manifests and can be pinned in a `.project-orbit` profile. |
-| 🌿 **Git power center** | A first-class Source Control panel: stage/unstage, inline diffs, commit, history with per-commit patches, branches, fetch/pull/push, stash and tags — on the `git` binary you already have. |
+| 🤖 **AI assistant** | A project-aware chat, docked as a tool window, over **any OpenAI-compatible endpoint** you choose — a local runtime (Ollama, LM Studio, llama.cpp) or a hosted provider. Off by default; the key and messages stay on your machine. |
+| 🌿 **Git power center** | A first-class Source Control panel: stage/unstage, inline diffs, commit, history with a **commit graph** and per-commit patches, branches, fetch/pull/push, stash and tags — on the `git` binary you already have. |
 | 🩺 **Project health** | A 0–100 score with concrete warnings — oversized files, stray TODOs, heavy artifacts, missing tests. |
 | 📦 **Dependency manager** | The declared dependencies of every ecosystem in a project, read offline from its manifests. |
 | 📊 **Developer analytics** | Local, private time tracking: hours per language, projects touched, build times. Never uploaded. |
 | 🔐 **Safe by default** | Every command is assessed before it runs — `rm -rf`, `dd`, `mkfs`, `curl \| sh` and force-pushes are refused until you confirm. Secrets in `.env` files are masked. |
 | 🗂 **Workspaces & env** | Pin tasks, notes and links per project; see every `.env` in one place with duplicate and missing-variable detection. |
-| 🖥 **Native IDE feel** | Tauri 2 app for macOS, Windows and Linux with a tray, native menus, keyboard shortcuts, a status bar, and a flat, dark, professional design. |
-| 🖥 **Built-in terminal** | A real PTY-backed shell per project — colours, `top`/`vim`, Ctrl-C and reflow all work. Opens in your shell (`$SHELL`/`COMSPEC`), in the project directory. |
-| 📝 **Code editor** | A tabbed CodeMirror editor — multi-file tabs, find/replace, go-to-line, a document outline, font/tab/wrap preferences, plus create/rename/delete in the file tree. |
+| 🧭 **IntelliJ-style workspace** | A slim icon-only activity bar, a permanent editor centre, and a resizable docked bottom tool-window strip (Problems, Git, Search, Testing, Terminal, …) — plus an interactive status bar. Tauri 2 for macOS, Windows and Linux, with a tray, native menus and keyboard shortcuts. |
+| 🖥 **Built-in terminal** | A real PTY-backed shell per project — colours, `top`/`vim`, Ctrl-C and reflow all work — with **tabs, side-by-side splits, in-terminal search and shell profiles**. Opens in your shell (`$SHELL`/`COMSPEC`), in the project directory. |
+| 📝 **Code editor** | A tabbed CodeMirror editor — multi-file tabs, breadcrumbs, **side-by-side split editors**, find/replace, go-to-line, a document outline, font/tab/wrap preferences, plus create/rename/delete in the file tree. |
 | 🔎 **Search & quick-open** | Fast find-in-files across a project, and `⌘/Ctrl+K` fuzzy quick-open to jump to any file. |
 | 🐳 **Docker · 🗄 Database · 🌐 APIs** | List and control Docker containers/images; browse a SQLite database and run `SELECT`s; send REST requests with a JSON-aware response viewer. |
 | 🧪 **Testing & problems** | Run a project's tests with a parsed pass/fail summary (cargo, Jest/Vitest, pytest), and a unified Problems panel with **live language-server diagnostics** (rust-analyzer, tsserver, pylsp, gopls) for your open files. |
@@ -91,20 +92,20 @@ The engine ships as a standalone binary too:
 $ orbit scan ~/code
 ✔ 5 projects under ~/code
 
-  Blink                   Rust    ◆ Blink
-  Beacon                  TypeScript
-  Flux                    Go      ◆ Flux
-  Killer                  Rust    ◆ Killer
-  Orbit                   Rust
+  api-server              Rust
+  web-app                 TypeScript
+  worker                  Go
+  scanner                 Rust
+  orbit                   Rust
 
-$ orbit info ./blink
-Blink
- Rust   ~/code/blink
-Developer acceleration toolkit
+$ orbit info ./api-server
+api-server
+ Rust   ~/code/api-server
+The backend service
 
 Git
   branch   main  ✓ clean
-  latest   a1b2c3d Added compiler optimization
+  latest   a1b2c3d Cache the request parser
 
 Health  87/100  Good
   12 files · 3,410 lines · 4 TODOs

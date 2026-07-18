@@ -23,8 +23,8 @@ directory).
 $ orbit scan ~/code
 ✔ 5 projects under ~/code
 
-  Blink                   Rust    ◆ Blink
-  Beacon                  TypeScript
+  api-server              Rust
+  web-app                 TypeScript
   ...
 ```
 
@@ -33,7 +33,7 @@ $ orbit scan ~/code
 Show git, health and dependency detail for a single project.
 
 ```console
-$ orbit info ./blink
+$ orbit info ./api-server
 ```
 
 ### `orbit health [PATH]`

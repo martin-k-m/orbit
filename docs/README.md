@@ -14,7 +14,7 @@ Everything you need to use, build and ship Orbit.
 - [Updates](./updates.md) — how auto-update works, what it sends (nothing), signing.
 - [Environment variables](./environment.md) — `.env` files, masking, validation.
 - [CLI reference](./cli.md) — the `orbit` terminal companion.
-- [Plugins & integrations](./plugins.md) — Blink, Killer, Flux, Beacon.
+- [Plugins & integrations](./plugins.md) — built-in capabilities, the AI-provider integration, and the planned plugin SDK.
 - [FAQ](./faq.md) — the questions people actually ask.
 - [Troubleshooting](./troubleshooting.md) — fixes for common issues.
 

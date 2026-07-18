@@ -23,10 +23,10 @@ friends.
 $ orbit scan ~/code
 ✔ 5 projects under ~/code
 
-  blink                   Rust
-  beacon                  TypeScript
-  flux                    Go
-  killer                  Rust
+  api-server              Rust
+  web-app                 TypeScript
+  worker                  Go
+  scanner                 Rust
   orbit                   Rust
 ```
 
@@ -77,8 +77,8 @@ orbit init          # writes .project-orbit
 ```toml
 # .project-orbit
 [project]
-name = "Blink"
-description = "Developer acceleration toolkit"
+name = "API Server"
+description = "The backend service"
 
 [commands]
 dev   = "cargo run --release"

@@ -1,57 +1,34 @@
-# Plugins & ecosystem integrations
+# Plugins & integrations
 
-Orbit is the hub of a family of local developer tools. It recognises sibling
-projects and surfaces the right action for each. In v1.0 these integrations ship
-as clearly-labelled **previews**: the UI and workflow are real, and they light
-up fully when the corresponding engine is present on your machine.
+Open **Plugins** from the activity bar. Today it does two things: it lists the
+capabilities that ship in the box, and it shows the integrations you can
+configure. A community plugin marketplace is on the [roadmap](../ROADMAP.md) —
+it isn't built yet, and the Plugins view says so plainly rather than pretending.
 
-```
-                       Orbit
-                         │
-      ┌─────────┬────────┼────────┬─────────┐
-    Blink     Flux     Killer   Beacon   (your project)
-    build   automate  security   API
-```
+## Built-in capabilities
 
-## How detection works
+Everything Orbit can do is presented here as a built-in "extension" — Source
+Control, the integrated terminal, the AI assistant, language-server diagnostics,
+testing, containers, database and APIs. These are always on; there's nothing to
+install.
 
-A project is linked to a sibling when Orbit recognises it — today by directory
-name (`blink`, `killer`, `flux`, `beacon`). The project card then shows the
-matching action.
+## Integrations
 
-## Blink — acceleration
+The **Integrations** section is where you connect Orbit to outside services.
+The first is the **AI provider**:
 
-*Accelerate with Blink* offers to speed up builds. The preview shows the
-expected before/after (e.g. 18s → 2s). With the Blink engine installed, Orbit
-delegates the build and reports real numbers.
+- It shows whether an AI endpoint is **connected** (and which model/host), or
+  **not configured**.
+- **Configure** takes you to **Settings → AI**, where you point Orbit at any
+  OpenAI-compatible endpoint — a local runtime (Ollama, LM Studio, a llama.cpp
+  server) or a hosted provider. AI is **off by default**, and the endpoint,
+  model and key are stored only on your device.
 
-## Killer — security
+More integrations will land here over time.
 
-Right-click a project → *Security scan* runs Killer's scanner and shows a
-security score, the vulnerabilities found and recommendations. Without the engine
-present, a representative preview is shown.
+## Plugin SDK (planned)
 
-## Flux — automation
-
-*Automate with Flux* opens a workflow builder. Example workflow:
-
-```
-On Build:
-  → Run tests
-  → Run security scan
-  → Create release
-```
-
-## Beacon — API monitoring
-
-*Monitor with Beacon* watches a local API (e.g. `localhost:3000`) and surfaces
-its routes, health and request activity.
-
-## Roadmap
-
-- Detect siblings by manifest metadata, not just folder name.
-- A stable plugin manifest so third-party tools can register actions.
-- Streaming output and live status for long-running integrations.
-
-Integrations never send your code or data anywhere; they run locally, in keeping
-with Orbit's local-first design.
+A versioned plugin SDK will let extensions contribute languages, themes, panels,
+commands, AI providers, debuggers and more — installed, updated and toggled from
+this view. It's designed but not implemented; follow the
+[roadmap](../ROADMAP.md) for progress.

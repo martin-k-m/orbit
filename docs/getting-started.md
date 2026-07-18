@@ -54,7 +54,8 @@ scan.
   tests).
 - **Dependencies** — everything declared across the project's ecosystems.
 - **Analytics** — local, private time-per-language and build-time stats.
-- **Ecosystem** — integrations with Blink, Killer, Flux and Beacon.
+- **AI** — a project-aware assistant over any OpenAI-compatible endpoint you
+  configure (local or hosted); off by default. See [Plugins](./plugins.md).
 
 ## Keyboard shortcuts
 

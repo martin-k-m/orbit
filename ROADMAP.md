@@ -1,129 +1,85 @@
 # Roadmap
 
-Orbit's north star: **the app you keep open all day next to your editor** — a
-local-first workspace that replaces a handful of daily tools. Everything below
-stays offline-first, private (no telemetry), fast, cross-platform and open
-source.
+Orbit's north star: **a local-first IDE you keep open all day** — a real editor
+plus the tools around it (git, terminals, containers, databases, APIs, AI), all
+offline-first, private (no telemetry), fast, cross-platform and open source.
 
-This roadmap is intentionally honest about status. Items are marked:
+This roadmap is intentionally honest about status:
 
 - ✅ **Shipped** — in the latest release
-- 🚧 **In progress** — actively being built
+- 🚧 **In progress / partial** — a real slice has landed; more to come
 - 📋 **Planned** — designed, not yet started
 
 Dates are deliberately absent; this is a sequence, not a schedule.
 
 ---
 
-## v1.0 — Foundation ✅
+## Shipped ✅
 
-The engine and the shell around it.
+The core IDE is here today.
 
-- ✅ **Project scanning & detection** — Rust, TypeScript/JavaScript, Python, Go,
-  Docker, with framework hints and package-manager detection.
-- ✅ **Project profiles** — human-editable `.project-orbit` (TOML).
-- ✅ **Command runner** — commands inferred from manifests, run with captured
-  output.
-- ✅ **Dangerous-command guard** — `rm -rf`, `dd`, `mkfs`, fork bombs,
-  `curl | sh`, force-push … require explicit confirmation.
-- ✅ **Git status** — branch, cleanliness, ahead/behind, last commit.
-- ✅ **Project health** — 0–100 score with actionable warnings.
-- ✅ **Dependency inspection** — offline, read from manifests.
-- ✅ **Local analytics** — time per language, build times. Never uploaded.
-- ✅ **Command palette** (`⌘/Ctrl+K`), tray, native menus.
+**Workspace & editor**
+
+- ✅ **IntelliJ-style workspace** — an icon-only activity bar, a permanent editor
+  centre, and a resizable docked bottom tool-window strip (Problems, Git, Search,
+  Testing, Terminal, Overview, Commands, Health, Dependencies). Layout persists.
+- ✅ **Multi-file CodeMirror editor** — tabs (per-tab drafts/dirty state),
+  breadcrumbs, find/replace/go-to-line, a document outline, editor preferences,
+  and **split editors** (two panes over one shared document model).
+- ✅ **File explorer** — lazy tree, create/rename/delete, collapsible rail.
+- ✅ **Interactive status bar** — branch, caret position, indent, encoding, EOL,
+  language, and an AI indicator; clickable segments.
+
+**Tools**
+
+- ✅ **Git power center** — staged/unstaged groups, one-click stage/unstage,
+  inline diff, commit, history with a **commit-graph rail**, branches, stash,
+  tags, and fetch/pull/push.
+- ✅ **Terminal 3.0** — PTY-backed shells with tabs, **split panes**, **in-terminal
+  search**, and **shell profiles**.
+- ✅ **Containers** — list Docker containers/images, start/stop/restart.
+- ✅ **Database** — a read-only SQLite explorer (browse tables, run `SELECT`s).
+- ✅ **APIs** — a REST client with a JSON-aware response viewer.
+- ✅ **Testing** — run the test command with a parsed cargo/Jest/Vitest/pytest
+  summary.
+- ✅ **AI assistant** — a project-aware chat over any OpenAI-compatible endpoint
+  (local Ollama/LM Studio/llama.cpp or hosted), off by default, local-first.
+- ✅ **Workspace search** — in-project find-in-files with click-through, plus
+  quick-open in the command palette.
+- ✅ **Project intelligence** — scanning/detection, profiles, command runner
+  (dangerous-command guard), health score, dependency inspection, local
+  analytics, environment (`.env`) discovery.
+
+**Platform**
+
 - ✅ **CLI companion** — `orbit scan|info|health|deps|git|commands|run|init`.
-- ✅ **Auto-update** — Orbit checks GitHub Releases on launch and installs
-  signed updates in place, verified against a key compiled into the app.
-  Enabled from v1.1.0.
-- ✅ **CI/CD** — test, build and release across macOS (Intel + ARM), Windows, Linux.
+- ✅ **Signed auto-update**, on-demand update check, system tray, native menus,
+  Dark/Light/High-Contrast/System themes, a launch splashscreen.
+- ✅ **CI/CD** — test, build and release across macOS (Intel + ARM), Windows and
+  Linux; the release pipeline signs macOS + Windows when signing certs are
+  provided (see [docs/SIGNING.md](docs/SIGNING.md)).
 
----
+## In progress / partial 🚧
 
-## v1.1 — Workspaces, terminal & editor 🚧
+- 🚧 **Language servers** — a real LSP client ships live diagnostics in the
+  Problems panel. Next: wiring go-to-definition / hover / rename to editor
+  gestures (the plumbing exists).
+- 🚧 **Git** — merge/rebase/cherry-pick, blame, and richer history are next.
+- 🚧 **Database** — Postgres/MySQL/Redis, saved queries and export beyond SQLite.
+- 🚧 **APIs** — collections, auth, history, GraphQL/WebSockets.
+- 🚧 **Universal search** — the cross-source `⌘/Ctrl+K` (projects, commands,
+  files, branches, commits, …) on top of today's in-project search.
 
-Turning projects into true workspaces.
+## Planned 📋
 
-- 🚧 **Workspace model** — each project remembers its terminals, launch
-  commands, env vars, notes, bookmarks, docs links and pinned logs. Switching a
-  project restores the whole workspace.
-- 🚧 **File explorer + editor** — a lazy file tree and a CodeMirror 6 editor
-  (syntax highlighting, folding, multi-cursor, save, encoding/line-ending
-  detection), now with **multiple editor tabs** (per-tab drafts and dirty state,
-  reopen-focuses, close-picks-neighbour, `Ctrl/Cmd+S`/`Ctrl/Cmd+W`) and
-  **in-editor find/replace/go-to-line**. Backed by `orbit_core::files`. Next:
-  split editors (needs a shared-document model so one file isn't two diverging
-  buffers), and a language server for go-to-definition and real diagnostics.
-- 🚧 **Integrated terminal** — a real PTY-backed shell per project has landed
-  (ConPTY on Windows, openpty elsewhere): ANSI colour, scrollback, resize, and
-  shell detection (PowerShell, CMD, bash, zsh, fish), and **multiple tabs**
-  (background shells keep running). Still to come: split panes, search, and
-  sessions that survive restarts.
-- 📋 **Live log viewer** — per-process, colourised, searchable, filter to
-  errors/warnings, copy/save/export, side-by-side logs, error surfacing.
-- 📋 **Task runner** — build/test/lint/format/bench/deploy + custom scripts,
-  with shortcuts, favourites, dependencies and parallel execution.
-
-## v1.2 — Git power center & environments 📋
-
-- 🚧 **Git power center** — staged/unstaged/untracked files, commit, stage,
-  push/pull/fetch, branch create/switch/delete, merge, rebase, cherry-pick,
-  stashes, tags, contributors, and a commit-graph visualisation. First slice
-  shipped: a Source Control tab with staged/unstaged groups, one-click
-  stage/unstage, an inline diff viewer, commit, recent history, branch
-  switch/create, and fetch/pull/push (backed by `orbit_core::git`). Stashes,
-  merge/rebase/cherry-pick and the commit-graph are next.
-- 🚧 **Environment variable manager** — the engine is in
-  (`orbit_core::env`: discovery across `.env`, `.env.local`, `.env.development`,
-  `.env.production`, `.env.example`; dotenv parsing, secret detection + masking,
-  duplicate / empty / invalid-key / missing-vs-template reporting). The visual
-  editor UI is next.
-- 📋 **Workspace notes** — Markdown notes per project (checklists, code blocks,
-  links), stored locally.
-
-## v1.3 — Containers, data & APIs 📋
-
-- 🚧 **Docker integration** — containers, images, networks, volumes, compose
-  projects; start/stop/restart/rebuild/logs/exec; one-click compose startup.
-  First slice shipped: a Containers view listing containers + images with
-  start/stop/restart (backed by `orbit_core::docker`). Networks/volumes/compose/
-  logs/exec are next.
-- 🚧 **Database explorer** — SQLite, PostgreSQL, MySQL/MariaDB, Redis. Browse
-  tables, view records, run SQL, save queries, CSV import/export. First slice
-  shipped: a read-only **SQLite** explorer (browse tables, view rows, run
-  `SELECT`), backed by `orbit_core::db`. Other engines + saved queries + export
-  are next.
-- 🚧 **API explorer** — REST, GraphQL, WebSockets; collections, variables, auth,
-  history, response viewer with JSON formatting and highlighting; auto-discovery
-  of local APIs. First slice shipped: a REST client (method/URL/headers/body,
-  JSON-aware response viewer) backed by `orbit_core::http` (via `curl`).
-  Collections, auth, history and GraphQL/WebSockets are next.
-
-## v1.4 — Insight & search 📋
-
-- 📋 **Developer dashboard** — active projects, coding hours, languages, build
-  and test frequency, commits, terminal usage, most-used commands. All local.
-- 📋 **System monitor** — CPU, RAM, disk, network, running dev servers and
-  active ports, with per-project port attribution.
-- 📋 **Explorer upgrades** — building on the v1.1 file tree: search, favourites,
-  recent files, quick preview, reveal in OS explorer, drag & drop.
-- 🚧 **Universal search** — one `⌘/Ctrl+K` across projects, commands, files,
-  branches, commits, notes, env vars, terminal history, databases, API requests
-  and settings. First slice shipped: **in-project find-in-files** (content
-  search with case/whole-word options, backed by `orbit_core::search`,
-  click-through to the editor). The cross-source palette is next.
-
-## v2.0 — Platform 📋
-
-- 📋 **Plugin SDK** — plugins contribute panels, commands, dashboards, project
-  analyzers, sidebar sections, widgets and status-bar items, with a documented,
-  versioned API.
-- 📋 **Ecosystem integrations** — first-class, beyond today's previews:
-  - **Blink** — run commands, build-acceleration metrics, optimisation hints.
-  - **Killer** — security scans, dependency audits, secret detection.
-  - **Flux** — workflow execution, automation pipelines, scheduled tasks.
-  - **Beacon** — local API detection, health, route discovery, request metrics.
-- 📋 **UI/UX overhaul** — split views, multi-monitor, richer context menus,
-  drag & drop, refined window management.
+- 📋 **Debugger (DAP)** — breakpoints, watches, call stack, launch profiles.
+- 📋 **Plugin SDK & marketplace** — a versioned API for extensions (languages,
+  themes, panels, commands, AI providers, debuggers), installed/updated from the
+  Plugins view. Today that view lists built-ins and the AI-provider integration.
+- 📋 **Terminal session persistence** across restarts.
+- 📋 **Docker** — networks/volumes/compose/logs/exec.
+- 📋 **Detachable panels / multi-window / multi-monitor.**
+- 📋 **Live log viewer** and a **system monitor** (CPU/RAM/ports per project).
 
 ---
 
@@ -133,9 +89,8 @@ Things Orbit will deliberately **not** do:
 
 - Require an account, a server or a network connection for core features.
 - Collect telemetry or send your code, projects or analytics anywhere.
-- Bloat into a heavyweight platform. Orbit is growing an editor and IDE
-  features, but the bar for every one is that it stays fast and local-first —
-  it earns its place beside (or as) your editor rather than by feature count.
+- Bloat into a heavyweight platform. Orbit keeps every feature fast and
+  local-first — it earns its place beside (or as) your editor, not by count.
 
 ## Influencing the roadmap
 
