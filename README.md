@@ -67,19 +67,19 @@ Think of it as the calm control room for everything you build:
 
 ## 📦 Download
 
-**Latest release: [v1.4.2](https://github.com/martin-k-m/orbit/releases/latest)** —
+**Latest release: [v1.4.3](https://github.com/martin-k-m/orbit/releases/latest)** —
 or download directly:
 
 | Platform | Download |
 | --- | --- |
-| 🍎 **macOS** (Apple Silicon) | [`Orbit_1.4.2_aarch64.dmg`](https://github.com/martin-k-m/orbit/releases/download/v1.4.2/Orbit_1.4.2_aarch64.dmg) |
-| 🍎 **macOS** (Intel) | [`Orbit_1.4.2_x64.dmg`](https://github.com/martin-k-m/orbit/releases/download/v1.4.2/Orbit_1.4.2_x64.dmg) |
-| 🪟 **Windows** (installer) | [`Orbit_1.4.2_x64_en-US.msi`](https://github.com/martin-k-m/orbit/releases/download/v1.4.2/Orbit_1.4.2_x64_en-US.msi) |
-| 🪟 **Windows** (setup) | [`Orbit_1.4.2_x64-setup.exe`](https://github.com/martin-k-m/orbit/releases/download/v1.4.2/Orbit_1.4.2_x64-setup.exe) |
-| 🐧 **Linux** (portable) | [`Orbit_1.4.2_amd64.AppImage`](https://github.com/martin-k-m/orbit/releases/download/v1.4.2/Orbit_1.4.2_amd64.AppImage) |
-| 🐧 **Linux** (Debian/Ubuntu) | [`Orbit_1.4.2_amd64.deb`](https://github.com/martin-k-m/orbit/releases/download/v1.4.2/Orbit_1.4.2_amd64.deb) |
+| 🍎 **macOS** (Apple Silicon) | [`Orbit_1.4.3_aarch64.dmg`](https://github.com/martin-k-m/orbit/releases/download/v1.4.3/Orbit_1.4.3_aarch64.dmg) |
+| 🍎 **macOS** (Intel) | [`Orbit_1.4.3_x64.dmg`](https://github.com/martin-k-m/orbit/releases/download/v1.4.3/Orbit_1.4.3_x64.dmg) |
+| 🪟 **Windows** (installer) | [`Orbit_1.4.3_x64_en-US.msi`](https://github.com/martin-k-m/orbit/releases/download/v1.4.3/Orbit_1.4.3_x64_en-US.msi) |
+| 🪟 **Windows** (setup) | [`Orbit_1.4.3_x64-setup.exe`](https://github.com/martin-k-m/orbit/releases/download/v1.4.3/Orbit_1.4.3_x64-setup.exe) |
+| 🐧 **Linux** (portable) | [`Orbit_1.4.3_amd64.AppImage`](https://github.com/martin-k-m/orbit/releases/download/v1.4.3/Orbit_1.4.3_amd64.AppImage) |
+| 🐧 **Linux** (Debian/Ubuntu) | [`Orbit_1.4.3_amd64.deb`](https://github.com/martin-k-m/orbit/releases/download/v1.4.3/Orbit_1.4.3_amd64.deb) |
 
-Verify with [`SHA256SUMS.txt`](https://github.com/martin-k-m/orbit/releases/download/v1.4.2/SHA256SUMS.txt).
+Verify with [`SHA256SUMS.txt`](https://github.com/martin-k-m/orbit/releases/download/v1.4.3/SHA256SUMS.txt).
 Install notes: [docs/installation.md](docs/installation.md) · Build from source:
 [docs/development.md](docs/development.md).
 
