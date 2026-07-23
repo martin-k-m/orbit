@@ -29,7 +29,7 @@ anyhow = "1"
 walkdir = "2"
 time = { version = "0.3", features = ["serde", "formatting", "parsing", "macros"] }
 rusqlite = { version = "0.31", features = ["bundled"] }
-toml = "0.8"
+toml = "1.1"
 clap = { version = "4", features = ["derive"] }
 
 [workspace.lints.rust]
