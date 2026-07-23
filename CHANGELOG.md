@@ -6,6 +6,28 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Python requirements with more than one constraint are parsed correctly.**
+  The dependency reader split a requirement at the first operator in its own
+  lookup list rather than the first one in the string, so `django<5,>=4.2` was
+  listed under the name `django<5,`. It now splits at the earliest operator by
+  position.
+- **Links to the website point at the real domain.** Generated `.project-orbit`
+  profiles carried a `https://orbit.dev/docs/profiles` header, and the crate and
+  bundle metadata declared `https://orbit.dev` as the homepage; the site lives at
+  https://orbit.blinkdev.me.
+- **The changelog's version links resolve.** `[Unreleased]` still compared
+  against v1.2.0 and every heading from 1.3.0 onward had no link target, so those
+  headings rendered as literal text.
+
+### Added
+
+- **Dependency-reader tests.** `orbit_core::deps` now has unit coverage for all
+  four manifest formats it reads — Cargo dependency/dev-dependency tables and
+  their path/git/workspace spec shapes, `package.json`, `requirements.txt` and
+  PEP 621 `pyproject.toml`, and both `go.mod` require forms.
+
 ## [1.4.3] — 2026-07-17
 
 A look-and-feel pass: a cleaner IntelliJ-style top toolbar, retuned
@@ -369,7 +391,13 @@ The first public release.
   workflows, building installers for macOS (Intel + Apple Silicon),
   Windows and Linux.
 
-[Unreleased]: https://github.com/martin-k-m/orbit/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/martin-k-m/orbit/compare/v1.4.3...HEAD
+[1.4.3]: https://github.com/martin-k-m/orbit/compare/v1.4.2...v1.4.3
+[1.4.2]: https://github.com/martin-k-m/orbit/compare/v1.4.1...v1.4.2
+[1.4.1]: https://github.com/martin-k-m/orbit/compare/v1.4.0...v1.4.1
+[1.4.0]: https://github.com/martin-k-m/orbit/compare/v1.3.1...v1.4.0
+[1.3.1]: https://github.com/martin-k-m/orbit/compare/v1.3.0...v1.3.1
+[1.3.0]: https://github.com/martin-k-m/orbit/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/martin-k-m/orbit/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/martin-k-m/orbit/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/martin-k-m/orbit/releases/tag/v1.0.0

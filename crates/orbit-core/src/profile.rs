@@ -73,7 +73,7 @@ pub fn parse(raw: &str) -> Result<Profile> {
 /// then edit it by hand.
 pub fn render(project: &Project) -> String {
     let mut out = String::new();
-    out.push_str("# Orbit project profile — https://orbit.dev/docs/profiles\n");
+    out.push_str("# Orbit project profile — https://orbit.blinkdev.me/docs/profiles\n");
     out.push_str("[project]\n");
     out.push_str(&format!("name = {}\n", toml_string(&project.name)));
     if let Some(description) = &project.description {

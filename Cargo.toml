@@ -16,7 +16,7 @@ edition = "2021"
 rust-version = "1.77"
 license = "MIT"
 authors = ["Orbit Contributors"]
-homepage = "https://orbit.dev"
+homepage = "https://orbit.blinkdev.me"
 repository = "https://github.com/martin-k-m/orbit"
 description = "A local-first developer command center."
 

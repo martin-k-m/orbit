@@ -158,16 +158,26 @@ fn python(dir: &Path) -> Vec<Dependency> {
         .unwrap_or_default()
 }
 
+/// Version operators a PEP 508 requirement may use, in no particular order —
+/// [`split_requirement`] picks whichever appears *earliest in the string*.
+const REQUIREMENT_OPS: [&str; 7] = ["==", ">=", "<=", "~=", "!=", ">", "<"];
+
 fn split_requirement(line: &str) -> (String, String) {
-    // Split on the first version operator we encounter.
-    for op in ["==", ">=", "<=", "~=", ">", "<", "!="] {
-        if let Some(idx) = line.find(op) {
-            let name = line[..idx].trim().to_string();
-            let current = line[idx..].trim().to_string();
-            return (name, current);
-        }
+    // Split at the earliest version operator *by position*. Looping over the
+    // operators instead would mis-split a multi-constraint requirement such as
+    // `django<5,>=4.2` at `>=`, leaving `django<5,` as the package name.
+    let split = line
+        .char_indices()
+        .find(|(i, _)| REQUIREMENT_OPS.iter().any(|op| line[*i..].starts_with(op)))
+        .map(|(i, _)| i);
+    match split {
+        Some(idx) => (
+            line[..idx].trim().to_string(),
+            line[idx..].trim().to_string(),
+        ),
+        // No operator at all: an unpinned requirement like `flask`.
+        None => (line.trim().to_string(), "*".into()),
     }
-    (line.trim().to_string(), "*".into())
 }
 
 fn go(dir: &Path) -> Vec<Dependency> {
@@ -208,4 +218,171 @@ fn go(dir: &Path) -> Vec<Dependency> {
         }
     }
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+
+    /// Write `contents` to `name` inside a fresh temp dir and hand back both,
+    /// so each test gets an isolated project directory.
+    fn project(name: &str, contents: &str) -> (tempfile::TempDir, PathBuf) {
+        let tmp = tempfile::tempdir().unwrap();
+        std::fs::write(tmp.path().join(name), contents).unwrap();
+        let path = tmp.path().to_path_buf();
+        (tmp, path)
+    }
+
+    fn find<'a>(deps: &'a [Dependency], name: &str) -> &'a Dependency {
+        deps.iter()
+            .find(|d| d.name == name)
+            .unwrap_or_else(|| panic!("no dependency named {name} in {deps:?}"))
+    }
+
+    #[test]
+    fn rust_reads_both_sections_and_every_spec_shape() {
+        let (_tmp, dir) = project(
+            "Cargo.toml",
+            r#"
+[package]
+name = "demo"
+
+[dependencies]
+serde = "1"
+tokio = { version = "1.38", features = ["full"] }
+orbit-core = { path = "../orbit-core" }
+shared = { workspace = true }
+patched = { git = "https://example.invalid/patched.git" }
+
+[dev-dependencies]
+tempfile = "3"
+"#,
+        );
+
+        let deps = list(&dir, Language::Rust);
+        assert_eq!(deps.len(), 6);
+        assert_eq!(count(&dir, Language::Rust), 6);
+
+        // A plain string is the version requirement verbatim.
+        assert_eq!(find(&deps, "serde").current, "1");
+        // A table's `version` key wins over anything else in the table.
+        assert_eq!(find(&deps, "tokio").current, "1.38");
+        // Tables without a version are labelled by how they resolve instead.
+        assert_eq!(find(&deps, "orbit-core").current, "local");
+        assert_eq!(find(&deps, "shared").current, "workspace");
+        assert_eq!(find(&deps, "patched").current, "git");
+
+        assert!(!find(&deps, "serde").dev);
+        assert!(find(&deps, "tempfile").dev);
+    }
+
+    #[test]
+    fn rust_without_a_manifest_or_with_a_broken_one_is_empty() {
+        let empty = tempfile::tempdir().unwrap();
+        assert!(list(empty.path(), Language::Rust).is_empty());
+
+        let (_tmp, dir) = project("Cargo.toml", "[package\nname = broken");
+        assert!(list(&dir, Language::Rust).is_empty());
+    }
+
+    #[test]
+    fn node_separates_dependencies_from_dev_dependencies() {
+        let (_tmp, dir) = project(
+            "package.json",
+            r#"{
+              "name": "web",
+              "dependencies": { "next": "14.2.5", "react": "^18.3.1" },
+              "devDependencies": { "typescript": "5.5.4" }
+            }"#,
+        );
+
+        let deps = list(&dir, Language::TypeScript);
+        assert_eq!(deps.len(), 3);
+        assert_eq!(find(&deps, "react").current, "^18.3.1");
+        assert!(!find(&deps, "next").dev);
+        assert!(find(&deps, "typescript").dev);
+        // The caller's language is carried through, so a JS project is not
+        // relabelled as TypeScript just because both share package.json.
+        assert_eq!(find(&deps, "next").language, Language::TypeScript);
+        assert_eq!(
+            find(&list(&dir, Language::JavaScript), "next").language,
+            Language::JavaScript
+        );
+    }
+
+    #[test]
+    fn python_prefers_requirements_txt_and_skips_comments_and_flags() {
+        let (_tmp, dir) = project(
+            "requirements.txt",
+            "# runtime deps\nflask==3.0.3\nrequests>=2.31\nrich\n\n-r dev-requirements.txt\n--index-url https://example.invalid\n",
+        );
+
+        let deps = list(&dir, Language::Python);
+        assert_eq!(deps.len(), 3);
+        assert_eq!(find(&deps, "flask").current, "==3.0.3");
+        assert_eq!(find(&deps, "requests").current, ">=2.31");
+        // An unpinned requirement has no operator at all.
+        assert_eq!(find(&deps, "rich").current, "*");
+        assert!(deps.iter().all(|d| !d.dev));
+    }
+
+    #[test]
+    fn python_splits_a_multi_constraint_requirement_at_the_first_operator() {
+        // Regression: scanning the operator list rather than the string used to
+        // split `django<5,>=4.2` at `>=`, yielding the name `django<5,`.
+        assert_eq!(
+            split_requirement("django<5,>=4.2"),
+            ("django".into(), "<5,>=4.2".into())
+        );
+        assert_eq!(
+            split_requirement("urllib3 != 2.0"),
+            ("urllib3".into(), "!= 2.0".into())
+        );
+        assert_eq!(
+            split_requirement("numpy~=1.26"),
+            ("numpy".into(), "~=1.26".into())
+        );
+    }
+
+    #[test]
+    fn python_falls_back_to_pyproject_dependencies() {
+        let (_tmp, dir) = project(
+            "pyproject.toml",
+            "[project]\nname = \"demo\"\ndependencies = [\"httpx>=0.27\", \"pydantic==2.8.2\"]\n",
+        );
+
+        let deps = list(&dir, Language::Python);
+        assert_eq!(deps.len(), 2);
+        assert_eq!(find(&deps, "httpx").current, ">=0.27");
+        assert_eq!(find(&deps, "pydantic").current, "==2.8.2");
+    }
+
+    #[test]
+    fn go_reads_single_line_and_block_requires() {
+        let (_tmp, dir) = project(
+            "go.mod",
+            "module example.invalid/app\n\ngo 1.22\n\nrequire github.com/spf13/cobra v1.8.1\n\nrequire (\n\tgithub.com/gin-gonic/gin v1.10.0\n\tgolang.org/x/sync v0.7.0 // indirect\n)\n",
+        );
+
+        let deps = list(&dir, Language::Go);
+        assert_eq!(deps.len(), 3, "got {deps:?}");
+        assert_eq!(find(&deps, "github.com/spf13/cobra").current, "v1.8.1");
+        assert_eq!(find(&deps, "github.com/gin-gonic/gin").current, "v1.10.0");
+        assert_eq!(find(&deps, "golang.org/x/sync").current, "v0.7.0");
+        // `module` and `go` directives are not dependencies.
+        assert!(deps
+            .iter()
+            .all(|d| d.name.contains('.') && d.name != "1.22"));
+    }
+
+    #[test]
+    fn docker_and_unknown_ecosystems_declare_nothing() {
+        let (_tmp, dir) = project(
+            "docker-compose.yml",
+            "services:\n  web:\n    image: nginx\n",
+        );
+        assert!(list(&dir, Language::Docker).is_empty());
+        assert!(list(&dir, Language::Unknown).is_empty());
+    }
 }

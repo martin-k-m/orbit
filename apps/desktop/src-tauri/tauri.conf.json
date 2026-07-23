@@ -64,7 +64,7 @@
       "minimumSystemVersion": "10.15"
     },
     "publisher": "Orbit Contributors",
-    "homepage": "https://orbit.dev",
+    "homepage": "https://orbit.blinkdev.me",
     "license": "MIT",
     "createUpdaterArtifacts": false
   },
