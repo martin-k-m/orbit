@@ -24,12 +24,12 @@ description = "A local-first developer command center."
 orbit-core = { path = "crates/orbit-core" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-thiserror = "1"
+thiserror = "2"
 anyhow = "1"
 walkdir = "2"
 time = { version = "0.3", features = ["serde", "formatting", "parsing", "macros"] }
-rusqlite = { version = "0.31", features = ["bundled"] }
-toml = "0.8"
+rusqlite = { version = "0.40", features = ["bundled"] }
+toml = "1.1"
 clap = { version = "4", features = ["derive"] }
 
 [workspace.lints.rust]
